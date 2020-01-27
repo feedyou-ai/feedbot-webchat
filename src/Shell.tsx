@@ -6,33 +6,52 @@ import { Dispatch, connect } from 'react-redux';
 import { Strings } from './Strings';
 import { Speech } from './SpeechModule'
 import { ChatActions, ListeningState, sendMessage, sendFiles } from './Store';
+import * as QRCode from 'qrcode'
+
+import { StyledDropZone } from 'react-drop-zone'
 
 interface Props {
     inputText: string,
     strings: Strings,
     listeningState: ListeningState,
-    showUploadButton: boolean
+    showUploadButton: boolean,
+    attachmentUrl: string,
     disableInput: boolean
 
     onChangeText: (inputText: string) => void
 
     sendMessage: (inputText: string) => void,
-    sendFiles: (files: FileList) => void,
+    sendFiles: (files: any) => void,
     stopListening: () => void,
     startListening: () => void
+}
+
+interface State {
+    attachmentQrCode: string
 }
 
 export interface ShellFunctions {
     focus: (appendKey?: string) => void
 }
 
-class ShellContainer extends React.Component<Props> implements ShellFunctions {
+class ShellContainer extends React.Component<Props, State> implements ShellFunctions {
     private textInput: HTMLInputElement;
     private fileInput: HTMLInputElement;
 
     private sendMessage() {
         if (this.props.inputText.trim().length > 0) {
             this.props.sendMessage(this.props.inputText);
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.props.attachmentUrl && (!this.state)) {
+            QRCode.toDataURL(this.props.attachmentUrl, {
+                color: {
+                dark: '#000',
+                light: '#0000' // transparent
+                }
+            }).then((attachmentQrCode:string) => this.setState({attachmentQrCode}))
         }
     }
 
@@ -89,7 +108,12 @@ class ShellContainer extends React.Component<Props> implements ShellFunctions {
         }
     }
 
+    addFile(file: any) {
+        this.props.sendFiles([file]);
+    }
+
     render() {
+        console.log('SHELL PROPS', this.props)
         const className = classList(
             'wc-console',
             this.props.inputText.length > 0 && 'has-text',
@@ -101,7 +125,7 @@ class ShellContainer extends React.Component<Props> implements ShellFunctions {
 
         const sendButtonClassName = classList(
             'wc-send',
-            showMicButton && 'hidden'
+            showMicButton || (this.props.showUploadButton && this.props.disableInput) && 'hidden'
         );
 
         const micButtonClassName = classList(
@@ -117,16 +141,13 @@ class ShellContainer extends React.Component<Props> implements ShellFunctions {
             <div className={ className }>
                 {
                     this.props.showUploadButton &&
-                        <label
-                            className="wc-upload"
-                            htmlFor="wc-upload-input"
-                            onKeyPress={ evt => this.handleUploadButtonKeyPress(evt) }
-                            tabIndex={ 0 }
-                        >
-                            <svg>
-                                <path d="M19.96 4.79m-2 0a2 2 0 0 1 4 0 2 2 0 0 1-4 0zM8.32 4.19L2.5 15.53 22.45 15.53 17.46 8.56 14.42 11.18 8.32 4.19ZM1.04 1L1.04 17 24.96 17 24.96 1 1.04 1ZM1.03 0L24.96 0C25.54 0 26 0.45 26 0.99L26 17.01C26 17.55 25.53 18 24.96 18L1.03 18C0.46 18 0 17.55 0 17.01L0 0.99C0 0.45 0.47 0 1.03 0Z" />
-                            </svg>
-                        </label>
+                        [
+                            <StyledDropZone label="Click to select file or drop it here" onDrop={(file:any) => this.addFile(file) } />,
+                            <div className="attachment-wrapper">
+                                <span className="attachment-url">To upload from another device scan or click QR code</span>
+                                <a href="#" onClick={() => alert('Please visit following address on device you want to upload from:\n\n'+this.props.attachmentUrl)}><img src={this.state && this.state.attachmentQrCode} style={{height: 90}} /></a>
+                            </div>
+                        ]
                 }
                 {
                     this.props.showUploadButton &&
@@ -194,6 +215,7 @@ export const Shell = connect(
         // passed down to ShellContainer
         inputText: state.shell.input,
         showUploadButton: state.format.showUploadButton,
+        attachmentUrl:state.format.attachmentUrl,
         disableInput: state.format.disableInput,
         strings: state.format.strings,
         // only used to create helper functions below
@@ -212,6 +234,7 @@ export const Shell = connect(
         // from stateProps
         inputText: stateProps.inputText,
         showUploadButton: stateProps.showUploadButton,
+        attachmentUrl: stateProps.attachmentUrl,
         disableInput: stateProps.disableInput,
         strings: stateProps.strings,
         listeningState: stateProps.listeningState,

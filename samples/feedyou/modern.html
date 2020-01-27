@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://feedyou.azureedge.net/webchat/latest/botchat.css" rel="stylesheet" />
+  <link href="https://feedbotskodaonboardi9617.blob.core.windows.net/public/botchat.css" rel="stylesheet" />
+  <link href="https://feedbotskodaonboardi9617.blob.core.windows.net/public/react-drop-zone.css" rel="stylesheet" />
   <link href="https://feedyou.azureedge.net/webchat/latest/botchat-fullwindow.css" rel="stylesheet" />
   <title>Chatbot</title>
   <style>
@@ -41,7 +42,7 @@
     }
 
     #logo {
-      height: 10%;
+      height: 15%;
 
       background-color: transparent;
       text-align: center;
@@ -140,11 +141,61 @@
 
       border-width: 0px;
       height: 70px;
+      display: flex;
+      align-items: center;
+    }
+
+    .wc-console .DropZone {
+      padding: 5px;
+      height: 60px;
+      position: relative;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      margin-right: 10px;
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wc-console .attachment-url {
+      max-width: 33%;
+      padding-right: 5px;
+      color: #626262;
+      font-size: 85%;
+    }
+
+    .attachment-wrapper {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      max-width: 230px;
+    }
+
+    .wc-console.disable-input .attachment-wrapper {
+      justify-content: flex-end;
+    }
+
+    .attachment-wrapper span {
+      text-align: center;
     }
 
     .wc-message-pane.show-actions .wc-message-groups {
       top: 0px;
       transform: translateY(0px);
+    }
+
+    .wc-message-pane.has-upload-button .wc-message-groups {
+      transform: translateY(-30px);
+    }
+
+    .wc-console.has-upload-button {
+      height: 100px;
+    }
+
+    .wc-console.disable-input.has-upload-button .wc-textbox {
+      display: none;
     }
 
     .wc-console.disable-input {
@@ -160,7 +211,12 @@
     }
 
     .wc-console .wc-mic, .wc-console .wc-send {
-      top: 10px;
+      top: auto;
+      position:relative;
+    }
+    
+    .wc-console .wc-mic.hidden, .wc-console .wc-send.hidden {
+      display: none;
     }
 
     .wc-console input[type=text], .wc-console textarea {
@@ -172,7 +228,12 @@
       background-color: #eceff1;
       height: 70%;
       margin-bottom: 0px;
-      top: 6px !important;
+      position: relative !important;
+      bottom: auto !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      flex: 1;
     }
 
     .wc-suggested-actions .wc-hscroll > ul {
@@ -209,20 +270,27 @@
     }
 
     .wc-carousel button.scroll {
-      background-color: #1f357a !important;
+      background-color: #00800D !important;
       border-width: 0px !important;
     }
 
     #bot .wc-suggested-actions .wc-hscroll > ul > li button, .wc-app .wc-card button {
       color: white !important;
-      background-color: #1f357a !important;
-      border-color: #1f357a !important;
+      background-color: #00800D !important;
+      border-color: #00800D !important;
     }
 
     #bot .wc-suggested-actions .wc-hscroll > ul > li button:active, .wc-app .wc-card button:active {
-      color: #1f357a !important;
+      color: #00800D !important;
       background-color: white !important;
-      border-color: #1f357a !important;
+      border-color: #00800D !important;
+    }
+
+    #footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.7em;
+      padding-bottom: 8px;
     }
   </style>
 </head>
@@ -231,21 +299,28 @@
 
   <div id="bot-wrapper">
     <div id="logo">
-      <img src="https://feedbotceskaposta3648.blob.core.windows.net/public/ceska-posta-logo-male.png" alt="Logo" />
+      <img src="https://feedbotskodaonboardi9617.blob.core.windows.net/public/logo.jpg" alt="Logo" />
     </div>
-    <div id="bot" />
+    <div id="bot"></div>
+    <div id="footer">Chatbot pracuje s důvěrnými informacemi • Chatbot works with confidential information</div>
   </div>
-  <script src="https://feedyou.azureedge.net/webchat/latest/botchat-es5.js"></script>
+  <script src="https://feedbotskodaonboardi9617.blob.core.windows.net/public/botchat-es5.js"></script>
   <script>
     const forceInput = window.location.hash.substr(1) === 'feedbot-show-input'
+    var botConnection = new BotChat.DirectLine({ secret: '1IfP8oGaUP8.HVHkwo0WQzl90h7zJmiHfQCKENUlpg9x-srjCTorN7A' });
+
     BotChat.App({
-      directLine: { secret: 'rziUwR-o4MU.Fm1nF8DhhVd0qaEvoB-PPpTCkCt8CblPjmRFqp3QVYc' },
-      bot: { id: 'feedbot-ceska-posta', name: 'Chatbot' },
-      theme: { mainColor: '#1f357a' },
+      botConnection,
+      bot: { id: 'feedbot-skoda-onboarding', name: 'Chatbot' },
+      theme: { mainColor: '#00800D' },
       disableInputWhenNotNeeded: !forceInput,
       
       // SEE https://github.com/wearefeedyou/feedbot-webchat FOR OPTIONAL PARAMS
     }, document.getElementById("bot"));
+
+    botConnection.activity$
+      .filter(activity => activity.type === "event" && activity.name === "reload")
+      .subscribe(activity => location.reload())
   </script>
 </body>
 

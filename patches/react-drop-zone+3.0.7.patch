@@ -1,0 +1,12 @@
+patch-package
+--- a/node_modules/react-drop-zone/dist/DropZone.js
++++ b/node_modules/react-drop-zone/dist/DropZone.js
+@@ -43,7 +43,7 @@ var events = {
+ Object.keys(events).forEach(function (event) {
+   document.addEventListener(event, function (ev) {
+     dropZones.forEach(function (zone) {
+-      return zone[events[event]](ev, true);
++      return zone[events[event]](ev, !ev.target || !ev.target.className || !ev.target.className.includes('DropZone'));
+     });
+   });
+ });
