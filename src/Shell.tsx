@@ -37,6 +37,7 @@ export interface ShellFunctions {
 class ShellContainer extends React.Component<Props, State> implements ShellFunctions {
     private textInput: HTMLInputElement;
     private fileInput: HTMLInputElement;
+    private addFileTimeout: any
 
     private sendMessage() {
         if (this.props.inputText.trim().length > 0) {
@@ -109,7 +110,12 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     }
 
     addFile(file: any) {
-        this.props.sendFiles([file]);
+        // onDrop called multiple times, need to debounce
+        clearTimeout(this.addFileTimeout)
+        this.addFileTimeout = setTimeout(() => {
+            console.log('addFile timeout')
+            this.props.sendFiles([file])
+        }, 75)
     }
 
     render() {
@@ -142,8 +148,8 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                 {
                     this.props.showUploadButton &&
                         [
-                            <StyledDropZone label="Click to select file or drop it here" onDrop={(file:any) => this.addFile(file) } />,
-                            <div className="attachment-wrapper">
+                            <StyledDropZone key="a" label="Click to select file or drop it here" onDrop={(file:any) => this.addFile(file) } />,
+                            <div key="b" className="attachment-wrapper">
                                 <span className="attachment-url">To upload from another device scan or click QR code</span>
                                 <a href="#" onClick={() => alert('Please visit following address on device you want to upload from:\n\n'+this.props.attachmentUrl)}><img src={this.state && this.state.attachmentQrCode} style={{height: 90}} /></a>
                             </div>

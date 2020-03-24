@@ -10,3 +10,37 @@ patch-package
      });
    });
  });
+@@ -79,13 +79,13 @@ var DropZone = function (_Component) {
+ 
+       if (value === false && document) {
+         this.timeout = setTimeout(function () {
+-          return _this2.setState({ overDocument: false });
++          return !_this2.unmounted && _this2.setState({ overDocument: false });
+         }, 75);
+       } else if (value === true && document) {
+         this.timeout = clearTimeout(this.timeout);
+-        this.setState({ overDocument: true });
++        !this.unmounted && this.setState({ overDocument: true });
+       } else {
+-        this.setState({ over: value });
++        !this.unmounted && this.setState({ over: value });
+       }
+     }
+   }, {
+@@ -112,6 +112,7 @@ var DropZone = function (_Component) {
+   }, {
+     key: 'componentWillUnmount',
+     value: function componentWillUnmount() {
++      this.unmounted = true
+       dropZones.push(this);
+     }
+   }, {
+@@ -163,6 +164,8 @@ var DropZone = function (_Component) {
+     key: 'onDrop',
+     value: function onDrop(event, document) {
+       event.preventDefault();
++      event.stopPropagation();
++
+       this.setDragOver(false, document);
+       if (document) return;
+ 
