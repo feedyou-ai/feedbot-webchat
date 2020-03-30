@@ -42,6 +42,7 @@ export interface ChatProps {
     selectedActivity?: BehaviorSubject<ActivityOrID>,
     sendTyping?: boolean,
     showUploadButton?: boolean,
+    uploadUsingQrCodeOnly?: boolean
     disableInputWhenNotNeeded?: boolean,
     formatOptions?: FormatOptions,
     resize?: 'none' | 'window' | 'detect',
@@ -110,7 +111,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             this.store.dispatch<ChatActions>({ type: 'Set_Chat_Title', chatTitle });
         }
 
-        this.store.dispatch<ChatActions>({ type: 'Toggle_Upload_Button', showUploadButton: props.showUploadButton !== false });
+        this.store.dispatch<ChatActions>({ type: 'Toggle_Upload_Button', showUploadButton: props.showUploadButton !== false, uploadUsingQrCodeOnly: !!props.uploadUsingQrCodeOnly });
 
         this.store.dispatch<ChatActions>({ type: 'Toggle_Disable_Input', disableInput: props.disableInputWhenNotNeeded });
 
@@ -221,31 +222,32 @@ export class Chat extends React.Component<ChatProps, {}> {
         let botConnection: any
         if (this.props.directLine) {
             botConnection = this.botConnection = new DirectLine(this.props.directLine)
-            botConnection.postActivityOriginal = botConnection.postActivity
-            
-            botConnection.postActivity = (activity: any) => {
-                // send userData only once during initial event
-                if (activity.name === 'beginIntroDialog') {
-                    const newActivity = {
-                        ...activity,
-                        channelData: {
-                            ...activity.channelData,
-                            userData: {
-                                ...(this.props.userData || {}),
-                                ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
-                                ...getLocaleUserData(this.props.locale),
-                                ...getReferrerUserData()
-                            }
-                        }
-                    };
-                    console.log('userData', newActivity.channelData.userData)
-                    return botConnection.postActivityOriginal(newActivity);
-                } else {
-                    return botConnection.postActivityOriginal(activity);
-                }
-            }
         } else {
             botConnection = this.props.botConnection
+        }
+
+        botConnection.postActivityOriginal = botConnection.postActivity
+            
+        botConnection.postActivity = (activity: any) => {
+            // send userData only once during initial event
+            if (activity.name === 'beginIntroDialog') {
+                const newActivity = {
+                    ...activity,
+                    channelData: {
+                        ...activity.channelData,
+                        userData: {
+                            ...(this.props.userData || {}),
+                            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
+                            ...getLocaleUserData(this.props.locale),
+                            ...getReferrerUserData()
+                        }
+                    }
+                };
+                console.log('userData', newActivity.channelData.userData)
+                return botConnection.postActivityOriginal(newActivity);
+            } else {
+                return botConnection.postActivityOriginal(activity);
+            }
         }
 
         if (this.props.resize === 'window')

@@ -13,7 +13,11 @@ export interface Strings {
     consolePlaceholder: string,
     listeningIndicator: string,
     uploadFile: string,
-    speak: string
+    speak: string,
+    attachmentDropArea?: string,
+    attachmentInfo?: string,
+    attachmentInfoQrOnly?: string,
+    attachmentAlert?: string,
 }
 
 interface LocalizedStrings {
@@ -36,7 +40,11 @@ const localizedStrings: LocalizedStrings = {
         consolePlaceholder: "Type your message...",
         listeningIndicator: "Listening...",
         uploadFile: "Upload file",
-        speak: "Speak"
+        speak: "Speak",
+        attachmentDropArea: "Click to select file or drop it here",
+        attachmentInfo: "To upload from another device scan or click QR code",
+        attachmentInfoQrOnly: "To upload attachment, visit following address on it or scan QR code on other device:",
+        attachmentAlert: "Please visit following address on device you want to upload from:"
     },
     'ja-jp': {
         title: "チャット",
@@ -325,7 +333,11 @@ const localizedStrings: LocalizedStrings = {
         consolePlaceholder: "Napište svou zprávu...",
         listeningIndicator: "Poslouchám...",
         uploadFile: "Nahrát soubor",
-        speak: "Použít hlas"
+        speak: "Použít hlas",
+        attachmentDropArea: "Přetáhněte soubor sem nebo klikněte pro nahrání",
+        attachmentInfo: "Pro nahrání z jíného zařízení naskenujte nebo klikněte na QR kód",
+        attachmentInfoQrOnly: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jíného zařízení:",
+        attachmentAlert: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jíného zařízení:"
     },
     'ko-kr': {
         title: "채팅",

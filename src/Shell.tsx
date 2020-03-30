@@ -16,6 +16,7 @@ interface Props {
     listeningState: ListeningState,
     showUploadButton: boolean,
     attachmentUrl: string,
+    uploadUsingQrCodeOnly: boolean,
     disableInput: boolean
 
     onChangeText: (inputText: string) => void
@@ -119,7 +120,6 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     }
 
     render() {
-        console.log('SHELL PROPS', this.props)
         const className = classList(
             'wc-console',
             this.props.inputText.length > 0 && 'has-text',
@@ -142,18 +142,26 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         );
 
         const placeholder = this.props.listeningState === ListeningState.STARTED ? this.props.strings.listeningIndicator : this.props.strings.consolePlaceholder;
+        
+        const localAndQrAttachment = [
+            <StyledDropZone key="a" label={this.props.strings.attachmentDropArea} onDrop={(file:any) => this.addFile(file) } />,
+            <div key="b" className="attachment-wrapper">
+                <span className="attachment-url">{this.props.strings.attachmentInfo}</span>
+                <a href="#" onClick={() => alert(this.props.strings.attachmentAlert + '\n\n'+this.props.attachmentUrl)}><img src={this.state && this.state.attachmentQrCode} /></a>
+            </div>
+        ]
 
+        const qrOnlyAttachment = [
+            <div key="b" className="attachment-wrapper qr-only">
+                <span className="attachment-url">{this.props.strings.attachmentInfoQrOnly}<br /><span>{this.props.attachmentUrl}</span></span>
+                <a href="#" onClick={() => alert(this.props.strings.attachmentAlert + '\n\n'+this.props.attachmentUrl)}><img src={this.state && this.state.attachmentQrCode} /></a>
+            </div>
+        ]
+        
         return (
             <div className={ className }>
                 {
-                    this.props.showUploadButton &&
-                        [
-                            <StyledDropZone key="a" label="Click to select file or drop it here" onDrop={(file:any) => this.addFile(file) } />,
-                            <div key="b" className="attachment-wrapper">
-                                <span className="attachment-url">To upload from another device scan or click QR code</span>
-                                <a href="#" onClick={() => alert('Please visit following address on device you want to upload from:\n\n'+this.props.attachmentUrl)}><img src={this.state && this.state.attachmentQrCode} style={{height: 90}} /></a>
-                            </div>
-                        ]
+                    this.props.showUploadButton && (this.props.uploadUsingQrCodeOnly ? qrOnlyAttachment : localAndQrAttachment)
                 }
                 {
                     this.props.showUploadButton &&
@@ -223,6 +231,7 @@ export const Shell = connect(
         showUploadButton: state.format.showUploadButton,
         attachmentUrl:state.format.attachmentUrl,
         disableInput: state.format.disableInput,
+        uploadUsingQrCodeOnly: state.format.uploadUsingQrCodeOnly,
         strings: state.format.strings,
         // only used to create helper functions below
         locale: state.format.locale,
@@ -242,6 +251,7 @@ export const Shell = connect(
         showUploadButton: stateProps.showUploadButton,
         attachmentUrl: stateProps.attachmentUrl,
         disableInput: stateProps.disableInput,
+        uploadUsingQrCodeOnly: stateProps.uploadUsingQrCodeOnly,
         strings: stateProps.strings,
         listeningState: stateProps.listeningState,
         // from dispatchProps
