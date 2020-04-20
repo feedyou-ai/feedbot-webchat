@@ -634,7 +634,6 @@ const speakOnMessageReceivedEpic: Epic<ChatActions, ChatState> = (action$, store
 // TODO do not overwrite Chat.props.showUploadButton=true
 const showUploadBasedOnInputHint: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Receive_Message')
-    .map(action=>{console.log(action); return action;})
     .map(action => ({
         type: 'Toggle_Upload_Button',
         showUploadButton: action.activity.inputHint === 'expectingUpload',
