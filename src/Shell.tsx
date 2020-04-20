@@ -170,7 +170,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                             tabIndex={ -1 }
                             type="file"
                             ref={ input => this.fileInput = input }
-                            multiple
+                            // multiple
                             onChange={ () => this.onChangeFile() }
                             aria-label={ this.props.strings.uploadFile }
                             role="button"
