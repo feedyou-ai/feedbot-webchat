@@ -40,19 +40,17 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     private fileInput: HTMLInputElement;
     private addFileTimeout: any
 
-    componentDidUpdate(prevProps: Props) {
-        if (prevProps.disableInput === true && this.props.disableInput === false) {
-            this.textInput.focus();
-        }
-    }
-
     private sendMessage() {
         if (this.props.inputText.trim().length > 0) {
             this.props.sendMessage(this.props.inputText);
         }
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.disableInput === true && this.props.disableInput === false) {
+            this.textInput.focus();
+        }
+
         if (this.props.attachmentUrl && (!this.state)) {
             QRCode.toDataURL(this.props.attachmentUrl, {
                 color: {
