@@ -300,6 +300,37 @@ export class Chat extends React.Component<ChatProps, {}> {
             });
         }
 
+        // FEEDYOU - way to trigger dialog from anywhere using window event
+        // polyfill needed for IEs https://gomakethings.com/custom-events-in-internet-explorer-with-vanilla-js/
+        window.addEventListener('feedbot:trigger-dialog', (event: CustomEvent) => {
+            console.log('feedbot:trigger-dialog', event.detail, event)
+            let eventName: string
+            let dialogId: string
+            let userData: object = {}
+            let mode: string
+            if (typeof event.detail === 'string') {
+                dialogId = event.detail
+                eventName = 'beginIntroDialog' 
+            } else if (typeof event.detail === 'object' && event.detail.id === 'string') {
+                dialogId = event.detail.id
+                userData = event.detail.userData || {}
+                mode = event.detail.mode || ''
+                eventName = 'beginDialog' // new event supported from bot v1.7.419
+            }
+            
+            if (dialogId) {
+                botConnection.postActivity({
+                    from: this.props.user,
+                    name: eventName,
+                    type: 'event',
+                    value: '',
+                    channelData: {id: dialogId, userData, mode}
+                }).subscribe(function (id: any) {
+                    konsole.log('"'+eventName+'" event sent', dialogId, userData, mode);
+                });
+            }
+        })
+
         this.connectionStatusSubscription = botConnection.connectionStatus$.subscribe((connectionStatus: any) =>{
                 if(this.props.speechOptions && this.props.speechOptions.speechRecognizer){
                     let refGrammarId = botConnection.referenceGrammarId;
