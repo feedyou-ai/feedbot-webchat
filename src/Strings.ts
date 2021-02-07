@@ -129,7 +129,11 @@ const localizedStrings: LocalizedStrings = {
         consolePlaceholder: "Wpisz swoją wiadomość...",
         listeningIndicator: "Słuchanie...",
         uploadFile: "Wyślij plik",
-        speak: "Mów"
+        speak: "Mów",
+        attachmentDropArea: "Przeciągnij plik tu lub kliknij w celu wczytania",
+        attachmentInfo: "W celu wczytania z innego urządzenia zeskanuj lub kliknij w ten kod QR",
+        attachmentInfoQrOnly: "W celu wczytania załącznika odwiedź następujący adres lub zeskanuj ten kod QR z innego urządzenia:",
+        attachmentAlert: "W celu wczytania załącznika odwiedź następujący adres lub zeskanuj ten kod QR z innego urządzenia:"
     },
     'ru-ru': {
         title: "Чат",
@@ -335,9 +339,9 @@ const localizedStrings: LocalizedStrings = {
         uploadFile: "Nahrát soubor",
         speak: "Použít hlas",
         attachmentDropArea: "Přetáhněte soubor sem nebo klikněte pro nahrání",
-        attachmentInfo: "Pro nahrání z jiného zařízení naskenujte nebo klikněte na QR kód",
-        attachmentInfoQrOnly: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:",
-        attachmentAlert: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:"
+        attachmentInfo: "Pro nahrání z jiného zařízení naskenujte nebo klikněte na tento QR kód",
+        attachmentInfoQrOnly: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte tento QR kód z jiného zařízení:",
+        attachmentAlert: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte tento QR kód z jiného zařízení:"
     },
     'ko-kr': {
         title: "채팅",
