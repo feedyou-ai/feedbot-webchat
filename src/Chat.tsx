@@ -66,6 +66,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private fbPixelEventsSubscription: Subscription;
     private gaEventsSubscription: Subscription;
     private gtmEventsSubscription: Subscription;
+    private botEventsSubscribtion: Subscription;
     private connectionStatusSubscription: Subscription;
     private selectedActivitySubscription: Subscription;
     private shellRef: React.Component & ShellFunctions;
@@ -281,6 +282,23 @@ export class Chat extends React.Component<ChatProps, {}> {
             .filter((activity: any) => activity.type === "event" && activity.name === "google-tag-manager-track-event")
             .subscribe((activity: any) => trackGoogleTagManagerEvent(JSON.parse(activity.value)))
 
+        this.botEventsSubscribtion = botConnection.activity$
+            .filter((activity: any) => activity.type === "event" && activity.name.startsWith('webchat-'))
+            .subscribe((activity: any) => {
+                switch (activity.name) {
+                    case 'webchat-collapse':
+                        const wrapper = document.getElementsByClassName('feedbot-wrapper')[0]
+                        wrapper && wrapper.classList.add('collapsed')
+                        break;
+                    case 'webchat-locale':
+                        activity.value && this.store.dispatch<ChatActions>({
+                            type: 'Set_Locale',
+                            locale: activity.value
+                        });
+                        break;
+                }
+            })
+
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
         if (!this.props.directLine || !this.props.directLine.conversationId) {
@@ -366,6 +384,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         this.fbPixelEventsSubscription.unsubscribe();
         this.gaEventsSubscription.unsubscribe();
         this.gtmEventsSubscription.unsubscribe();
+        this.botEventsSubscribtion.unsubscribe();
         this.connectionStatusSubscription.unsubscribe();
         this.activitySubscription.unsubscribe();
         if (this.selectedActivitySubscription)
