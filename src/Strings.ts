@@ -339,7 +339,7 @@ const localizedStrings: LocalizedStrings = {
         uploadFile: "Nahrát soubor",
         speak: "Použít hlas",
         attachmentDropArea: "Přetáhněte soubor sem nebo klikněte pro nahrání",
-        attachmentInfo: "Pro nahrání z jiného zařízení naskenujte nebo klikněte na QR kód",
+        attachmentInfo: "Pro nahrání z jiného zařízení naskenujte nebo klikněte na tento QR kód",
         attachmentInfoQrOnly: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:",
         attachmentAlert: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:"
     },
