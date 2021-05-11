@@ -325,7 +325,8 @@ export class Chat extends React.Component<ChatProps, {}> {
             let eventName: string
             let dialogId: string
             let userData: object = {}
-            let mode: string
+            let mode: string = ''
+            let cancelDialogId: string = ''
             if (typeof event.detail === 'string') {
                 dialogId = event.detail
                 eventName = 'beginIntroDialog' 
@@ -333,6 +334,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                 dialogId = event.detail.id
                 userData = event.detail.userData || {}
                 mode = event.detail.mode || ''
+                cancelDialogId = event.detail.cancelDialogId || ''
                 eventName = 'beginDialog' // new event supported from bot v1.7.419
             }
             
@@ -342,7 +344,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                     name: eventName,
                     type: 'event',
                     value: '',
-                    channelData: {id: dialogId, userData, mode}
+                    channelData: {id: dialogId, userData, mode, cancelDialogId}
                 }).subscribe(function (id: any) {
                     konsole.log('"'+eventName+'" event sent', dialogId, userData, mode);
                 });
