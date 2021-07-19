@@ -105,7 +105,7 @@ const AppContainer = (props: AppProps) => (
 );
 
 function getAutoExpandTimeout(defaultTimeout: number): number {
-  if (window.location.href.includes('?utm_source=Feedbot')) {
+  if (window.location.href.includes('utm_source=Feedbot')) {
     return 1
   }
 
