@@ -104,7 +104,9 @@ class AdaptiveCardContainer extends React.Component<Props, State> {
             const openUrlTarget = getFeedyouParam("openUrlTarget")
             
             if(openUrlTarget === "same-domain"){
-                const url = new URL(action.url)
+                const actionUrl = decodeActionUrl(action.url)    
+                const url = new URL(actionUrl)
+                console.log('openUrl same-domain', actionUrl, window.location.hostname, url.hostname)
                 if(window.location.hostname === url.hostname){
                     window.location.href = url.href;
                 }else{
@@ -256,3 +258,17 @@ export default connect(
         ...stateProps
     })
 )(AdaptiveCardContainer);
+
+function decodeActionUrl(actionUrl: string): string {
+    try {
+        if (actionUrl.includes('//feedbot-') && actionUrl.includes('/url/')) {
+            const parts = actionUrl.split('/')
+            if (parts[5]) {
+                const decodedUrl = atob(parts[5])
+                return decodedUrl || actionUrl
+            }
+        }    
+    } catch (err) {}
+    
+    return actionUrl
+}
