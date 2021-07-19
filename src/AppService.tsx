@@ -43,20 +43,15 @@ export function renderExpandableTemplate(props: AppProps) {
   wrapper.appendChild(container);
   props.theme && props.theme.showSignature && wrapper.appendChild(signature);
   
-
   document.body.appendChild(wrapper);
 
-  if (
-    props.autoExpandTimeout &&
-    (!localStorage || localStorage.feedbotClosed !== "true") &&
-    window.matchMedia &&
-    window.matchMedia("(min-width: 1024px)").matches
-  ) {
+  const autoExpandTimeout = getAutoExpandTimeout(props.autoExpandTimeout)
+  if (autoExpandTimeout > 0) {
     setTimeout(() => {
       if (wrapper.className.indexOf("collapsed") >= 0) {
         header.click();
       }
-    }, props.autoExpandTimeout);
+    }, autoExpandTimeout);
   }
 }
 
@@ -93,3 +88,16 @@ const AppContainer = (props: AppProps) => (
     <Chat {...props} />
   </div>
 );
+
+function getAutoExpandTimeout(defaultTimeout: number): number {
+  if (window.location.href.includes('?utm_source=Feedbot')) {
+    return 1
+  }
+
+  if ((localStorage && localStorage.feedbotClosed === "true") ||
+    (window.matchMedia && !window.matchMedia("(min-width: 1024px)").matches)) {
+    return 0
+  }
+
+  return defaultTimeout
+}

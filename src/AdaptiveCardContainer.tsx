@@ -108,7 +108,7 @@ class AdaptiveCardContainer extends React.Component<Props, State> {
                 const url = new URL(actionUrl)
                 console.log('openUrl same-domain', actionUrl, window.location.hostname, url.hostname)
                 if(window.location.hostname === url.hostname){
-                    window.location.href = url.href;
+                    window.location.href = action.url;
                 }else{
                     window.open(action.url);
                 }
