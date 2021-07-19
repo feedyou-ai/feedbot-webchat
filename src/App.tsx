@@ -9,7 +9,7 @@ import {
 import { DirectLine } from "botframework-directlinejs";
 import * as konsole from "./Konsole";
 import * as rgb2hex from "rgb2hex"
-import {setFeedyouParam} from "./FeedyouParams"
+import { getFeedyouParam, setFeedyouParam } from "./FeedyouParams"
 
 export type Theme = {
   mainColor: string;
@@ -94,6 +94,9 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
           directLine.webSocket = false
         }
         
+        if (!getFeedyouParam("openUrlTarget")) {
+          setFeedyouParam("openUrlTarget", "same-domain")
+        }
       }
 
       props.botConnection = new DirectLine({
