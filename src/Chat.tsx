@@ -379,7 +379,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                 this.store.dispatch<ChatActions>({ type: 'Connection_Change', connectionStatus })
 
                 // FEEDYOU
-                sessionStorage.setItem("feedbotConversationId", botConnection.conversationId)
+                botConnection.conversationId && sessionStorage.setItem("feedbotConversationId", botConnection.conversationId)
                 if (this.props.onConversationStarted && connectionStatus === ConnectionStatus.Online && botConnection.conversationId) {
                     this.props.onConversationStarted(botConnection.conversationId)
                 }

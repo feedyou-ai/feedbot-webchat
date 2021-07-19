@@ -88,7 +88,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
           sessionStorage.setItem("feedbotDirectLineToken", body.token)
           sessionStorage.setItem("feedbotConversationExpiration", String(new Date().getTime() + 60 * 60 * 1000))
         }
-
+        
         if(sessionStorage.getItem("feedbotConversationId") && new Date().getTime() < parseInt(sessionStorage.getItem("feedbotConversationExpiration"))) {
           directLine.conversationId = sessionStorage["feedbotConversationId"]
           directLine.webSocket = false
