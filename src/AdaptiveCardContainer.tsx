@@ -264,7 +264,7 @@ function decodeActionUrl(actionUrl: string): string {
         if (actionUrl.includes('//feedbot-') && actionUrl.includes('/url/')) {
             const parts = actionUrl.split('/')
             if (parts[5]) {
-                const decodedUrl = atob(parts[5])
+                const decodedUrl = atob(decodeURIComponent(parts[5]))
                 return decodedUrl || actionUrl
             }
         }    
