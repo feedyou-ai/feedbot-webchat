@@ -68,13 +68,8 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
       setFeedyouParam("openUrlTarget", props.openUrlTarget || body.config.openUrlTarget)
       
       const persist = props.persist || body.config.persist
-      if(persist === "user" || persist === "conversation" ){
-        if(sessionStorage.getItem("feedbotUserId")){
-          props.user.id = sessionStorage.getItem("feedbotUserId")
-        } else {
-          props.user.id = MakeId()
-          sessionStorage.setItem("feedbotUserId", props.user.id)
-        }
+      if(["user", "conversation"].includes(persist) && sessionStorage.getItem("feedbotUserId")){
+        props.user.id = sessionStorage.getItem("feedbotUserId")
       }
     
       const directLine = props.directLine || {}
@@ -175,6 +170,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
   }
 
   props.user.id = props.user.id ? String(props.user.id) : MakeId()
+  sessionStorage.setItem("feedbotUserId", props.user.id)
 
   // FEEDYOU props defaults
   props.showUploadButton = props.hasOwnProperty("showUploadButton")
