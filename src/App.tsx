@@ -17,6 +17,12 @@ export type Theme = {
   customCss?: string;
   showSignature?: boolean,
   enableScreenshotUpload?: boolean
+  signature?: {
+    partnerLogoUrl: string,
+    partnerLogoStyle: string,
+    partnerLinkUrl: string,
+    mode: string
+  }
 };
 
 export type AppProps = ChatProps & {
@@ -63,7 +69,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         }
       );
       const body = await response.json();
-      console.log("Token response", body);
+      console.log("WebChat init", body);
 
       setFeedyouParam("openUrlTarget", props.openUrlTarget || body.config.openUrlTarget)
       
@@ -130,6 +136,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         }
 
         props.theme.showSignature = !config.hideSignature
+        props.theme.signature = config.signature || {}
 
         props.theme.enableScreenshotUpload = !!config.enableScreenshotUpload
 
@@ -137,12 +144,25 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
           props.disableInputWhenNotNeeded = true;
         }
 
-        if (config.template.autoExpandTimeout > 0) {
+        if (config.locale && !props.hasOwnProperty("locale")) {
+          props.locale = config.locale
+        }
+
+        if (config.template.autoExpandTimeout > 0 && !props.hasOwnProperty("autoExpandTimeout")) {
           props.autoExpandTimeout = config.template.autoExpandTimeout;
         }
 
+        if (config.introDialogId) {
+          props.introDialog = {id: config.introDialogId}
+        }
+
         if (config.userData) {
-          // TODO
+          props.userData = config.userData.reduce(
+            (data: {[key: string]: any}, row: {storage: string, value: string}) => {
+              if (row.storage && row.value && !data[row.storage]) {
+                data[row.storage] = row.value
+              }
+            }, props.userData || {})
         }
 
         if (config.customCss) {
@@ -164,7 +184,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         }
       }
     } catch (err) {
-      console.error("Token response error", err);
+      console.error("WebChat init error", err);
       return;
     }
   }
@@ -457,20 +477,20 @@ const FullScreenTheme = (theme: Theme) => `
   }
 
   .wc-carousel button.scroll {
-    background-color: #1f357a !important;
+    background-color: ${theme.mainColor} !important;
     border-width: 0px !important;
   }
 
   .feedbot .wc-suggested-actions .wc-hscroll > ul > li button, .wc-app .wc-card button {
     color: white !important;
-    background-color: #1f357a !important;
-    border-color: #1f357a !important;
+    background-color: ${theme.mainColor} !important;
+    border-color: ${theme.mainColor} !important;
   }
 
   .feedbot .wc-suggested-actions .wc-hscroll > ul > li button:active, .wc-app .wc-card button:active {
-    color: #1f357a !important;
+    color: ${theme.mainColor} !important;
     background-color: white !important;
-    border-color: #1f357a !important;
+    border-color: ${theme.mainColor} !important;
   }
 
   ${BaseTheme(theme)}
@@ -478,8 +498,8 @@ const FullScreenTheme = (theme: Theme) => `
 
 const ExpandableKnobTheme = (theme: Theme) => `
   body .feedbot-wrapper {
-    bottom: calc(10px + 1vw);
-    right: calc(10px + 1vw);
+    bottom: 24px;
+    right: 24px;
     border-radius: 15px;
   }
 
@@ -534,6 +554,7 @@ const ExpandableKnobTheme = (theme: Theme) => `
     text-indent: 999%;
     white-space: nowrap;
     overflow: hidden;
+    font-size: 0px;
   }
 
   body .feedbot-wrapper {
@@ -541,43 +562,20 @@ const ExpandableKnobTheme = (theme: Theme) => `
     height: 565px;
   }
 
-  .wc-upload-screenshot {
-    display: none !important;
-  }
-
-  ${theme.enableScreenshotUpload && !isSafari() ? `
-    .wc-upload-screenshot {
-      display: inline-block !important;
-      position: absolute !important;
-      left: 46px !important;
-      height: 40px !important;
-      background-color: transparent !important;
-      border: none !important;
-      color: #8a8a8a;
-      padding: 0;
-    }
-    .wc-upload-screenshot svg {
-      margin: 9px 6px !important;
-      width: 32px;
-      height: 22px;
-    }
-    .wc-console.has-upload-button .wc-textbox {
-      left: 96px !important;
-    }
-  ` : ''}
-
   .feedbot-wrapper.collapsed .feedbot-signature {
     display: none;
   }
 
   .feedbot-wrapper .feedbot-signature {
     position: absolute;
-    bottom: -22px;
+    bottom: -23px;
     font-size: 13px;
     right: 11px;
     opacity: 0.50;
     font-family: "Roboto", sans-serif;
-    display: flex;
+
+    height: 22px;
+    display: block;
     align-items: center;
     -webkit-transition: opacity 0.3s ease-in-out;
     -moz-transition: opacity 0.3s ease-in-out;
@@ -594,18 +592,22 @@ const ExpandableKnobTheme = (theme: Theme) => `
     transition: 0.3s;
     color: black;
     text-decoration: none;
-    height: 19px;
-    margin-left: 3px;
+    margin: 0 4px;
     display: flex;
+    align-items: center;
   }
 
   .feedbot-signature a:hover {
     cursor: pointer;
   }
+
   .feedbot-signature a img {
-    height: 20px;
-    position: relative;
-    top: -1px;
+    height: 22px;
+  }
+  
+  .feedbot-signature-row{
+    display: flex;
+    height: 100%;
   }
 
   ${ExpandableBarTheme(theme)}
@@ -627,12 +629,12 @@ const Sidebar = (theme: Theme) => `
     text-indent: 999%;
     white-space: nowrap;
     overflow: hidden;
+    font-size: 0px;
 
     background-image: url('https://feedyou.blob.core.windows.net/webchat/times-solid.svg');
     background-repeat: no-repeat;
     background-size: 15px;
     background-position: center center;    
-
   }
 
   .feedbot-wrapper.collapsed .feedbot-header {
@@ -730,6 +732,10 @@ const Sidebar = (theme: Theme) => `
 
   .feedbot-signature a img {
     height: 22px;
+  }
+
+  .feedbot-signature-row {
+    justify-content: center;
   }
   
 `;
@@ -1109,6 +1115,9 @@ const BaseTheme = (theme: Theme) => `
 
     .wc-carousel .wc-hscroll > ul > li > .wc-card > div > .ac-container > .ac-container .ac-textBlock{
       padding: 0 20px;
+      white-space: unset !important;
+      text-overflow: unset !important;
+      overflow: unset !important;
     }
 
     .wc-carousel .wc-hscroll > ul > li > .wc-card > div .ac-actionSet{
@@ -1118,6 +1127,31 @@ const BaseTheme = (theme: Theme) => `
     .feedbot-signature {
       display: none;
     }
+
+    .wc-upload-screenshot {
+      display: none !important;
+    }
+  
+    ${theme.enableScreenshotUpload && !isSafari() ? `
+      .wc-upload-screenshot {
+        display: inline-block !important;
+        position: absolute !important;
+        left: 46px !important;
+        height: 40px !important;
+        background-color: transparent !important;
+        border: none !important;
+        color: #8a8a8a;
+        padding: 0;
+      }
+      .wc-upload-screenshot svg {
+        margin: 9px 6px !important;
+        width: 32px;
+        height: 22px;
+      }
+      .wc-console.has-upload-button .wc-textbox {
+        left: 96px !important;
+      }
+    ` : ''}
 
     ${theme.customCss || ""}
   `;

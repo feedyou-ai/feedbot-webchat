@@ -77,6 +77,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private gtmEventsSubscription: Subscription;
     private handoffSubscription: Subscription;
     private webchatCollapseSubscribtion: Subscription;
+    private redirectSubscribtion: Subscription;
     private connectionStatusSubscription: Subscription;
     private selectedActivitySubscription: Subscription;
     private shellRef: React.Component & ShellFunctions;
@@ -257,7 +258,6 @@ export class Chat extends React.Component<ChatProps, {}> {
                         }
                     }
                 };
-                console.log('User data', newActivity.channelData.userData)
                 return botConnection.postActivityOriginal(newActivity);
             /*} else if (this.smartsupp && activity.type === "message") {
                 console.log('Smartsupp send', activity.text, activity)
@@ -318,6 +318,13 @@ export class Chat extends React.Component<ChatProps, {}> {
             .subscribe(() => {
                 const wrapper = document.getElementsByClassName('feedbot-wrapper')[0]
                 wrapper && wrapper.classList.add('collapsed')
+            })
+
+        this.redirectSubscribtion = botConnection.activity$
+            .filter((activity: any) => activity.type === "event" && activity.name === "redirect")
+            .subscribe((activity: any) => {
+                // ignore redirect inside of Designer's Try panel
+                activity.value && !window.hasOwnProperty('API_URL') && (location.href = activity.value)
             })
 
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
@@ -454,6 +461,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         this.gtmEventsSubscription.unsubscribe();
         // this.handoffSubscription.unsubscribe();
         this.webchatCollapseSubscribtion.unsubscribe();
+        this.redirectSubscribtion.unsubscribe();
         this.connectionStatusSubscription.unsubscribe();
         this.activitySubscription.unsubscribe();
         if (this.selectedActivitySubscription)
