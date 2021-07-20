@@ -9,7 +9,7 @@ import { AjaxResponse, AjaxRequest } from 'rxjs/observable/dom/AjaxObservable';
 import * as adaptivecardsHostConfig from '../adaptivecards-hostconfig.json';
 import * as konsole from './Konsole';
 import { ChatState, AdaptiveCardsState } from './Store';
-import {getFeedyouParam} from "./FeedyouParams"
+import { getFeedyouParam } from "./FeedyouParams"
 
 export interface Props {
     className?: string,

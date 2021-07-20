@@ -74,8 +74,8 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
       setFeedyouParam("openUrlTarget", props.openUrlTarget || body.config.openUrlTarget)
       
       const persist = props.persist || body.config.persist
-      if(["user", "conversation"].includes(persist) && sessionStorage.getItem("feedbotUserId")){
-        props.user.id = sessionStorage.getItem("feedbotUserId")
+      if((persist === "user" || persist === "conversation") && sessionStorage.feedbotUserId){
+        props.user.id = sessionStorage.feedbotUserId
       }
     
       const directLine = props.directLine || {}

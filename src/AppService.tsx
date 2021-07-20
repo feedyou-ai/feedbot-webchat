@@ -54,7 +54,7 @@ export function renderExpandableTemplate(props: AppProps) {
   
   document.body.appendChild(wrapper);
 
-  const autoExpandTimeout = getAutoExpandTimeout(props.autoExpandTimeout)
+  const autoExpandTimeout = getAutoExpandTimeout(props.autoExpandTimeout, props.persist)
   if (autoExpandTimeout > 0) {
     setTimeout(() => {
       if (wrapper.className.indexOf("collapsed") >= 0) {
@@ -104,13 +104,14 @@ const AppContainer = (props: AppProps) => (
   </div>
 );
 
-function getAutoExpandTimeout(defaultTimeout: number): number {
-  if (window.location.href.includes('utm_source=Feedbot')) {
+function getAutoExpandTimeout(defaultTimeout: number, persist: string): number {
+  if (window.location.href.includes('utm_source=Feedbot') && (persist === 'user' || persist === 'conversation')) {
     return 1
   }
 
-  if ((localStorage && localStorage.feedbotClosed === "true") ||
-    (window.matchMedia && !window.matchMedia("(min-width: 1024px)").matches)) {
+  const wasManuallyClosed = localStorage && localStorage.feedbotClosed === "true"
+  const isSmallScreen = window.matchMedia && !window.matchMedia("(min-width: 1024px)").matches
+  if (wasManuallyClosed || isSmallScreen) {
     return 0
   }
 
