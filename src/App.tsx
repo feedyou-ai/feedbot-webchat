@@ -9,6 +9,7 @@ import {
 import { DirectLine } from "botframework-directlinejs";
 import * as konsole from "./Konsole";
 import * as rgb2hex from "rgb2hex"
+import { getFeedyouParam, setFeedyouParam } from "./FeedyouParams"
 
 export type Theme = {
   mainColor: string;
@@ -27,8 +28,10 @@ export type Theme = {
 export type AppProps = ChatProps & {
   theme?: Theme;
   header?: { textWhenCollapsed?: string; text: string };
-  channel?: { index?: number, id?: string },
+  channel?: { index?: number, id?: string };
   autoExpandTimeout?: number;
+  openUrlTarget: "new" | "same" | "same-domain";
+  persist?: "user" | "conversation" | "none";
 };
 
 export const App = async (props: AppProps, container?: HTMLElement) => {
@@ -37,8 +40,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
   // FEEDYOU generate user ID if not present in props, make sure its always string
   props.user = {
     name: "Uživatel",
-    ...props.user,
-    id: props.user && props.user.id ? "" + props.user.id : MakeId(),
+    ...props.user
   };
 
   // FEEDYOU fetch DL token from bot when no token or secret found
@@ -69,8 +71,38 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
       const body = await response.json();
       console.log("WebChat init", body);
 
+      setFeedyouParam("openUrlTarget", props.openUrlTarget || (body.config && body.config.openUrlTarget))
+      
+      props.persist = props.persist || (body.config && body.config.persist)
+      if((props.persist === "user" || props.persist === "conversation") && localStorage.feedbotUserId){
+        props.user.id = localStorage.feedbotUserId
+      }
+    
+      const directLine = props.directLine || {}
+      if(props.persist === "conversation"){
+        const conversationExpiration = parseInt(sessionStorage.feedbotConversationExpiration)
+        const isConversationExpired = !conversationExpiration || Date.now() >= conversationExpiration
+        if (isConversationExpired) {
+          sessionStorage.removeItem('feedbotDirectLineToken')
+          sessionStorage.removeItem('feedbotConversationId')
+        }
+
+        if (sessionStorage.feedbotDirectLineToken && sessionStorage.feedbotConversationId) {
+          body.token = sessionStorage.feedbotDirectLineToken
+          directLine.conversationId = sessionStorage.feedbotConversationId
+          directLine.webSocket = false
+        } else {
+          sessionStorage.feedbotDirectLineToken = body.token
+          sessionStorage.feedbotConversationExpiration = String(Date.now() + 60 * 60 * 1000)
+        }
+        
+        if (!getFeedyouParam("openUrlTarget")) {
+          setFeedyouParam("openUrlTarget", "same-domain")
+        }
+      }
+
       props.botConnection = new DirectLine({
-        ...(props.directLine || {}),
+        ...directLine,
         token: body.token,
       });
       delete props.directLine;
@@ -157,6 +189,9 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
       return;
     }
   }
+
+  props.user.id = props.user.id ? String(props.user.id) : MakeId()
+  localStorage.feedbotUserId = props.user.id
 
   // FEEDYOU props defaults
   props.showUploadButton = props.hasOwnProperty("showUploadButton")
@@ -464,8 +499,8 @@ const FullScreenTheme = (theme: Theme) => `
 
 const ExpandableKnobTheme = (theme: Theme) => `
   body .feedbot-wrapper {
-    bottom: calc(10px + 1vw);
-    right: calc(10px + 1vw);
+    bottom: 24px;
+    right: 24px;
     border-radius: 15px;
   }
 
@@ -559,16 +594,21 @@ const ExpandableKnobTheme = (theme: Theme) => `
     color: black;
     text-decoration: none;
     margin: 0 4px;
+    display: flex;
+    align-items: center;
   }
 
   .feedbot-signature a:hover {
     cursor: pointer;
   }
+
   .feedbot-signature a img {
     height: 22px;
   }
+  
   .feedbot-signature-row{
-    display: flex; 
+    display: flex;
+    height: 100%;
   }
 
   ${ExpandableBarTheme(theme)}
