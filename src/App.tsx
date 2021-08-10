@@ -140,7 +140,8 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         props.theme.signature = config.signature || {}
 
         props.theme.enableScreenshotUpload = !!config.enableScreenshotUpload
-
+        props.disableInputWhenNotNeeded = !!config.showInput
+        
         if (config.showInput === "auto") {
           props.disableInputWhenNotNeeded = true;
         }
