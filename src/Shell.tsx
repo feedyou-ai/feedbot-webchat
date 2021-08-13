@@ -24,7 +24,7 @@ interface Props {
     onChangeText: (inputText: string) => void
 
     sendMessage: (inputText: string) => void,
-    sendFiles: (files: any) => void,
+    sendFiles: (files: any, isDirectUpload: boolean) => void,
     sendScreenshot: (screen: string) => void,
     stopListening: () => void,
     startListening: () => void
@@ -91,7 +91,37 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     }
 
     private onChangeFile() {
-        this.props.sendFiles(this.fileInput.files);
+        if(location.hash.includes('#feedbot-direct-upload')) {
+            console.log(this.props)
+            const attachmentUrl = this.props.attachmentUrl
+            const f = this.fileInput.files[0]
+            const reader = new FileReader()
+            
+            console.log(f)
+
+            reader.onload = (function(file) {
+                return async function(e: any) {
+                    console.log(e)
+                    var binaryData = e.target.result
+                    //Converting Binary Data to base 64
+                    var base64String = 'data:' + file.type + ';base64,' + window.btoa(binaryData)
+                    const body = JSON.stringify([{data: base64String, fileName: file.name}])
+                    try{
+                        const response = await fetch(attachmentUrl, {
+                            method: 'POST',
+                            body
+                        })
+
+                        console.log("File successfully uploaded", response.status, response.statusText)
+                    } catch(error) {
+                        console.log("File upload failed", error)
+                    }
+            }})(f)
+            
+            reader.readAsBinaryString(f) 
+        }
+        
+        this.props.sendFiles(this.fileInput.files, location.hash.includes('#feedbot-direct-upload'));
         this.fileInput.value = null;
         this.textInput.focus();
     }
@@ -126,12 +156,14 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         })
         this.props.sendScreenshot(screen);
     }
+
+
     addFile(file: any) {
         // onDrop called multiple times, need to debounce
         clearTimeout(this.addFileTimeout)
         this.addFileTimeout = setTimeout(() => {
             console.log('addFile timeout')
-            this.props.sendFiles([file])
+            this.props.sendFiles([file], location.hash.includes('#feedbot-direct-upload'))
         }, 75)
     }
 
@@ -299,7 +331,7 @@ export const Shell = connect(
     onChangeText: dispatchProps.onChangeText,
     // helper functions
     sendMessage: (text: string) => dispatchProps.sendMessage(text, stateProps.user, stateProps.locale),
-    sendFiles: (files: FileList) => dispatchProps.sendFiles(files, stateProps.user, stateProps.locale),
+    sendFiles: (files: FileList, isDirectUpload: boolean) => dispatchProps.sendFiles(files, stateProps.user, stateProps.locale, isDirectUpload),
     sendScreenshot: (screen: string) => dispatchProps.sendScreenshot(screen, stateProps.user, stateProps.locale),
     startListening: () => dispatchProps.startListening(),
     stopListening: () => dispatchProps.stopListening()

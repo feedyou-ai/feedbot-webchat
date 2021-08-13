@@ -271,7 +271,11 @@ export class Chat extends React.Component<ChatProps, {}> {
                     },
                 })
                 return new Observable()*/
+            } else if(activity.type === "message" && activity.isDirectUpload) {
+                console.log("activity", activity)
+                return new Observable()
             } else {
+                
                 return botConnection.postActivityOriginal(activity);
             }
         }
