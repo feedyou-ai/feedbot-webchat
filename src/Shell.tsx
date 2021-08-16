@@ -91,8 +91,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     }
 
     private onChangeFile() {
-        if(location.hash.includes('#feedbot-direct-upload')) {
-            console.log(this.props)
+        if(true || location.hash.includes('#feedbot-direct-upload')) {
             const attachmentUrl = this.props.attachmentUrl
             const f = this.fileInput.files[0]
             const reader = new FileReader()
@@ -121,7 +120,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
             reader.readAsBinaryString(f) 
         }
         
-        this.props.sendFiles(this.fileInput.files, location.hash.includes('#feedbot-direct-upload'));
+        this.props.sendFiles(this.fileInput.files, true || location.hash.includes('#feedbot-direct-upload'));
         this.fileInput.value = null;
         this.textInput.focus();
     }
@@ -163,7 +162,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         clearTimeout(this.addFileTimeout)
         this.addFileTimeout = setTimeout(() => {
             console.log('addFile timeout')
-            this.props.sendFiles([file], location.hash.includes('#feedbot-direct-upload'))
+            this.props.sendFiles([file], true || location.hash.includes('#feedbot-direct-upload'))
         }, 75)
     }
 
