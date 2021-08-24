@@ -832,6 +832,10 @@ const ExpandableBarTheme = (theme: Theme) => `
 `;
 
 const BaseTheme = (theme: Theme) => `
+    html {
+      -ms-overflow-style: scrollbar;
+    }
+
     body.feedbot-disabled div.feedbot {
         display: none;
     }
@@ -1016,7 +1020,9 @@ const BaseTheme = (theme: Theme) => `
     }
 
     .wc-list.tiles .ac-pushButton {
-      flex-basis: 44% !important;
+      width: auto;
+      flex: auto !important;
+      min-width: 44% !important;
       min-height: 120px !important;
       margin: 3% !important;
       flex-direction: column !important;
