@@ -162,6 +162,35 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         clearTimeout(this.addFileTimeout)
         this.addFileTimeout = setTimeout(() => {
             console.log('addFile timeout')
+
+            if(true || location.hash.includes('#feedbot-direct-upload')) {
+                const attachmentUrl = this.props.attachmentUrl
+                const f = file
+                const reader = new FileReader()
+                
+                console.log(f)
+    
+                reader.onload = (function(file) {
+                    return async function(e: any) {
+                        console.log(e)
+                        var binaryData = e.target.result
+                        //Converting Binary Data to base 64
+                        var base64String = 'data:' + file.type + ';base64,' + window.btoa(binaryData)
+                        const body = JSON.stringify([{data: base64String, fileName: file.name}])
+                        try{
+                            const response = await fetch(attachmentUrl, {
+                                method: 'POST',
+                                body
+                            })
+    
+                            console.log("File successfully uploaded", response.status, response.statusText)
+                        } catch(error) {
+                            console.log("File upload failed", error)
+                        }
+                }})(f)
+                
+                reader.readAsBinaryString(f) 
+            }
             this.props.sendFiles([file], true || location.hash.includes('#feedbot-direct-upload'))
         }, 75)
     }
@@ -208,17 +237,18 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         return (
             <div className={className}>
                 {
-                    this.props.showUploadButton &&
-                    <label
-                        className="wc-upload"
-                        htmlFor="wc-upload-input"
-                        onKeyPress={evt => this.handleUploadButtonKeyPress(evt)}
-                        tabIndex={0}
-                    >
-                        <svg>
-                            <path d="M19.96 4.79m-2 0a2 2 0 0 1 4 0 2 2 0 0 1-4 0zM8.32 4.19L2.5 15.53 22.45 15.53 17.46 8.56 14.42 11.18 8.32 4.19ZM1.04 1L1.04 17 24.96 17 24.96 1 1.04 1ZM1.03 0L24.96 0C25.54 0 26 0.45 26 0.99L26 17.01C26 17.55 25.53 18 24.96 18L1.03 18C0.46 18 0 17.55 0 17.01L0 0.99C0 0.45 0.47 0 1.03 0Z" />
-                        </svg>
-                    </label>
+                    // FEEDYOU - do not show default upload button
+                    // this.props.showUploadButton &&
+                    // <label
+                    //     className="wc-upload"
+                    //     htmlFor="wc-upload-input"
+                    //     onKeyPress={evt => this.handleUploadButtonKeyPress(evt)}
+                    //     tabIndex={0}
+                    // >
+                    //     <svg>
+                    //         <path d="M19.96 4.79m-2 0a2 2 0 0 1 4 0 2 2 0 0 1-4 0zM8.32 4.19L2.5 15.53 22.45 15.53 17.46 8.56 14.42 11.18 8.32 4.19ZM1.04 1L1.04 17 24.96 17 24.96 1 1.04 1ZM1.03 0L24.96 0C25.54 0 26 0.45 26 0.99L26 17.01C26 17.55 25.53 18 24.96 18L1.03 18C0.46 18 0 17.55 0 17.01L0 0.99C0 0.45 0.47 0 1.03 0Z" />
+                    //     </svg>
+                    // </label>
                 }
                 {
                     this.props.showUploadButton &&
