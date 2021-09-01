@@ -114,19 +114,17 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         }
     }
 
-    addFile(file: any) {
+    addFile(file: File) {
         // onDrop called multiple times, need to debounce
         clearTimeout(this.addFileTimeout)
 
         this.addFileTimeout = setTimeout(() => {
             console.log('addFile timeout')
 
-            if (true || location.hash.includes('#feedbot-direct-upload')) {
+            if (file.size > 3 * 1024 * 1024 || location.hash.includes('#feedbot-direct-upload')) {
                 const attachmentUrl = this.props.attachmentUrl
                 const f = file
                 const reader = new FileReader()
-
-                console.log(f)
 
                 reader.onload = (function (file) {
                     return async function (e: any) {
@@ -150,7 +148,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
 
                 reader.readAsBinaryString(f)
             }
-            this.props.sendFiles([file], true || location.hash.includes('#feedbot-direct-upload'))
+            this.props.sendFiles([file], file.size > 3 * 1024 * 1024 || location.hash.includes('#feedbot-direct-upload'))
         }, 75)
     }
 

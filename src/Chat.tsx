@@ -18,16 +18,16 @@ import { ConnectionStatus } from 'botframework-directlinejs';
 declare const fbq: Function;
 declare const dataLayer: Array<Object>;
 
-interface GaEvent {    
+interface GaEvent {
     eventCategory: string
-    eventAction:string
+    eventAction: string
     eventLabel?: string
     eventValue?: string
 }
 
-interface GtmEvent {    
+interface GtmEvent {
     event: string
-    variables?: Array<{name: string, value: string}>
+    variables?: Array<{ name: string, value: string }>
 }
 
 export interface ChatProps {
@@ -47,7 +47,7 @@ export interface ChatProps {
     formatOptions?: FormatOptions,
     resize?: 'none' | 'window' | 'detect',
     userData?: {},
-    introDialog?: {id?: string},
+    introDialog?: { id?: string },
     startOverTrigger?: (trigger: () => void) => void,
     onConversationStarted?: (callback: (conversationId: string) => void) => void
 }
@@ -228,7 +228,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         }
 
         botConnection.postActivityOriginal = botConnection.postActivity
-            
+
         botConnection.postActivity = (activity: any) => {
             // send userData only once during initial event
             if (activity.name === 'beginIntroDialog') {
@@ -246,6 +246,9 @@ export class Chat extends React.Component<ChatProps, {}> {
                 };
                 console.log('User data', newActivity.channelData.userData)
                 return botConnection.postActivityOriginal(newActivity);
+            } else if (activity.type === "message" && activity.isDirectUpload) {
+                console.log("activity", activity)
+                return new Observable()
             } else {
                 return botConnection.postActivityOriginal(activity);
             }
@@ -255,13 +258,13 @@ export class Chat extends React.Component<ChatProps, {}> {
             window.addEventListener('resize', this.resizeListener);
 
         this.store.dispatch<ChatActions>({ type: 'Start_Connection', user: this.props.user, bot: this.props.bot, botConnection, selectedActivity: this.props.selectedActivity });
-        
+
         // FEEDYOU - TECHNICAL ISSUES MESSAGE
         // this.handleIncomingActivity({ id: 'maintenance', type: 'message', from: { name: "Chatbot", ...this.props.bot }, text: "Dobrý den, aktuálně mám technické problémy, které kolegové intenzivně řeší. Je možné, že nebudu reagovat úplně správně, moc se za to omlouvám. Prosím zkuste si se mnou popovídat později.", timestamp: new Date().toISOString()});
 
         // FEEDYOU - show typing on startup - if bot.id is set to the same value as value on server, it will be cleared by first message
         if (this.props.bot && this.props.bot.id) {
-            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot }, timestamp: new Date().toISOString()}});
+            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot }, timestamp: new Date().toISOString() } });
         }
 
         // FEEDYOU - support "start over" button
@@ -269,7 +272,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             console.log('starting over')
             sendPostBack(botConnection, "start over", {}, this.props.user, this.props.locale)
         })
-        
+
         this.fbPixelEventsSubscription = botConnection.activity$
             .filter((activity: any) => activity.type === "event" && activity.name === "facebook-pixel-track-event")
             .subscribe((activity: any) => trackFacebookPixelEvent(activity.value))
@@ -305,14 +308,14 @@ export class Chat extends React.Component<ChatProps, {}> {
             let introDialogId = this.props.introDialog && this.props.introDialog.id ? this.props.introDialog.id : undefined
             if (window.location.hash.startsWith('#feedbot-intro-dialog=')) {
                 introDialogId = window.location.hash.substr(22)
-            } 
-            
+            }
+
             botConnection.postActivity({
                 from: this.props.user,
                 name: 'beginIntroDialog',
                 type: 'event',
                 value: '',
-                channelData: introDialogId ? {id: introDialogId} : undefined
+                channelData: introDialogId ? { id: introDialogId } : undefined
             }).subscribe(function (id: any) {
                 konsole.log('"beginIntroDialog" event sent');
             });
@@ -329,7 +332,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             let cancelDialogId: string = ''
             if (typeof event.detail === 'string') {
                 dialogId = event.detail
-                eventName = 'beginIntroDialog' 
+                eventName = 'beginIntroDialog'
             } else if (typeof event.detail === 'object' && typeof event.detail.id === 'string') {
                 dialogId = event.detail.id
                 userData = event.detail.userData || {}
@@ -337,34 +340,34 @@ export class Chat extends React.Component<ChatProps, {}> {
                 cancelDialogId = event.detail.cancelDialogId || ''
                 eventName = 'beginDialog' // new event supported from bot v1.7.419
             }
-            
+
             if (dialogId) {
                 botConnection.postActivity({
                     from: this.props.user,
                     name: eventName,
                     type: 'event',
                     value: '',
-                    channelData: {id: dialogId, userData, mode, cancelDialogId}
+                    channelData: { id: dialogId, userData, mode, cancelDialogId }
                 }).subscribe(function (id: any) {
-                    konsole.log('"'+eventName+'" event sent', dialogId, userData, mode);
+                    konsole.log('"' + eventName + '" event sent', dialogId, userData, mode);
                 });
             }
         })
 
-        this.connectionStatusSubscription = botConnection.connectionStatus$.subscribe((connectionStatus: any) =>{
-                if(this.props.speechOptions && this.props.speechOptions.speechRecognizer){
-                    let refGrammarId = botConnection.referenceGrammarId;
-                    if(refGrammarId)
-                        this.props.speechOptions.speechRecognizer.referenceGrammarId = refGrammarId;
-                }
-                this.store.dispatch<ChatActions>({ type: 'Connection_Change', connectionStatus })
-
-                // FEEDYOU
-                if (this.props.onConversationStarted && connectionStatus === ConnectionStatus.Online && botConnection.conversationId) {
-                    this.props.onConversationStarted(botConnection.conversationId)
-                }
-
+        this.connectionStatusSubscription = botConnection.connectionStatus$.subscribe((connectionStatus: any) => {
+            if (this.props.speechOptions && this.props.speechOptions.speechRecognizer) {
+                let refGrammarId = botConnection.referenceGrammarId;
+                if (refGrammarId)
+                    this.props.speechOptions.speechRecognizer.referenceGrammarId = refGrammarId;
             }
+            this.store.dispatch<ChatActions>({ type: 'Connection_Change', connectionStatus })
+
+            // FEEDYOU
+            if (this.props.onConversationStarted && connectionStatus === ConnectionStatus.Online && botConnection.conversationId) {
+                this.props.onConversationStarted(botConnection.conversationId)
+            }
+
+        }
         );
 
         this.activitySubscription = botConnection.activity$.subscribe(
@@ -437,28 +440,28 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // only render real stuff after we know our dimensions
         return (
-            <Provider store={ this.store }>
+            <Provider store={this.store}>
                 <div
                     className="wc-chatview-panel"
-                    onKeyDownCapture={ this._handleKeyDownCapture }
-                    ref={ this._saveChatviewPanelRef }
+                    onKeyDownCapture={this._handleKeyDownCapture}
+                    ref={this._saveChatviewPanelRef}
                 >
                     {
                         !!state.format.chatTitle &&
-                            <div className="wc-header">
-                                <span>{ typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title }</span>
-                            </div>
+                        <div className="wc-header">
+                            <span>{typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title}</span>
+                        </div>
                     }
                     <MessagePane>
                         <History
-                            onCardAction={ this._handleCardAction }
-                            ref={ this._saveHistoryRef }
+                            onCardAction={this._handleCardAction}
+                            ref={this._saveHistoryRef}
                         />
                     </MessagePane>
-                    <Shell ref={ this._saveShellRef } />
+                    <Shell ref={this._saveShellRef} />
                     {
                         this.props.resize === 'detect' &&
-                            <ResizeDetector onresize={ this.resizeListener } />
+                        <ResizeDetector onresize={this.resizeListener} />
                     }
                 </div>
             </Provider>
@@ -480,46 +483,46 @@ export const doCardAction = (
     actionValue
 ) => {
 
-    const text = (typeof actionValue === 'string') ? actionValue as string : undefined;
-    const value = (typeof actionValue === 'object')? actionValue as object : undefined;
+        const text = (typeof actionValue === 'string') ? actionValue as string : undefined;
+        const value = (typeof actionValue === 'object') ? actionValue as object : undefined;
 
-    switch (type) {
-        case "imBack":
-            if (typeof text === 'string')
-                sendMessage(text, from, locale);
-            break;
+        switch (type) {
+            case "imBack":
+                if (typeof text === 'string')
+                    sendMessage(text, from, locale);
+                break;
 
-        case "postBack":
-            sendPostBack(botConnection, text, value, from, locale);
-            break;
+            case "postBack":
+                sendPostBack(botConnection, text, value, from, locale);
+                break;
 
-        case "call":
-        case "openUrl":
-        case "playAudio":
-        case "playVideo":
-        case "showImage":
-        case "downloadFile":
-            window.open(text);
-            break;
-        case "signin":
-            let loginWindow =  window.open();
-            if (botConnection.getSessionId)  {
-                botConnection.getSessionId().subscribe(sessionId => {
-                    konsole.log("received sessionId: " + sessionId);
-                    loginWindow.location.href = text + encodeURIComponent('&code_challenge=' + sessionId);
-                }, error => {
-                    konsole.log("failed to get sessionId", error);
-                });
-            }
-            else {
-                loginWindow.location.href = text;
-            }
-            break;
+            case "call":
+            case "openUrl":
+            case "playAudio":
+            case "playVideo":
+            case "showImage":
+            case "downloadFile":
+                window.open(text);
+                break;
+            case "signin":
+                let loginWindow = window.open();
+                if (botConnection.getSessionId) {
+                    botConnection.getSessionId().subscribe(sessionId => {
+                        konsole.log("received sessionId: " + sessionId);
+                        loginWindow.location.href = text + encodeURIComponent('&code_challenge=' + sessionId);
+                    }, error => {
+                        konsole.log("failed to get sessionId", error);
+                    });
+                }
+                else {
+                    loginWindow.location.href = text;
+                }
+                break;
 
-        default:
-            konsole.log("unknown button type", type);
+            default:
+                konsole.log("unknown button type", type);
         }
-}
+    }
 
 export const sendPostBack = (botConnection: IBotConnection, text: string, value: object, from: User, locale: string) => {
     botConnection.postActivity({
@@ -529,19 +532,19 @@ export const sendPostBack = (botConnection: IBotConnection, text: string, value:
         from,
         locale
     })
-    .subscribe(id => {
-        konsole.log("success sending postBack", id)
-    }, error => {
-        konsole.log("failed to send postBack", error);
-    });
+        .subscribe(id => {
+            konsole.log("success sending postBack", id)
+        }, error => {
+            konsole.log("failed to send postBack", error);
+        });
 }
 
-export const renderIfNonempty = (value: any, renderer: (value: any) => JSX.Element ) => {
+export const renderIfNonempty = (value: any, renderer: (value: any) => JSX.Element) => {
     if (value !== undefined && value !== null && (typeof value !== 'string' || value.length > 0))
         return renderer(value);
 }
 
-export const classList = (...args:(string | boolean)[]) => {
+export const classList = (...args: (string | boolean)[]) => {
     return args.filter(Boolean).join(' ');
 }
 
@@ -551,11 +554,11 @@ const ResizeDetector = (props: {
 }) =>
     // adapted to React from https://github.com/developit/simple-element-resize-detector
     <iframe
-        style={ { position: 'absolute', left: '0', top: '-100%', width: '100%', height: '100%', margin: '1px 0 0', border: 'none', opacity: 0, visibility: 'hidden', pointerEvents: 'none' } }
-        ref={ frame => {
+        style={{ position: 'absolute', left: '0', top: '-100%', width: '100%', height: '100%', margin: '1px 0 0', border: 'none', opacity: 0, visibility: 'hidden', pointerEvents: 'none' }}
+        ref={frame => {
             if (frame)
                 frame.contentWindow.onresize = props.onresize;
-        } }
+        }}
     />;
 
 // For auto-focus in some browsers, we synthetically insert keys into the chatbox.
@@ -578,17 +581,17 @@ function getGoogleAnalyticsUserData() {
     const tracker = (typeof ga !== 'undefined') && ga && ga.getAll && ga.getAll() && ga.getAll()[0]
     if (tracker) {
         const trackingId = tracker.get('trackingId')
-        return {googleAnalyticsTrackingId: trackingId} || {}
+        return { googleAnalyticsTrackingId: trackingId } || {}
     }
     return {}
 }
 
 function getReferrerUserData() {
-    return {referrerUrl: window.location.href}
+    return { referrerUrl: window.location.href }
 }
 
 function getLocaleUserData(locale?: string) {
-    return locale ? {locale: locale.replace(/-.*/,'')} : {}
+    return locale ? { locale: locale.replace(/-.*/, '') } : {}
 }
 
 function trackFacebookPixelEvent(eventName: string) {
@@ -602,7 +605,7 @@ function trackFacebookPixelEvent(eventName: string) {
 }
 
 function trackGoogleAnalyticsEvent(event: GaEvent) {
-    const eventInfo = 'ga("'+event.eventCategory+'", "'+event.eventAction+'", '+(event.eventLabel || 'undefined')+', '+(event.eventValue ? parseInt(event.eventValue) : 'undefined')+')'
+    const eventInfo = 'ga("' + event.eventCategory + '", "' + event.eventAction + '", ' + (event.eventLabel || 'undefined') + ', ' + (event.eventValue ? parseInt(event.eventValue) : 'undefined') + ')'
     if (typeof ga === 'function') {
         console.log('Tracking GA custom event ' + eventInfo, event)
         ga(event.eventCategory, event.eventAction, event.eventLabel || undefined, event.eventValue ? parseInt(event.eventValue) : undefined)
@@ -611,8 +614,8 @@ function trackGoogleAnalyticsEvent(event: GaEvent) {
     }
 }
 
-function trackGoogleTagManagerEvent({event, variables}: GtmEvent) {
-    const data = (variables || []).reduce((data, variable) => ({...data, [variable.name]: variable.value}), {event})
+function trackGoogleTagManagerEvent({ event, variables }: GtmEvent) {
+    const data = (variables || []).reduce((data, variable) => ({ ...data, [variable.name]: variable.value }), { event })
     if (typeof dataLayer === 'object') {
         console.log('Tracking GTM custom event dataLayer.push(...)', data)
         dataLayer.push(data)
