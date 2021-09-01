@@ -28,13 +28,14 @@ export const sendMessage = (text: string, from: User, locale: string) => ({
         timestamp: (new Date()).toISOString()
     }} as ChatActions);
 
-export const sendFiles = (files: FileList, from: User, locale: string) => ({
+export const sendFiles = (files: FileList, from: User, locale: string, isDirectUpload: boolean) => ({
     type: 'Send_Message',
     activity: {
         type: "message",
         attachments: attachmentsFromFiles(files),
         from,
-        locale
+        locale,
+        isDirectUpload
     }} as ChatActions);
 
 const attachmentsFromFiles = (files: FileList) => {
