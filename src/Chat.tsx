@@ -247,6 +247,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                 console.log('User data', newActivity.channelData.userData)
                 return botConnection.postActivityOriginal(newActivity);
             } else if (activity.type === "message" && activity.isDirectUpload) {
+                activity.id = "directupload"
                 console.log("activity", activity)
                 return new Observable()
             } else {
