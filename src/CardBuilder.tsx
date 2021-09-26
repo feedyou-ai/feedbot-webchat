@@ -1,7 +1,6 @@
 import { Attachment, CardAction, HeroCard, Thumbnail, CardImage } from 'botframework-directlinejs';
 import { AdaptiveCard, CardElement, Column, ColumnSet, Container, Image, OpenUrlAction, Size, SizeUnit, SubmitAction, TextBlock, TextSize, TextWeight } from 'adaptivecards';
 import { BotFrameworkCardAction } from './AdaptiveCardContainer';
-import { SizeAndUnit } from 'adaptivecards/lib/utils';
 
 export class AdaptiveCardBuilder {
     private container: Container;
@@ -20,7 +19,7 @@ export class AdaptiveCardBuilder {
         container.addItem(columnSet);
         const columns = sizes.map(size => {
             const column = new Column();
-            column.width = new SizeAndUnit(size, SizeUnit.Pixel);;
+            column.width = size;
             columnSet.addColumn(column);
             return column;
         })
