@@ -327,6 +327,23 @@ const localizedStrings: LocalizedStrings = {
         uploadFile: "Nahrát soubor",
         speak: "Použít hlas"
     },
+    'sk-sk': {
+        title: "Chat",
+        send: "Odoslať",
+        unknownFile: "[Soubor typu '%1']",
+        unknownCard: "[Neznámá karta '%1']",
+        receiptVat: "DPH",
+        receiptTax: "Daň z prod.",
+        receiptTotal: "Celkem",
+        messageRetry: "Opakovať",
+        messageFailed: "Nepodarilo sa odoslať",
+        messageSending: "Odosielanie",
+        timeSent: " v %1",
+        consolePlaceholder: "Prosím, napíšte svoju otázku",
+        listeningIndicator: "Poslouchám...",
+        uploadFile: "Nahrať súbor",
+        speak: "Použít hlas"
+    },
     'ko-kr': {
         title: "채팅",
         send: "전송",
@@ -499,6 +516,8 @@ function mapLocale(locale: string) {
         return 'ro-ro';
     } else if (locale.startsWith('ru')) {
         return 'ru-ru';
+    } else if (locale.startsWith('sk')) {
+        return 'sk-sk';
     } else if (locale.startsWith('sv')) {
         return 'sv-se';
     } else if (locale.startsWith('tr')) {
