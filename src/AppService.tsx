@@ -14,7 +14,17 @@ export function renderExpandableTemplate(props: AppProps) {
 
   const signature = document.createElement("div");
   signature.classList.add("feedbot-signature");
-  signature.innerHTML = 'with ❤️ by <a class="signature-link" target="_blank" href="https://feedyou.ai/?utm_source=webchat&utm_medium=chatbot&utm_campaign='+props.bot.id+'"><img src="https://cdn.feedyou.ai/webchat/feedyou_logo_red.png" alt="logo" /></a>';
+
+  const feedyouLinkUrl = `https://feedyou.ai/?utm_source=webchat&utm_medium=chatbot&utm_campaign=${props.bot.id}`
+  const partnerLinkUrl = props.theme && props.theme.signature && props.theme.signature.partnerLinkUrl ? `${props.theme.signature.partnerLinkUrl}?utm_source=webchat&utm_medium=chatbot&utm_campaign=${props.bot.id}` : feedyouLinkUrl
+
+  if (props.theme && props.theme.signature && props.theme.signature.partnerLogoUrl && props.theme.signature.mode === "both") {
+    signature.innerHTML = `<div class="feedbot-signature-row"><div style="align-self: center;">with ❤️ by</div><a class="signature-link" target="_blank" href="${partnerLinkUrl}"><img style="${props.theme.signature.partnerLogoStyle || ''}" src="${props.theme.signature.partnerLogoUrl}" alt="Logo" /></a><div style="align-self: center;">&</div><a class="signature-link" target="_blank" href="${feedyouLinkUrl}"><img src="https://cdn.feedyou.ai/webchat/feedyou_logo_red.png" alt="Logo" /></a></div>`;
+  } else if (props.theme && props.theme.signature && props.theme.signature.partnerLogoUrl && props.theme.signature.mode === "partner") {
+    signature.innerHTML = `<div class="feedbot-signature-row"><div style="align-self: center;">with ❤️ by</div><a class="signature-link" target="_blank" href="${partnerLinkUrl}"><img style="${props.theme.signature.partnerLogoStyle || ''}" src="${props.theme.signature.partnerLogoUrl}" alt="Logo" /></a></div>`;
+  } else if (!props.theme || !props.theme.signature || props.theme.signature.mode !== "none") {
+    signature.innerHTML = `<div class="feedbot-signature-row"><div style="align-self: center;">with ❤️ by</div><a class="signature-link" target="_blank" href="${feedyouLinkUrl}"><img src="https://cdn.feedyou.ai/webchat/feedyou_logo_red.png" alt="Logo" /></a></div>`;
+  }
 
   const header = document.createElement("div");
   header.className = "feedbot-header";
@@ -43,20 +53,15 @@ export function renderExpandableTemplate(props: AppProps) {
   wrapper.appendChild(container);
   props.theme && props.theme.showSignature && wrapper.appendChild(signature);
   
-
   document.body.appendChild(wrapper);
 
-  if (
-    props.autoExpandTimeout &&
-    (!localStorage || localStorage.feedbotClosed !== "true") &&
-    window.matchMedia &&
-    window.matchMedia("(min-width: 1024px)").matches
-  ) {
+  const autoExpandTimeout = getAutoExpandTimeout(props.autoExpandTimeout, props.persist)
+  if (autoExpandTimeout > 0) {
     setTimeout(() => {
       if (wrapper.className.indexOf("collapsed") >= 0) {
         header.click();
       }
-    }, props.autoExpandTimeout);
+    }, autoExpandTimeout);
   }
 }
 
@@ -71,15 +76,21 @@ export function renderFullScreenTemplate(props: AppProps) {
     logo.className = "feedbot-logo";
     
     const logoImg = document.createElement('img')
-    console.log('render fullscreen', props.theme)
     logoImg.src = props.theme && props.theme.template && props.theme.template.logoUrl || "https://cdn.feedyou.ai/webchat/feedyou_logo_red.png"
     logoImg.alt = "Logo"
     logo.appendChild(logoImg)
     
     wrapper.appendChild(logo);
-  
+
     wrapper.appendChild(container);
     document.body.appendChild(wrapper);
+
+    const customScript = props.theme && props.theme.template && props.theme.template.customScript
+    if (customScript)  {
+      const customScriptTag = document.createElement("script");
+      customScriptTag.appendChild(document.createTextNode(customScript))
+      document.body.appendChild(customScriptTag);
+    }
 
     render(props, container);
   }
@@ -93,3 +104,17 @@ const AppContainer = (props: AppProps) => (
     <Chat {...props} />
   </div>
 );
+
+function getAutoExpandTimeout(defaultTimeout: number, persist: string): number {
+  if (window.location.href.includes('utm_source=Feedbot') && (persist === 'user' || persist === 'conversation')) {
+    return 1
+  }
+
+  const wasManuallyClosed = localStorage && localStorage.feedbotClosed === "true"
+  const isSmallScreen = window.matchMedia && !window.matchMedia("(min-width: 1024px)").matches
+  if (wasManuallyClosed || isSmallScreen) {
+    return 0
+  }
+
+  return defaultTimeout
+}

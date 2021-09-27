@@ -9,6 +9,7 @@ import {
 import { DirectLine } from "botframework-directlinejs";
 import * as konsole from "./Konsole";
 import * as rgb2hex from "rgb2hex"
+import { getFeedyouParam, setFeedyouParam } from "./FeedyouParams"
 
 export type Theme = {
   mainColor: string;
@@ -16,14 +17,22 @@ export type Theme = {
   customCss?: string;
   showSignature?: boolean,
   enableScreenshotUpload?: boolean
+  signature?: {
+    partnerLogoUrl: string,
+    partnerLogoStyle: string,
+    partnerLinkUrl: string,
+    mode: string
+  }
 };
 
 export type AppProps = ChatProps & {
   theme?: Theme;
   header?: { textWhenCollapsed?: string; text: string };
-  channel?: { index?: number, id?: string },
+  channel?: { index?: number, id?: string };
   autoExpandTimeout?: number;
   enableScreenshotUpload?: boolean;
+  openUrlTarget: "new" | "same" | "same-domain";
+  persist?: "user" | "conversation" | "none";
 };
 
 export const App = async (props: AppProps, container?: HTMLElement) => {
@@ -32,8 +41,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
   // FEEDYOU generate user ID if not present in props, make sure its always string
   props.user = {
     name: "Uživatel",
-    ...props.user,
-    id: props.user && props.user.id ? "" + props.user.id : MakeId(),
+    ...props.user
   };
 
   // FEEDYOU fetch DL token from bot when no token or secret found
@@ -62,10 +70,40 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         }
       );
       const body = await response.json();
-      console.log("Token response", body);
+      console.log("Feedyou WebChat init", body);
+
+      setFeedyouParam("openUrlTarget", props.openUrlTarget || (body.config && body.config.openUrlTarget))
+      
+      props.persist = props.persist || (body.config && body.config.persist)
+      if((props.persist === "user" || props.persist === "conversation") && localStorage.feedbotUserId){
+        props.user.id = localStorage.feedbotUserId
+      }
+    
+      const directLine = props.directLine || {}
+      if(props.persist === "conversation"){
+        const conversationExpiration = parseInt(sessionStorage.feedbotConversationExpiration)
+        const isConversationExpired = !conversationExpiration || Date.now() >= conversationExpiration
+        if (isConversationExpired) {
+          sessionStorage.removeItem('feedbotDirectLineToken')
+          sessionStorage.removeItem('feedbotConversationId')
+        }
+
+        if (sessionStorage.feedbotDirectLineToken && sessionStorage.feedbotConversationId) {
+          body.token = sessionStorage.feedbotDirectLineToken
+          directLine.conversationId = sessionStorage.feedbotConversationId
+          directLine.webSocket = false
+        } else {
+          sessionStorage.feedbotDirectLineToken = body.token
+          sessionStorage.feedbotConversationExpiration = String(Date.now() + 60 * 60 * 1000)
+        }
+        
+        if (!getFeedyouParam("openUrlTarget")) {
+          setFeedyouParam("openUrlTarget", "same-domain")
+        }
+      }
 
       props.botConnection = new DirectLine({
-        ...(props.directLine || {}),
+        ...directLine,
         token: body.token,
       });
       delete props.directLine;
@@ -100,17 +138,33 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         }
 
         props.theme.showSignature = !config.hideSignature
+        props.theme.signature = config.signature || {}
 
-        if (config.showInput === "auto") {
-          props.disableInputWhenNotNeeded = true;
+        props.theme.enableScreenshotUpload = !!config.enableScreenshotUpload
+
+        if (config.showInput && !props.hasOwnProperty("disableInputWhenNotNeeded")) {
+          props.disableInputWhenNotNeeded = config.showInput !== "always"
+        }
+        
+        if (config.locale && !props.hasOwnProperty("locale")) {
+          props.locale = config.locale
         }
 
-        if (config.template.autoExpandTimeout > 0) {
+        if (config.template.autoExpandTimeout > 0 && !props.hasOwnProperty("autoExpandTimeout")) {
           props.autoExpandTimeout = config.template.autoExpandTimeout;
         }
 
+        if (config.introDialogId) {
+          props.introDialog = {id: config.introDialogId}
+        }
+
         if (config.userData) {
-          // TODO
+          props.userData = config.userData.reduce(
+            (data: {[key: string]: any}, row: {storage: string, value: string}) => {
+              if (row.storage && row.value && !data[row.storage]) {
+                data[row.storage] = row.value
+              }
+            }, props.userData || {})
         }
 
         if (config.customCss) {
@@ -132,10 +186,13 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         }
       }
     } catch (err) {
-      console.error("Token response error", err);
+      console.error("WebChat init error", err);
       return;
     }
   }
+
+  props.user.id = props.user.id ? String(props.user.id) : MakeId()
+  localStorage.feedbotUserId = props.user.id
 
   // FEEDYOU props defaults
   props.showUploadButton = props.hasOwnProperty("showUploadButton")
@@ -276,11 +333,6 @@ const FullScreenTheme = (theme: Theme) => `
     }
   }
 
-  .wc-adaptive-card {
-    border-radius: 8px;
-    padding: 2px 6px;
-  }
-
   .feedbot-wrapper {
     background-color: transparent;
     width: 95%;
@@ -299,6 +351,12 @@ const FullScreenTheme = (theme: Theme) => `
 
     position: absolute;
     bottom: 0;
+  }
+
+  @media screen and (min-width: 950px) {
+    .feedbot-wrapper {
+      left: calc(50% - 450px);
+    }
   }
 
   .feedbot-wrapper .feedbot {
@@ -423,29 +481,31 @@ const FullScreenTheme = (theme: Theme) => `
   }
 
   .wc-carousel button.scroll {
-    background-color: #1f357a !important;
+    background-color: ${theme.mainColor} !important;
     border-width: 0px !important;
   }
 
   .feedbot .wc-suggested-actions .wc-hscroll > ul > li button, .wc-app .wc-card button {
     color: white !important;
-    background-color: #1f357a !important;
-    border-color: #1f357a !important;
+    background-color: ${theme.mainColor} !important;
+    border-color: ${theme.mainColor} !important;
   }
 
   .feedbot .wc-suggested-actions .wc-hscroll > ul > li button:active, .wc-app .wc-card button:active {
-    color: #1f357a !important;
+    color: ${theme.mainColor} !important;
     background-color: white !important;
-    border-color: #1f357a !important;
+    border-color: ${theme.mainColor} !important;
   }
+
+  
 
   ${BaseTheme(theme)}
 `;
 
 const ExpandableKnobTheme = (theme: Theme) => `
   body .feedbot-wrapper {
-    bottom: calc(10px + 1vw);
-    right: calc(10px + 1vw);
+    bottom: 24px;
+    right: 24px;
     border-radius: 15px;
   }
 
@@ -500,6 +560,7 @@ const ExpandableKnobTheme = (theme: Theme) => `
     text-indent: 999%;
     white-space: nowrap;
     overflow: hidden;
+    font-size: 0px;
   }
 
   body .feedbot-wrapper {
@@ -507,43 +568,20 @@ const ExpandableKnobTheme = (theme: Theme) => `
     height: 565px;
   }
 
-  .wc-upload-screenshot {
-    display: none !important;
-  }
-
-  ${theme.enableScreenshotUpload && !isSafari() ? `
-    .wc-upload-screenshot {
-      display: inline-block !important;
-      position: absolute !important;
-      left: 46px !important;
-      height: 40px !important;
-      background-color: transparent !important;
-      border: none !important;
-      color: #8a8a8a;
-      padding: 0;
-    }
-    .wc-upload-screenshot svg {
-      margin: 9px 6px !important;
-      width: 32px;
-      height: 22px;
-    }
-    .wc-console.has-upload-button .wc-textbox {
-      left: 96px !important;
-    }
-  ` : ''}
-
   .feedbot-wrapper.collapsed .feedbot-signature {
     display: none;
   }
 
   .feedbot-wrapper .feedbot-signature {
     position: absolute;
-    bottom: -22px;
+    bottom: -23px;
     font-size: 13px;
     right: 11px;
     opacity: 0.50;
     font-family: "Roboto", sans-serif;
-    display: flex;
+
+    height: 22px;
+    display: block;
     align-items: center;
     -webkit-transition: opacity 0.3s ease-in-out;
     -moz-transition: opacity 0.3s ease-in-out;
@@ -560,18 +598,22 @@ const ExpandableKnobTheme = (theme: Theme) => `
     transition: 0.3s;
     color: black;
     text-decoration: none;
-    height: 19px;
-    margin-left: 3px;
+    margin: 0 4px;
     display: flex;
+    align-items: center;
   }
 
   .feedbot-signature a:hover {
     cursor: pointer;
   }
+
   .feedbot-signature a img {
-    height: 20px;
-    position: relative;
-    top: -1px;
+    height: 22px;
+  }
+  
+  .feedbot-signature-row{
+    display: flex;
+    height: 100%;
   }
 
   ${ExpandableBarTheme(theme)}
@@ -593,12 +635,12 @@ const Sidebar = (theme: Theme) => `
     text-indent: 999%;
     white-space: nowrap;
     overflow: hidden;
+    font-size: 0px;
 
     background-image: url('https://feedyou.blob.core.windows.net/webchat/times-solid.svg');
     background-repeat: no-repeat;
     background-size: 15px;
     background-position: center center;    
-
   }
 
   .feedbot-wrapper.collapsed .feedbot-header {
@@ -696,6 +738,10 @@ const Sidebar = (theme: Theme) => `
 
   .feedbot-signature a img {
     height: 22px;
+  }
+
+  .feedbot-signature-row {
+    justify-content: center;
   }
   
 `;
@@ -926,7 +972,7 @@ const BaseTheme = (theme: Theme) => `
     .feedbot-wrapper .wc-app .wc-card {
         background-color: transparent;
         border-width: 0px;
-        border-radius: 5px;
+        border-radius: 8px;
     }
 
     .feedbot-wrapper .wc-app .wc-carousel .wc-card {
@@ -1075,6 +1121,18 @@ const BaseTheme = (theme: Theme) => `
 
     .wc-carousel .wc-hscroll > ul > li > .wc-card > div > .ac-container > .ac-container .ac-textBlock{
       padding: 0 20px;
+      white-space: unset !important;
+      text-overflow: unset !important;
+      overflow: unset !important;
+    }
+
+    .wc-carousel .wc-hscroll > ul > li > .wc-card > div > .ac-container > .ac-container .ac-textBlock:last-child{
+      padding-bottom: 8px;
+    }
+
+    .wc-carousel .wc-hscroll > ul > li > .wc-card {
+      height: 100%;
+
     }
 
     .wc-carousel .wc-hscroll > ul > li > .wc-card > div .ac-actionSet{
@@ -1084,6 +1142,31 @@ const BaseTheme = (theme: Theme) => `
     .feedbot-signature {
       display: none;
     }
+
+    .wc-upload-screenshot {
+      display: none !important;
+    }
+  
+    ${theme.enableScreenshotUpload && !isSafari() ? `
+      .wc-upload-screenshot {
+        display: inline-block !important;
+        position: absolute !important;
+        left: 46px !important;
+        height: 40px !important;
+        background-color: transparent !important;
+        border: none !important;
+        color: #8a8a8a;
+        padding: 0;
+      }
+      .wc-upload-screenshot svg {
+        margin: 9px 6px !important;
+        width: 32px;
+        height: 22px;
+      }
+      .wc-console.has-upload-button .wc-textbox {
+        left: 96px !important;
+      }
+    ` : ''}
 
     ${theme.customCss || ""}
   `;

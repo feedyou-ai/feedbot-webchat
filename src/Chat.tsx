@@ -77,6 +77,8 @@ export class Chat extends React.Component<ChatProps, {}> {
     private gtmEventsSubscription: Subscription;
     private handoffSubscription: Subscription;
     private webchatCollapseSubscribtion: Subscription;
+    private redirectSubscribtion: Subscription;
+    private logSubscribtion: Subscription;
     private connectionStatusSubscription: Subscription;
     private selectedActivitySubscription: Subscription;
     private shellRef: React.Component & ShellFunctions;
@@ -257,7 +259,6 @@ export class Chat extends React.Component<ChatProps, {}> {
                         }
                     }
                 };
-                console.log('User data', newActivity.channelData.userData)
                 return botConnection.postActivityOriginal(newActivity);
             /*} else if (this.smartsupp && activity.type === "message") {
                 console.log('Smartsupp send', activity.text, activity)
@@ -320,9 +321,28 @@ export class Chat extends React.Component<ChatProps, {}> {
                 wrapper && wrapper.classList.add('collapsed')
             })
 
+        this.redirectSubscribtion = botConnection.activity$
+            .filter((activity: any) => activity.type === "event" && activity.name === "redirect")
+            .subscribe((activity: any) => {
+                // ignore redirect inside of Designer's Try panel
+                activity.value && !window.hasOwnProperty('API_URL') && (location.href = activity.value)
+            })
+
+        this.logSubscribtion = botConnection.activity$
+            .filter((activity: any) => activity.type === "event" && activity.name === "log")
+            .subscribe((activity: any) => {
+                if (Array.isArray(activity.value)) {
+                    const logs: any[] = activity.value
+                    logs.unshift('Feedyou WebChat log')
+                    console.log.apply(this, logs)
+                } else {
+                    console.log('Feedyou WebChat log', activity.value)
+                }
+            })
+
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
-        if (!this.props.directLine || !this.props.directLine.conversationId) {
+        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
             let introDialogId = this.props.introDialog && this.props.introDialog.id ? this.props.introDialog.id : undefined
             if (window.location.hash.startsWith('#feedbot-intro-dialog=')) {
                 introDialogId = window.location.hash.substr(22)
@@ -379,6 +399,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                 this.store.dispatch<ChatActions>({ type: 'Connection_Change', connectionStatus })
 
                 // FEEDYOU
+                botConnection.conversationId && sessionStorage.setItem("feedbotConversationId", botConnection.conversationId)
                 if (this.props.onConversationStarted && connectionStatus === ConnectionStatus.Online && botConnection.conversationId) {
                     this.props.onConversationStarted(botConnection.conversationId)
                 }
@@ -453,6 +474,8 @@ export class Chat extends React.Component<ChatProps, {}> {
         this.gtmEventsSubscription.unsubscribe();
         // this.handoffSubscription.unsubscribe();
         this.webchatCollapseSubscribtion.unsubscribe();
+        this.redirectSubscribtion.unsubscribe();
+        this.logSubscribtion.unsubscribe();
         this.connectionStatusSubscription.unsubscribe();
         this.activitySubscription.unsubscribe();
         if (this.selectedActivitySubscription)
@@ -558,7 +581,7 @@ export const doCardAction = (
         case "postBack":
             sendPostBack(botConnection, text, value, from, locale);
             break;
-
+                
         case "call":
         case "openUrl":
         case "playAudio":
