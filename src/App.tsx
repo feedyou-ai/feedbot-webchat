@@ -27,7 +27,7 @@ export type Theme = {
 
 export type AppProps = ChatProps & {
   theme?: Theme;
-  header?: { textWhenCollapsed?: string; text: string };
+  header?: { textWhenCollapsed?: string; text: string, extraHtml?: Element };
   channel?: { index?: number, id?: string };
   autoExpandTimeout?: number;
   enableScreenshotUpload?: boolean;

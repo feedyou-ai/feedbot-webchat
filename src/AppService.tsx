@@ -30,9 +30,15 @@ export function renderExpandableTemplate(props: AppProps) {
   header.className = "feedbot-header";
   header.style.backgroundColor =
     props.theme && props.theme.mainColor ? props.theme.mainColor : "#e51836";
-  header.innerText = props.header
-    ? props.header.textWhenCollapsed || props.header.text || "Chatbot"
-    : "Chatbot";
+
+  // if (props.header?.extraHtml) {
+  //   header.appendChild(props.header?.innerHtml)
+  // } else {
+    header.innerText = props.header
+      ? props.header.textWhenCollapsed || props.header.text || "Chatbot"
+      : "Chatbot";
+  //}
+
   header.onclick = () => {
     wrapper.classList.toggle("collapsed");
 
@@ -40,6 +46,7 @@ export function renderExpandableTemplate(props: AppProps) {
       header.innerHTML =
         '<span class="feedbot-title">' +
         ((props.header && props.header.text) || "Chatbot") +
+        ((props.header && props.header.extraHtml ) || "") +
         '</span><a onclick="return false;" class="feedbot-minimize" href="#">_</a>';
       render(props, container);
     }
