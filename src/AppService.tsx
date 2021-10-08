@@ -42,7 +42,7 @@ export function renderExpandableTemplate(props: AppProps) {
       header.innerHTML =
         '<span class="feedbot-title">' +
         ((props.header && props.header.text) || "Chatbot") +
-        '</span>'+((props.header && props.header.extraHtml && '<span class="extra-html">' + props.header.extraHtml + '</span>') || "") +'<a onclick="return false;" class="feedbot-minimize" href="#">_</a>';
+        '</span>'+((props.header && props.header.extraHtml && '<span class="feedbot-extra-html">' + props.header.extraHtml + '</span>') || "") +'<a onclick="return false;" class="feedbot-minimize" href="#">_</a>';
       render(props, container);
     }
 

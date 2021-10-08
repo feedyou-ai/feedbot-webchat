@@ -1147,7 +1147,7 @@ const BaseTheme = (theme: Theme) => `
       display: none !important;
     }
 
-    body .feedbot-wrapper.collapsed .feedbot-header .extra-html {
+    body .feedbot-wrapper.collapsed .feedbot-header .feedbot-extra-html {
       display: none
     }
   
