@@ -46,8 +46,7 @@ export function renderExpandableTemplate(props: AppProps) {
       header.innerHTML =
         '<span class="feedbot-title">' +
         ((props.header && props.header.text) || "Chatbot") +
-        ((props.header && props.header.extraHtml ) || "") +
-        '</span><a onclick="return false;" class="feedbot-minimize" href="#">_</a>';
+        '</span>'+((props.header && props.header.extraHtml ) || "") +'<a onclick="return false;" class="feedbot-minimize" href="#">_</a>';
       render(props, container);
     }
 

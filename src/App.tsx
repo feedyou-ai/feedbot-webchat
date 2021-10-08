@@ -1146,6 +1146,10 @@ const BaseTheme = (theme: Theme) => `
     .wc-upload-screenshot {
       display: none !important;
     }
+
+    body .feedbot-wrapper.collapsed .feedbot-header .extra-html {
+      display: none
+    }
   
     ${theme.enableScreenshotUpload && !isSafari() ? `
       .wc-upload-screenshot {
