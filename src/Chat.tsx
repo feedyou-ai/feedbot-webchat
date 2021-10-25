@@ -100,7 +100,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     constructor(props: ChatProps) {
         super(props);
 
-        console.log("BotChat.Chat props", props);
+        konsole.log("BotChat.Chat props", props);
 
         this.store.dispatch<ChatActions>({
             type: 'Set_Locale',
