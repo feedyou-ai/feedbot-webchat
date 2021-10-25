@@ -43,6 +43,7 @@ interface SmartsuppHandoffOptions {
 export interface ChatProps {
     adaptiveCardsHostConfig: any,
     chatTitle?: boolean | string,
+    consolePlaceholder?: string
     user: User,
     bot: User,
     botConnection?: IBotConnection,
@@ -99,12 +100,20 @@ export class Chat extends React.Component<ChatProps, {}> {
     constructor(props: ChatProps) {
         super(props);
 
-        konsole.log("BotChat.Chat props", props);
+        console.log("BotChat.Chat props", props);
 
         this.store.dispatch<ChatActions>({
             type: 'Set_Locale',
             locale: props.locale || (window.navigator as any)["userLanguage"] || window.navigator.language || 'en'
         });
+
+        if(props.consolePlaceholder){
+        this.store.dispatch<ChatActions>({
+            type: 'Set_Console_Placeholder',
+            locale: props.locale || (window.navigator as any)["userLanguage"] || window.navigator.language || 'en',
+            consolePlaceholder: props.consolePlaceholder
+        });
+    }
 
         if (props.adaptiveCardsHostConfig) {
             this.store.dispatch<ChatActions>({
