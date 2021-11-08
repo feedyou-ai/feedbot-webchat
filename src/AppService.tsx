@@ -101,9 +101,7 @@ export function renderFullScreenTemplate(props: AppProps) {
     document.body.appendChild(wrapper);
 
     const customScript = props.theme && props.theme.template && props.theme.template.customScript
-    console.log(customScript)
     if (customScript)  {
-      console.log("createCustomScript el")
       const customScriptTag = document.createElement("script");
       customScriptTag.appendChild(document.createTextNode(customScript))
       document.body.appendChild(customScriptTag);
