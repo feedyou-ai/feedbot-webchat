@@ -172,13 +172,6 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
           props.theme.customCss = config.customCss;
         }
 
-        if(config.customScript) {
-          const scriptTag = document.createElement("script")
-          scriptTag.innerHTML = config.customScript
-          document.querySelector("body").appendChild(scriptTag)
-        }
-
-
         if (config.template.headerText) {
           props.header = {
             ...(props.header || {}),
