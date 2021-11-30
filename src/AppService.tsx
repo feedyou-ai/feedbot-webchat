@@ -60,15 +60,22 @@ export function renderExpandableTemplate(props: AppProps) {
   
   reset.appendChild(wrapper)
   
-  document.body.appendChild(location.hash.includes('#feedbot-css-reset') ? reset : wrapper);
+  document.body.appendChild(location.hash.includes('#feedbot-css-reset') ? reset : wrapper)
 
   const autoExpandTimeout = getAutoExpandTimeout(props.autoExpandTimeout, props.persist)
   if (autoExpandTimeout > 0) {
+    
+    let expandedOnce = false
+    header.addEventListener("click", () => {
+      expandedOnce = true      
+    })
+    
     setTimeout(() => {
-      if (wrapper.className.indexOf("collapsed") >= 0) {
+      if (!expandedOnce && wrapper.className.indexOf("collapsed") >= 0) {
         header.click();
-      }
+      }    
     }, autoExpandTimeout);
+  
   }
 }
 
