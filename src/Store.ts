@@ -770,7 +770,7 @@ const updateSelectedActivityEpic: Epic<ChatActions, ChatState> = (action$, store
 
 const showTypingEpic: Epic<ChatActions, ChatState> = (action$) => {
     return action$.ofType('Show_Typing')
-    .delay(parseInt(getFeedyouParam("typingDelay")))
+    .delay(parseInt(getFeedyouParam("typingDelay") || 20000))
     .map(action => ({ type: 'Clear_Typing', id: action.activity.id } as HistoryAction));
 }
 

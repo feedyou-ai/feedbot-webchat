@@ -76,8 +76,6 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 
       if(props.typingDelay) {
         setFeedyouParam("typingDelay", props.typingDelay.toString())
-      }else{
-        setFeedyouParam("typingDelay", "20000")
       }
       
       props.persist = props.persist || (body.config && body.config.persist)
