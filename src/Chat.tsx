@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
 import { Activity, IBotConnection, User, DirectLine, DirectLineOptions, CardActionTypes } from 'botframework-directlinejs';
-import { createStore, ChatActions, sendMessage, typingDelay } from './Store';
+import { createStore, ChatActions, sendMessage, typingDelay, HistoryAction, ChatStore } from './Store';
 import { Provider } from 'react-redux';
 import { SpeechOptions } from './SpeechOptions';
 import { Speech } from './SpeechModule';
@@ -311,11 +311,10 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - support "start over" button
         this.props.startOverTrigger && this.props.startOverTrigger(() => {
-            console.log('starting over')
-            sendPostBack(botConnection, "start over", {}, this.props.user, this.props.locale)
+            startOver(botConnection, this.store, this.props.user)
         })
         window.addEventListener('feedbot:start-over', () => {
-            sendPostBack(botConnection, "start over", {}, this.props.user, this.props.locale)
+            startOver(botConnection, this.store, this.props.user)
         })
         
         this.fbPixelEventsSubscription = botConnection.activity$
@@ -643,6 +642,24 @@ export const sendPostBack = (botConnection: IBotConnection, text: string, value:
         konsole.log("success sending postBack", id)
     }, error => {
         konsole.log("failed to send postBack", error);
+    });
+}
+
+export const startOver = (botConnection: IBotConnection, store: ChatStore, from: User) => {
+    konsole.log('cleaning history and starting over')
+    
+    store.dispatch<HistoryAction>({ type: 'Clear_History' });
+    
+    botConnection.postActivity({
+        from,
+        name: 'beginIntroDialog',
+        type: 'event',
+        value: '',
+        channelData: {id: 'main'} //
+    }).subscribe(() => {
+        console.log("success sending startOver")
+    }, error => {
+        console.log("failed to send startOver", error);
     });
 }
 
