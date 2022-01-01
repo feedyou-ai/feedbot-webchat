@@ -311,10 +311,10 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - support "start over" button
         this.props.startOverTrigger && this.props.startOverTrigger(() => {
-            startOver(botConnection, this.store, this.props.user)
+            startOver(botConnection, this.store, this.props)
         })
         window.addEventListener('feedbot:start-over', () => {
-            startOver(botConnection, this.store, this.props.user)
+            startOver(botConnection, this.store, this.props)
         })
         
         this.fbPixelEventsSubscription = botConnection.activity$
@@ -362,11 +362,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
         if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
-            let introDialogId = this.props.introDialog && this.props.introDialog.id ? this.props.introDialog.id : undefined
-            if (window.location.hash.startsWith('#feedbot-intro-dialog=')) {
-                introDialogId = window.location.hash.substr(22)
-            }
-            
+            const introDialogId = getIntroDialogId(this.props)
             botConnection.postActivity({
                 from: this.props.user,
                 name: 'beginIntroDialog',
@@ -645,17 +641,18 @@ export const sendPostBack = (botConnection: IBotConnection, text: string, value:
     });
 }
 
-export const startOver = (botConnection: IBotConnection, store: ChatStore, from: User) => {
+export const startOver = (botConnection: IBotConnection, store: ChatStore, props: ChatProps) => {
     konsole.log('cleaning history and starting over')
-    
+
     store.dispatch<HistoryAction>({ type: 'Clear_History' });
     
+    const introDialogId = getIntroDialogId(props)
     botConnection.postActivity({
-        from,
+        from: props.user,
         name: 'beginIntroDialog',
         type: 'event',
         value: '',
-        channelData: {id: 'main'} //
+        channelData: introDialogId ? {id: introDialogId} : undefined
     }).subscribe(() => {
         console.log("success sending startOver")
     }, error => {
@@ -746,4 +743,12 @@ function trackGoogleTagManagerEvent({event, variables}: GtmEvent) {
     } else {
         console.warn('dataLayer is undefined - cannot track GTM custom event dataLayer.push(...)', data)
     }
+}
+
+function getIntroDialogId(props: ChatProps): string | undefined {
+    if (window.location.hash.startsWith('#feedbot-intro-dialog=')) {
+        return window.location.hash.substr(22)
+    }
+
+    return props.introDialog && props.introDialog.id ? props.introDialog.id : undefined
 }
