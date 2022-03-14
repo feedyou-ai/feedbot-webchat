@@ -8,7 +8,7 @@ import { Speech } from "./SpeechModule";
 import { ChatActions, ListeningState, sendMessage, sendFiles } from "./Store";
 import * as QRCode from "qrcode";
 import Downshift from "downshift";
-import { debounce } from "lodash";
+import { debounce } from "debounce";
 
 import { StyledDropZone } from "react-drop-zone";
 
