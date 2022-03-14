@@ -823,16 +823,20 @@ const showUploadBasedOnInputHint: Epic<ChatActions, ChatState> = (
 const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
   action$,
   store
-) =>
-  action$.ofType("Recieve_Message").map(
+) => {
+  return action$.ofType("Receive_Message").map(
     (action) =>
       ({
         type: "Toggle_Auto_Suggest",
         showAutoSuggest:
-          action.activity.channelData.autosuggest === "google-city",
-        autoSuggestType: action.activity.channelData.autosuggest,
+          action.activity.channelData.autosuggest &&
+          action.activity.channelData.autosuggest.type === "google-city",
+        autoSuggestType:
+          action.activity.channelData.autosuggest &&
+          action.activity.channelData.autosuggest.type,
       } as FormatAction)
   );
+};
 
 // FEEDYOU disable/hide input prompt only when last message's inputHint=='ignoringInput'
 const disableInputBasedOnInputHint: Epic<ChatActions, ChatState> = (
@@ -1019,6 +1023,7 @@ export const createStore = () =>
           speakSSMLEpic,
           speakOnMessageReceivedEpic,
           showUploadBasedOnInputHint,
+          showAutoSuggestBasedOnChannelData,
           disableInputBasedOnInputHint,
           startListeningEpic,
           stopListeningEpic,

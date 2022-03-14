@@ -103,12 +103,16 @@ class ShellContainer
   }
 
   debounceCall = debounce(async (queryString: string) => {
-    console.log(queryString);
-    const res = await fetch("https://jsonplaceholder.typicode.com/todos");
+    const replacedQueryString = queryString
+      .normalize("NFKD")
+      .replace(/[^\w]/g, "");
+    const res = await fetch(
+      `https://feedbot-test-demo-honza.azurewebsites.net/webchat/autosuggest/${replacedQueryString}`
+    );
     const data = await res.json();
     console.log(data);
-    this.setState({ items: data });
-  }, 2000);
+    this.setState({ items: data.value });
+  }, 500);
 
   private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     this.debounceCall(e.currentTarget.value);
@@ -300,12 +304,11 @@ class ShellContainer
         {this.props.showAutoSuggest ? (
           <Downshift
             onChange={(selection) => {
-              alert(
-                selection ? `You selected ${selection}` : "Selection Cleared"
-              );
               return this.props.onChangeText(selection);
             }}
-            itemToString={(item) => (item ? item.title : "")}
+            itemToString={(item) => {
+              return item ? item : "";
+            }}
           >
             {({
               getInputProps,
@@ -359,14 +362,16 @@ class ShellContainer
                     ? this.state.items
                         .filter(
                           (item: any) =>
-                            !inputValue || item.title.includes(inputValue)
+                            !inputValue || item.structured_formatting.main_text
+                          // .toLowerCase()
+                          // .includes(inputValue.toLowerCase())
                         )
                         .map((item: any, index: number) => (
                           <li
                             {...getItemProps({
-                              key: item.title,
+                              key: item.structured_formatting.main_text,
                               index,
-                              item: item.title,
+                              item: item.structured_formatting.main_text,
                               style: {
                                 backgroundColor:
                                   highlightedIndex === index
@@ -378,7 +383,7 @@ class ShellContainer
                               },
                             })}
                           >
-                            {item.title}
+                            {item.structured_formatting.main_text}
                           </li>
                         ))
                     : null}
