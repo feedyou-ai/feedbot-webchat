@@ -20,6 +20,7 @@ interface Props {
   attachmentUrl: string;
   showAutoSuggest: boolean;
   autoSuggestType: string;
+  autoSuggestItems: string[];
   uploadUsingQrCodeOnly: boolean;
   disableInput: boolean;
 
@@ -51,7 +52,7 @@ class ShellContainer
   constructor(props: Props) {
     super(props);
 
-    this.state = { attachmentQrCode: "", items: [] };
+    this.state = { attachmentQrCode: "", items: this.props.autoSuggestItems };
   }
 
   private sendMessage() {
@@ -110,12 +111,18 @@ class ShellContainer
       `https://feedbot-test-demo-honza.azurewebsites.net/webchat/autosuggest/${replacedQueryString}`
     );
     const data = await res.json();
-    console.log(data);
-    this.setState({ items: data.value });
+
+    this.setState({
+      items: data.value.map((item: any) => ({
+        answer: item.terms[0].value,
+      })),
+    });
   }, 500);
 
   private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    this.debounceCall(e.currentTarget.value);
+    if (this.props.autoSuggestType === "google-city") {
+      this.debounceCall(e.currentTarget.value);
+    }
   };
 
   private onClickSend() {
@@ -359,19 +366,23 @@ class ShellContainer
                   {...getMenuProps()}
                 >
                   {isOpen
-                    ? this.state.items
+                    ? (this.props.autoSuggestItems.length > 0
+                        ? this.props.autoSuggestItems
+                        : this.state.items
+                      )
                         .filter(
                           (item: any) =>
-                            !inputValue || item.structured_formatting.main_text
-                          // .toLowerCase()
-                          // .includes(inputValue.toLowerCase())
+                            !inputValue ||
+                            item.answer
+                              .toLowerCase()
+                              .includes(inputValue.toLowerCase())
                         )
                         .map((item: any, index: number) => (
                           <li
                             {...getItemProps({
-                              key: item.structured_formatting.main_text,
+                              key: item.answer,
                               index,
-                              item: item.structured_formatting.main_text,
+                              item: item.answer,
                               style: {
                                 backgroundColor:
                                   highlightedIndex === index
@@ -383,7 +394,7 @@ class ShellContainer
                               },
                             })}
                           >
-                            {item.structured_formatting.main_text}
+                            {item.answer}
                           </li>
                         ))
                     : null}
@@ -452,6 +463,7 @@ export const Shell = connect(
     attachmentUrl: state.format.attachmentUrl,
     showAutoSuggest: state.format.showAutoSuggest,
     autoSuggestType: state.format.autoSuggestType,
+    autoSuggestItems: state.format.autoSuggestItems,
     disableInput: state.format.disableInput,
     uploadUsingQrCodeOnly: state.format.uploadUsingQrCodeOnly,
     strings: state.format.strings,
@@ -477,6 +489,7 @@ export const Shell = connect(
     attachmentUrl: stateProps.attachmentUrl,
     showAutoSuggest: stateProps.showAutoSuggest,
     autoSuggestType: stateProps.autoSuggestType,
+    autoSuggestItems: stateProps.autoSuggestItems,
     disableInput: stateProps.disableInput,
     uploadUsingQrCodeOnly: stateProps.uploadUsingQrCodeOnly,
     strings: stateProps.strings,

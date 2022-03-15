@@ -184,6 +184,7 @@ export interface FormatState {
   showUploadButton: boolean;
   showAutoSuggest: boolean;
   autoSuggestType: string;
+  autoSuggestItems: any[];
   attachmentUrl: string;
   uploadUsingQrCodeOnly: boolean;
   disableInput: boolean;
@@ -215,6 +216,7 @@ export type FormatAction =
       type: "Toggle_Auto_Suggest";
       showAutoSuggest: boolean;
       autoSuggestType?: string;
+      autoSuggestItems?: any[];
     }
   | {
       type: "Toggle_Disable_Input";
@@ -233,6 +235,7 @@ export const format: Reducer<FormatState> = (
     attachmentUrl: null,
     showAutoSuggest: false,
     autoSuggestType: "",
+    autoSuggestItems: [],
     disableInput: false,
     disableInputWhenNotNeeded: false,
     uploadUsingQrCodeOnly: false,
@@ -273,6 +276,7 @@ export const format: Reducer<FormatState> = (
         ...state,
         showAutoSuggest: action.showAutoSuggest,
         autoSuggestType: action.autoSuggestType || "",
+        autoSuggestItems: action.autoSuggestItems || [],
       };
     case "Toggle_Disable_Input":
       return {
@@ -824,18 +828,23 @@ const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
   action$,
   store
 ) => {
-  return action$.ofType("Receive_Message").map(
-    (action) =>
-      ({
-        type: "Toggle_Auto_Suggest",
-        showAutoSuggest:
-          action.activity.channelData.autosuggest &&
-          action.activity.channelData.autosuggest.type === "google-city",
-        autoSuggestType:
-          action.activity.channelData.autosuggest &&
-          action.activity.channelData.autosuggest.type,
-      } as FormatAction)
-  );
+  return action$.ofType("Receive_Message").map((action) => {
+    console.log(action.activity.channelData.autosuggest);
+    return {
+      type: "Toggle_Auto_Suggest",
+      showAutoSuggest:
+        action.activity.channelData.autosuggest &&
+        ["google-city", "static"].includes(
+          action.activity.channelData.autosuggest.type
+        ),
+      autoSuggestType:
+        action.activity.channelData.autosuggest &&
+        action.activity.channelData.autosuggest.type,
+      autoSuggestItems:
+        action.activity.channelData.autosuggest &&
+        action.activity.channelData.autosuggest.answers,
+    } as FormatAction;
+  });
 };
 
 // FEEDYOU disable/hide input prompt only when last message's inputHint=='ignoringInput'
