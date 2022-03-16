@@ -158,6 +158,7 @@ export interface FormatState {
     showAutoSuggest: boolean;
     autoSuggestType: string;
     autoSuggestItems: any[];
+    autoSuggestCountry: string;
     attachmentUrl: string,
     uploadUsingQrCodeOnly: boolean,
     disableInput: boolean,
@@ -185,6 +186,7 @@ export type FormatAction = {
     showAutoSuggest: boolean;
     autoSuggestType?: string;
     autoSuggestItems?: any[];
+    autoSuggestCountry?: string;
 } | {
     type: 'Toggle_Disable_Input',
     disableInput: boolean
@@ -202,6 +204,7 @@ export const format: Reducer<FormatState> = (
         showAutoSuggest: false,
         autoSuggestType: "",
         autoSuggestItems: [],
+        autoSuggestCountry: "cs",
         disableInput: false,
         disableInputWhenNotNeeded: false,
         uploadUsingQrCodeOnly: false,
@@ -240,6 +243,7 @@ export const format: Reducer<FormatState> = (
                 showAutoSuggest: action.showAutoSuggest,
                 autoSuggestType: action.autoSuggestType || "",
                 autoSuggestItems: action.autoSuggestItems || [],
+                autoSuggestCountry: action.autoSuggestCountry || "cs"
             };
         case 'Toggle_Disable_Input':
             return {
@@ -683,6 +687,9 @@ const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
         autoSuggestItems:
             action.activity.channelData.autosuggest &&
             action.activity.channelData.autosuggest.answers,
+        autoSuggestCountry:
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.countryCode,
         } as FormatAction;
     });
     };

@@ -20,6 +20,7 @@ interface Props {
     showAutoSuggest: boolean;
     autoSuggestType: string;
     autoSuggestItems: string[];
+    autoSuggestCountry: string;
     attachmentUrl: string,
     uploadUsingQrCodeOnly: boolean,
     disableInput: boolean
@@ -99,7 +100,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         .normalize("NFKD")
         .replace(/[^\w]/g, "");
       const res = await fetch(
-        `https://feedbot-test-demo-honza.azurewebsites.net/webchat/autosuggest/${replacedQueryString}`
+        `https://feedbot-test-demo-honza.azurewebsites.net/webchat/autosuggest/${replacedQueryString}/${this.props.autoSuggestCountry}`
       );
       const data = await res.json();
   
@@ -394,8 +395,9 @@ export const Shell = connect(
         showUploadButton: state.format.showUploadButton,
         attachmentUrl: state.format.attachmentUrl,
         showAutoSuggest: state.format.showAutoSuggest,
-    autoSuggestType: state.format.autoSuggestType,
-    autoSuggestItems: state.format.autoSuggestItems,
+        autoSuggestType: state.format.autoSuggestType,
+        autoSuggestItems: state.format.autoSuggestItems,
+        autoSuggestCountry: state.format.autoSuggestCountry,
         disableInput: state.format.disableInput,
         uploadUsingQrCodeOnly: state.format.uploadUsingQrCodeOnly,
         strings: state.format.strings,
@@ -419,6 +421,7 @@ export const Shell = connect(
     showAutoSuggest: stateProps.showAutoSuggest,
     autoSuggestType: stateProps.autoSuggestType,
     autoSuggestItems: stateProps.autoSuggestItems,
+    autoSuggestCountry: stateProps.autoSuggestCountry,
     disableInput: stateProps.disableInput,
     uploadUsingQrCodeOnly: stateProps.uploadUsingQrCodeOnly,
     strings: stateProps.strings,
