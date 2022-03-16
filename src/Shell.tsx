@@ -13,6 +13,7 @@ import { debounce } from "debounce";
 import { StyledDropZone } from 'react-drop-zone'
 
 interface Props {
+    botId: string,
     inputText: string,
     strings: Strings,
     listeningState: ListeningState,
@@ -100,7 +101,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         .normalize("NFKD")
         .replace(/[^\w]/g, "");
       const res = await fetch(
-        `https://feedbot-test-demo-honza.azurewebsites.net/webchat/autosuggest/${replacedQueryString}/${this.props.autoSuggestCountry}`
+        `https://${this.props.botId}.azurewebsites.net/webchat/autosuggest/${replacedQueryString}/${this.props.autoSuggestCountry}`
       );
       const data = await res.json();
   
@@ -391,6 +392,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
 export const Shell = connect(
     (state: ChatState) => ({
         // passed down to ShellContainer
+        botId: state.connection.bot.id,
         inputText: state.shell.input,
         showUploadButton: state.format.showUploadButton,
         attachmentUrl: state.format.attachmentUrl,
@@ -415,6 +417,7 @@ export const Shell = connect(
     sendFiles
 }, (stateProps: any, dispatchProps: any, ownProps: any): Props => ({
     // from stateProps
+    botId: stateProps.botId,
     inputText: stateProps.inputText,
     showUploadButton: stateProps.showUploadButton,
     attachmentUrl: stateProps.attachmentUrl,

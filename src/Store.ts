@@ -316,7 +316,7 @@ export const connection: Reducer<ConnectionState> = (
         botConnection: undefined,
         selectedActivity: undefined,
         user: undefined,
-        bot: undefined
+        bot: {id: undefined}
     },
     action: ConnectionAction
 ) => {
