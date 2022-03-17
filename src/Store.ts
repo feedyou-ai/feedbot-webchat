@@ -155,6 +155,10 @@ export interface FormatState {
     chatTitle: boolean | string,
     locale: string,
     showUploadButton: boolean,
+    showAutoSuggest: boolean;
+    autoSuggestType: string;
+    autoSuggestItems: any[];
+    autoSuggestCountry: string;
     attachmentUrl: string,
     uploadUsingQrCodeOnly: boolean,
     disableInput: boolean,
@@ -178,6 +182,12 @@ export type FormatAction = {
     attachmentUrl?: string
     uploadUsingQrCodeOnly?: boolean
 } | {
+    type: "Toggle_Auto_Suggest";
+    showAutoSuggest: boolean;
+    autoSuggestType?: string;
+    autoSuggestItems?: any[];
+    autoSuggestCountry?: string;
+} | {
     type: 'Toggle_Disable_Input',
     disableInput: boolean
 } | {
@@ -191,6 +201,10 @@ export const format: Reducer<FormatState> = (
         locale: 'en-us',
         showUploadButton: true,
         attachmentUrl: null,
+        showAutoSuggest: false,
+        autoSuggestType: "",
+        autoSuggestItems: [],
+        autoSuggestCountry: "cs",
         disableInput: false,
         disableInputWhenNotNeeded: false,
         uploadUsingQrCodeOnly: false,
@@ -222,6 +236,14 @@ export const format: Reducer<FormatState> = (
                 showUploadButton: action.showUploadButton,
                 attachmentUrl: action.attachmentUrl,
                 uploadUsingQrCodeOnly: action.hasOwnProperty('uploadUsingQrCodeOnly') ? action.uploadUsingQrCodeOnly : state.uploadUsingQrCodeOnly
+            };
+        case "Toggle_Auto_Suggest":
+            return {
+                ...state,
+                showAutoSuggest: action.showAutoSuggest,
+                autoSuggestType: action.autoSuggestType || "",
+                autoSuggestItems: action.autoSuggestItems || [],
+                autoSuggestCountry: action.autoSuggestCountry || "cs"
             };
         case 'Toggle_Disable_Input':
             return {
@@ -294,7 +316,7 @@ export const connection: Reducer<ConnectionState> = (
         botConnection: undefined,
         selectedActivity: undefined,
         user: undefined,
-        bot: undefined
+        bot: {id: undefined}
     },
     action: ConnectionAction
 ) => {
@@ -647,6 +669,31 @@ const disableInputBasedOnInputHint: Epic<ChatActions, ChatState> = (action$, sto
     .filter(action => (action.activity as Message) && store.getState().format.disableInputWhenNotNeeded)
     .map(action => ({ type: 'Toggle_Disable_Input', disableInput: action.activity.inputHint === 'ignoringInput' || action.activity.inputHint === 'expectingUpload' } as FormatAction))
 
+const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
+    action$,
+    store
+    ) => {
+    return action$.ofType("Receive_Message").map((action) => {
+        return {
+        type: "Toggle_Auto_Suggest",
+        showAutoSuggest:
+            action.activity.channelData.autosuggest &&
+            ["google-city", "static"].includes(
+            action.activity.channelData.autosuggest.type
+            ),
+        autoSuggestType:
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.type,
+        autoSuggestItems:
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.answers,
+        autoSuggestCountry:
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.countryCode,
+        } as FormatAction;
+    });
+    };
+
 const stopSpeakingEpic: Epic<ChatActions, ChatState> = (action$) =>
     action$.ofType(
         'Update_Input',
@@ -771,6 +818,7 @@ export const createStore = () =>
             speakSSMLEpic,
             speakOnMessageReceivedEpic,
             showUploadBasedOnInputHint,
+            showAutoSuggestBasedOnChannelData,
             disableInputBasedOnInputHint,
             startListeningEpic,
             stopListeningEpic,
