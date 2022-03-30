@@ -638,10 +638,9 @@ export const doCardAction = (
             else {
                 loginWindow.location.href = text;
             }
-            break;
-
-       
+            break;      
     }
+}
 
 export const startOver = (botConnection: IBotConnection, store: ChatStore, props: ChatProps) => {
     konsole.log('cleaning history and starting over')

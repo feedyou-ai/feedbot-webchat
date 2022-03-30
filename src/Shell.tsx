@@ -47,7 +47,7 @@ export interface ShellFunctions {
 }
 
 class ShellContainer extends React.Component<Props, State> implements ShellFunctions {
-    private textInput: HTMLInputElement;
+    private textInput: HTMLTextAreaElement | HTMLInputElement;
     private fileInput: HTMLInputElement;
     private addFileTimeout: any
 
@@ -55,12 +55,6 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
       super(props);
   
       this.state = { attachmentQrCode: "", items: this.props.autoSuggestItems };
-    }
-
-    componentDidUpdate(prevProps: Props) {
-        if (prevProps.disableInput === true && this.props.disableInput === false) {
-            this.textInput.focus();
-        }
     }
 
     private sendMessage() {
@@ -99,7 +93,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         }
     }
 
-    private onKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    private onKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) {
         if (e.key === 'Enter' && !e.shiftKey) {
             this.sendMessage();
             e.stopPropagation()
@@ -372,7 +366,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                         autoFocus
                         value={this.props.inputText}
                         onChange={_ => this.props.onChangeText(this.textInput.value)}
-                        onKeyPress={e => this.onKeyPress(e)}
+                        onKeyPress={(e) => this.onKeyPress(e)}
                         onFocus={() => this.onTextInputFocus()}
                         placeholder={placeholder}
                         disabled={this.props.disableInput}
