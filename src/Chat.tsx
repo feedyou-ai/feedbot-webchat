@@ -6,7 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
 import { Activity, IBotConnection, User, DirectLine, DirectLineOptions, CardActionTypes } from 'botframework-directlinejs';
-import { createStore, ChatActions, sendMessage } from './Store';
+import { createStore, ChatActions, sendMessage, typingDelay, HistoryAction, ChatStore } from './Store';
 import { Provider } from 'react-redux';
 import { SpeechOptions } from './SpeechOptions';
 import { Speech } from './SpeechModule';
@@ -14,6 +14,12 @@ import { ActivityOrID, FormatOptions } from './Types';
 import * as konsole from './Konsole';
 import { getTabIndex } from './getTabIndex';
 import { ConnectionStatus } from 'botframework-directlinejs';
+//import { createVisitorClient, VisitorClient, MessageSubType } from 'smartsupp-websocket'
+
+import { History } from './History';
+import { MessagePane } from './MessagePane';
+import { Shell, ShellFunctions } from './Shell';
+import getDeviceData from './utils/getDeviceData'
 
 declare const fbq: Function;
 declare const dataLayer: Array<Object>;
@@ -30,9 +36,19 @@ interface GtmEvent {
     variables?: Array<{ name: string, value: string }>
 }
 
+interface SmartsuppHandoffOptions {
+    key: string
+    name?: string
+    email?: string
+    phone?: string
+    notification?: string
+    variables?: {[key: string]: string}
+}
+
 export interface ChatProps {
     adaptiveCardsHostConfig: any,
     chatTitle?: boolean | string,
+    consolePlaceholder?: string
     user: User,
     bot: User,
     botConnection?: IBotConnection,
@@ -49,12 +65,11 @@ export interface ChatProps {
     userData?: {},
     introDialog?: { id?: string },
     startOverTrigger?: (trigger: () => void) => void,
-    onConversationStarted?: (callback: (conversationId: string) => void) => void
+    onConversationStarted?: (callback: (conversationId: string) => void) => void,
+    typingDelay?: number
 }
 
-import { History } from './History';
-import { MessagePane } from './MessagePane';
-import { Shell, ShellFunctions } from './Shell';
+
 
 export class Chat extends React.Component<ChatProps, {}> {
 
@@ -67,11 +82,17 @@ export class Chat extends React.Component<ChatProps, {}> {
     private gaEventsSubscription: Subscription;
     private gtmEventsSubscription: Subscription;
     private botEventsSubscribtion: Subscription;
+    private handoffSubscription: Subscription;
+    private webchatCollapseSubscribtion: Subscription;
+    private redirectSubscribtion: Subscription;
+    private logSubscribtion: Subscription;
     private connectionStatusSubscription: Subscription;
     private selectedActivitySubscription: Subscription;
     private shellRef: React.Component & ShellFunctions;
     private historyRef: React.Component;
     private chatviewPanelRef: HTMLElement;
+
+    //private smartsupp: VisitorClient
 
     private resizeListener = () => this.setSize();
 
@@ -80,6 +101,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private _saveChatviewPanelRef = this.saveChatviewPanelRef.bind(this);
     private _saveHistoryRef = this.saveHistoryRef.bind(this);
     private _saveShellRef = this.saveShellRef.bind(this);
+    //private _smartsuppHandoff = this.smartsuppHandoff.bind(this);
 
     constructor(props: ChatProps) {
         super(props);
@@ -90,6 +112,20 @@ export class Chat extends React.Component<ChatProps, {}> {
             type: 'Set_Locale',
             locale: props.locale || (window.navigator as any)["userLanguage"] || window.navigator.language || 'en'
         });
+
+        if(props.consolePlaceholder){
+        this.store.dispatch<ChatActions>({
+            type: 'Set_Console_Placeholder',
+            locale: props.locale || (window.navigator as any)["userLanguage"] || window.navigator.language || 'en',
+            consolePlaceholder: props.consolePlaceholder
+        });
+    }
+        if(props.typingDelay) {
+            this.store.dispatch<ChatActions>({
+                type: "Set_TypingDelay",
+                payload: props.typingDelay
+            })
+        }
 
         if (props.adaptiveCardsHostConfig) {
             this.store.dispatch<ChatActions>({
@@ -240,16 +276,21 @@ export class Chat extends React.Component<ChatProps, {}> {
                             ...(this.props.userData || {}),
                             ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
                             ...getLocaleUserData(this.props.locale),
-                            ...getReferrerUserData()
+                            ...getReferrerUserData(),
+							"user-device": getDeviceData()
                         }
                     }
                 };
-                console.log('User data', newActivity.channelData.userData)
                 return botConnection.postActivityOriginal(newActivity);
-            } else if (activity.type === "message" && activity.isDirectUpload) {
-                activity.id = "directupload"
-                console.log("activity", activity)
-                return new Observable()
+            /*} else if (this.smartsupp && activity.type === "message") {
+                console.log('Smartsupp send', activity.text, activity)
+                this.smartsupp.chatMessage({
+                    content: {
+                        type: 'text',
+                        text: activity.text,
+                    },
+                })
+                return new Observable()*/
             } else {
                 return botConnection.postActivityOriginal(activity);
             }
@@ -259,6 +300,8 @@ export class Chat extends React.Component<ChatProps, {}> {
             window.addEventListener('resize', this.resizeListener);
 
         this.store.dispatch<ChatActions>({ type: 'Start_Connection', user: this.props.user, bot: this.props.bot, botConnection, selectedActivity: this.props.selectedActivity });
+        
+        // setTimeout(() => this.smartsuppHandoff({key: '8f2622df0b638f00440671a5fb471919ff3cfea1'}), 10000)
 
         // FEEDYOU - TECHNICAL ISSUES MESSAGE
         // this.handleIncomingActivity({ id: 'maintenance', type: 'message', from: { name: "Chatbot", ...this.props.bot }, text: "Dobrý den, aktuálně mám technické problémy, které kolegové intenzivně řeší. Je možné, že nebudu reagovat úplně správně, moc se za to omlouvám. Prosím zkuste si se mnou popovídat později.", timestamp: new Date().toISOString()});
@@ -270,8 +313,10 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - support "start over" button
         this.props.startOverTrigger && this.props.startOverTrigger(() => {
-            console.log('starting over')
-            sendPostBack(botConnection, "start over", {}, this.props.user, this.props.locale)
+            startOver(botConnection, this.store, this.props)
+        })
+        window.addEventListener('feedbot:start-over', () => {
+            startOver(botConnection, this.store, this.props)
         })
 
         this.fbPixelEventsSubscription = botConnection.activity$
@@ -286,31 +331,40 @@ export class Chat extends React.Component<ChatProps, {}> {
             .filter((activity: any) => activity.type === "event" && activity.name === "google-tag-manager-track-event")
             .subscribe((activity: any) => trackGoogleTagManagerEvent(JSON.parse(activity.value)))
 
-        this.botEventsSubscribtion = botConnection.activity$
-            .filter((activity: any) => activity.type === "event" && activity.name.startsWith('webchat-'))
+        /*this.handoffSubscription = botConnection.activity$
+            .filter((activity: any) => activity.type === "event" && activity.name === "handoff")
+            .subscribe((activity: any) => this._smartsuppHandoff(JSON.parse(activity.value)))*/
+
+        this.webchatCollapseSubscribtion = botConnection.activity$
+            .filter((activity: any) => activity.type === "event" && activity.name === "webchat-collapse")
+            .subscribe(() => {
+                const wrapper = document.getElementsByClassName('feedbot-wrapper')[0]
+                wrapper && wrapper.classList.add('collapsed')
+            })
+
+        this.redirectSubscribtion = botConnection.activity$
+            .filter((activity: any) => activity.type === "event" && activity.name === "redirect")
             .subscribe((activity: any) => {
-                switch (activity.name) {
-                    case 'webchat-collapse':
-                        const wrapper = document.getElementsByClassName('feedbot-wrapper')[0]
-                        wrapper && wrapper.classList.add('collapsed')
-                        break;
-                    case 'webchat-locale':
-                        activity.value && this.store.dispatch<ChatActions>({
-                            type: 'Set_Locale',
-                            locale: activity.value
-                        });
-                        break;
+                // ignore redirect inside of Designer's Try panel
+                activity.value && !window.hasOwnProperty('API_URL') && (location.href = activity.value)
+            })
+
+        this.logSubscribtion = botConnection.activity$
+            .filter((activity: any) => activity.type === "event" && activity.name === "log")
+            .subscribe((activity: any) => {
+                if (Array.isArray(activity.value)) {
+                    const logs: any[] = activity.value
+                    logs.unshift('Feedyou WebChat log')
+                    console.log.apply(this, logs)
+                } else {
+                    console.log('Feedyou WebChat log', activity.value)
                 }
             })
 
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
-        if (!this.props.directLine || !this.props.directLine.conversationId) {
-            let introDialogId = this.props.introDialog && this.props.introDialog.id ? this.props.introDialog.id : undefined
-            if (window.location.hash.startsWith('#feedbot-intro-dialog=')) {
-                introDialogId = window.location.hash.substr(22)
-            }
-
+        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
+            const introDialogId = getIntroDialogId(this.props)
             botConnection.postActivity({
                 from: this.props.user,
                 name: 'beginIntroDialog',
@@ -386,11 +440,61 @@ export class Chat extends React.Component<ChatProps, {}> {
         }
     }
 
+    /*smartsuppHandoff(options: SmartsuppHandoffOptions) {
+        console.log('SMARTSUPP HANDOFF')
+
+        this.smartsupp = createVisitorClient({
+            data: {
+                id: this.props.user.id,
+                key: options.key,
+                domain: document.domain || "localhost",
+                name: options.name || null,
+                email: options.email || null,
+                phone: options.phone || null,
+                variables: options.variables
+            },
+            connection: {
+                url: 'https://websocket.smartsupp.com',
+                options: {}
+            }
+        })
+
+        this.smartsupp.connect().then(() => {
+            console.log('Smartsupp connected')
+
+            this.smartsupp.chatMessage({
+                content: {
+                    type: 'text',
+                    text: options.notification || '🤖',
+                },
+            })
+        }).catch((err) => {
+            console.error(err)
+        })
+        
+        this.smartsupp.on('chat.message_received', (data) => {
+            if (data.message.subType === MessageSubType.Agent) {
+                console.log('Smartsupp receive', data.message.content.text, data)
+
+                this.store.dispatch<ChatActions>({ type: 'Receive_Message', activity: {
+                    from: { id: this.props.bot.id, name: this.props.bot.name},
+                    type: "message",
+                    text: data.message.content.text,
+                    id: data.message.id
+                } });
+            }
+        })
+    }*/
+
     componentWillUnmount() {
         this.fbPixelEventsSubscription.unsubscribe();
         this.gaEventsSubscription.unsubscribe();
         this.gtmEventsSubscription.unsubscribe();
         this.botEventsSubscribtion.unsubscribe();
+        // this.handoffSubscription.unsubscribe();
+        this.webchatCollapseSubscribtion.unsubscribe();
+        this.redirectSubscribtion.unsubscribe();
+        this.logSubscribtion.unsubscribe();
         this.connectionStatusSubscription.unsubscribe();
         this.activitySubscription.unsubscribe();
         if (this.selectedActivitySubscription)
@@ -474,6 +578,22 @@ export interface IDoCardAction {
     (type: CardActionTypes, value: string | object): void;
 }
 
+export const sendPostBack = (botConnection: IBotConnection, text: string, value: object, from: User, locale: string) => {
+    botConnection.postActivity({
+        type: "message",
+        text,
+        value,
+        from,
+        locale,
+        timestamp: new Date().toISOString()
+    })
+        .subscribe(id => {
+            konsole.log("success sending postBack", id)
+        }, error => {
+            konsole.log("failed to send postBack", error);
+        });
+}
+
 export const doCardAction = (
     botConnection: IBotConnection,
     from: User,
@@ -484,63 +604,67 @@ export const doCardAction = (
     actionValue
 ) => {
 
-        const text = (typeof actionValue === 'string') ? actionValue as string : undefined;
-        const value = (typeof actionValue === 'object') ? actionValue as object : undefined;
+    const text = (typeof actionValue === 'string') ? actionValue as string : undefined;
+    const value = (typeof actionValue === 'object')? actionValue as object : undefined;
 
-        switch (type) {
-            case "imBack":
-                if (typeof text === 'string')
-                    sendMessage(text, from, locale);
-                break;
+    switch (type) {
+        case "imBack":
+            if (typeof text === 'string')
+                sendMessage(text, from, locale);
+            break;
 
-            case "postBack":
-                sendPostBack(botConnection, text, value, from, locale);
-                break;
+        case "postBack":
+            sendPostBack(botConnection, text, value, from, locale);
+            break;
+            
+        case "call":
+        case "openUrl":
+        case "playAudio":
+        case "playVideo":
+        case "showImage":
+        case "downloadFile":
+            window.open(text);
+            break;
+        case "signin":
+            let loginWindow =  window.open();
+            if (botConnection.getSessionId)  {
+                botConnection.getSessionId().subscribe(sessionId => {
+                    konsole.log("received sessionId: " + sessionId);
+                    loginWindow.location.href = text + encodeURIComponent('&code_challenge=' + sessionId);
+                }, error => {
+                    konsole.log("failed to get sessionId", error);
+                });
+            }
+            else {
+                loginWindow.location.href = text;
+            }
+            break;
 
-            case "call":
-            case "openUrl":
-            case "playAudio":
-            case "playVideo":
-            case "showImage":
-            case "downloadFile":
-                window.open(text);
-                break;
-            case "signin":
-                let loginWindow = window.open();
-                if (botConnection.getSessionId) {
-                    botConnection.getSessionId().subscribe(sessionId => {
-                        konsole.log("received sessionId: " + sessionId);
-                        loginWindow.location.href = text + encodeURIComponent('&code_challenge=' + sessionId);
-                    }, error => {
-                        konsole.log("failed to get sessionId", error);
-                    });
-                }
-                else {
-                    loginWindow.location.href = text;
-                }
-                break;
-
-            default:
-                konsole.log("unknown button type", type);
-        }
+       
     }
 
-export const sendPostBack = (botConnection: IBotConnection, text: string, value: object, from: User, locale: string) => {
+export const startOver = (botConnection: IBotConnection, store: ChatStore, props: ChatProps) => {
+    konsole.log('cleaning history and starting over')
+
+    store.dispatch<HistoryAction>({ type: 'Clear_History' });
+    
+    store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...props.bot }, timestamp: new Date().toISOString()}});
+
+    const introDialogId = getIntroDialogId(props)
     botConnection.postActivity({
-        type: "message",
-        text,
-        value,
-        from,
-        locale
-    })
-        .subscribe(id => {
-            konsole.log("success sending postBack", id)
-        }, error => {
-            konsole.log("failed to send postBack", error);
-        });
+        from: props.user,
+        name: 'beginIntroDialog',
+        type: 'event',
+        value: '',
+        channelData: introDialogId ? {id: introDialogId} : undefined
+    }).subscribe(() => {
+        konsole.log("success sending startOver")
+    }, error => {
+        konsole.log("failed to send startOver", error);
+    });
 }
 
-export const renderIfNonempty = (value: any, renderer: (value: any) => JSX.Element) => {
+export const renderIfNonempty = (value: any, renderer: (value: any) => JSX.Element ) => {
     if (value !== undefined && value !== null && (typeof value !== 'string' || value.length > 0))
         return renderer(value);
 }
@@ -623,4 +747,12 @@ function trackGoogleTagManagerEvent({ event, variables }: GtmEvent) {
     } else {
         console.warn('dataLayer is undefined - cannot track GTM custom event dataLayer.push(...)', data)
     }
+}
+
+function getIntroDialogId(props: ChatProps): string | undefined {
+    if (window.location.hash.startsWith('#feedbot-intro-dialog=')) {
+        return window.location.hash.substr(22)
+    }
+
+    return props.introDialog && props.introDialog.id ? props.introDialog.id : undefined
 }

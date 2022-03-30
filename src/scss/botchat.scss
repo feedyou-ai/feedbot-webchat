@@ -594,11 +594,18 @@
         input[type=text],
         textarea {
             border: none;
-            height: 100%;
+            height: calc(100% - 15px);
             outline: none;
             padding: 0;
             resize: none;
             width: 100%;
+            padding-top: 15px;
+            background-color: transparent;
+            color: #424242;
+            min-height: initial;
+            box-shadow: none;
+            line-height: initial;
+            box-sizing: initial;
         }
 
         &.has-text .wc-send svg {
@@ -645,6 +652,7 @@
 
             input {
                 background-color: transparent;
+                word-break: break-word;
             }
         }
 
@@ -728,11 +736,11 @@
     }
 
     .format-markdown ol {
-        padding-left: 30px;  /* numbers are right-aligned to the period */
+        padding-left: 30px !important;  /* numbers are right-aligned to the period */
     }
 
     .format-markdown ul {
-        padding-left: 33px;
+        padding-left: 33px !important;
     }
 
 /* browser scrollbar customization */
@@ -800,4 +808,8 @@
         &:active {
             @include link-and-svg-arrow($c01, 0.6);
         }
+    }
+
+    .ac-textBlock img.emoji {
+        width: auto !important;
     }

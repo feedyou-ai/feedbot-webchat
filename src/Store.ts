@@ -38,6 +38,24 @@ export const sendFiles = (files: FileList, from: User, locale: string, isDirectU
         isDirectUpload
     }} as ChatActions);
 
+export const sendScreenshot = (screen: string, from: User, locale: string) => {
+  return {
+    type: "Send_Message",
+    activity: {
+      type: "message",
+      attachments: [
+        {
+          contentType: "image/png" as MediaType,
+          contentUrl: screen,
+          name: "screenshot.png",
+        } as Media,
+      ],
+      from,
+      locale,
+    },
+  } as ChatActions;
+};
+    
 const attachmentsFromFiles = (files: FileList) => {
     const attachments: Media[] = [];
     for (let i = 0, numFiles = files.length; i < numFiles; i++) {
@@ -193,6 +211,10 @@ export type FormatAction = {
 } | {
     type: 'Toggle_Disable_Input_When_Not_Needed',
     disableInputWhenNotNeeded: boolean
+} | {
+    type: 'Set_Console_Placeholder',
+    locale: string,
+    consolePlaceholder: string
 }
 
 export const format: Reducer<FormatState> = (
@@ -254,6 +276,11 @@ export const format: Reducer<FormatState> = (
             return {
                 ...state,
                 disableInputWhenNotNeeded: action.disableInputWhenNotNeeded
+            };
+        case 'Set_Console_Placeholder':
+            return {
+                ...state,
+                strings: {...strings(action.locale), consolePlaceholder: action.consolePlaceholder}
             };
         default:
             return state;
@@ -365,6 +392,8 @@ export type HistoryAction = {
 } | {
     type: 'Clear_Typing',
     id: string
+} | {
+    type: 'Clear_History'
 }
 
 const copyArrayWithUpdatedItem = <T>(array: Array<T>, i: number, item: T) => [
@@ -474,6 +503,12 @@ export const history: Reducer<HistoryState> = (
                     action.activity
                 ]
             };
+        
+        case 'Clear_History':
+            return {
+                ... state,
+                activities: []
+            };
 
         case 'Clear_Typing':
             return {
@@ -534,8 +569,35 @@ export const adaptiveCards: Reducer<AdaptiveCardsState> = (
     }
 }
 
+export type TypingDelayAction = {
+    type: 'Set_TypingDelay',
+    payload: number
+}
 
-export type ChatActions = ShellAction | FormatAction | SizeAction | ConnectionAction | HistoryAction | AdaptiveCardsAction;
+export interface TypingDelayState {
+    delay: number
+}
+
+export const typingDelay: Reducer<TypingDelayState> = (
+    state: TypingDelayState = {
+        delay: 20000
+    },
+    action: TypingDelayAction
+) => {
+    switch (action.type) {
+        case 'Set_TypingDelay':
+            return {
+                ...state,
+                delay: action.payload
+            };
+
+        default:
+            return state;
+    }
+}
+
+
+export type ChatActions = ShellAction | FormatAction | SizeAction | ConnectionAction | HistoryAction | AdaptiveCardsAction | TypingDelayAction;
 
 const nullAction = { type: null } as ChatActions;
 
@@ -545,7 +607,8 @@ export interface ChatState {
     format: FormatState,
     history: HistoryState,
     shell: ShellState,
-    size: SizeState
+    size: SizeState,
+    typingDelay: TypingDelayState
 }
 
 const speakFromMsg = (msg: Message, fallbackLocale: string) => {
@@ -777,10 +840,11 @@ const updateSelectedActivityEpic: Epic<ChatActions, ChatState> = (action$, store
         return nullAction;
     });
 
-const showTypingEpic: Epic<ChatActions, ChatState> = (action$) =>
-    action$.ofType('Show_Typing')
-    .delay(20000)
+const showTypingEpic: Epic<ChatActions, ChatState> = (action$) => {
+    return action$.ofType('Show_Typing')
+    .delay(parseInt(getFeedyouParam("typingDelay") || 20000))
     .map(action => ({ type: 'Clear_Typing', id: action.activity.id } as HistoryAction));
+}
 
 const sendTypingEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Update_Input')
@@ -801,6 +865,7 @@ const sendTypingEpic: Epic<ChatActions, ChatState> = (action$, store) =>
 
 import { Store, createStore as reduxCreateStore, combineReducers } from 'redux';
 import { combineEpics, createEpicMiddleware } from 'redux-observable';
+import { getFeedyouParam } from './FeedyouParams';
 
 export const createStore = () =>
     reduxCreateStore(
@@ -810,7 +875,8 @@ export const createStore = () =>
             format,
             history,
             shell,
-            size
+            size,
+            typingDelay
         }),
         applyMiddleware(createEpicMiddleware(combineEpics(
             updateSelectedActivityEpic,

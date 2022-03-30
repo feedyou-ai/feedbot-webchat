@@ -5,12 +5,14 @@ import { classList } from './Chat';
 import { Dispatch, connect } from 'react-redux';
 import { Strings } from './Strings';
 import { Speech } from './SpeechModule'
-import { ChatActions, ListeningState, sendMessage, sendFiles } from './Store';
+
 import * as QRCode from 'qrcode'
 import Downshift from "downshift";
 import { debounce } from "debounce";
-
 import { StyledDropZone } from 'react-drop-zone'
+import { ChatActions, ListeningState, sendMessage, sendFiles, sendScreenshot } from './Store';
+import { isSafari } from "./App"
+import * as html2canvas from 'html2canvas'
 
 interface Props {
     botId: string,
@@ -30,6 +32,7 @@ interface Props {
 
     sendMessage: (inputText: string) => void,
     sendFiles: (files: any, isDirectUpload: boolean) => void,
+    sendScreenshot: (screen: string) => void,
     stopListening: () => void,
     startListening: () => void
 }
@@ -52,6 +55,12 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
       super(props);
   
       this.state = { attachmentQrCode: "", items: this.props.autoSuggestItems };
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.disableInput === true && this.props.disableInput === false) {
+            this.textInput.focus();
+        }
     }
 
     private sendMessage() {
@@ -90,9 +99,11 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         }
     }
 
-    private onKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key === 'Enter') {
+    private onKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+        if (e.key === 'Enter' && !e.shiftKey) {
             this.sendMessage();
+            e.stopPropagation()
+            e.preventDefault()
         }
     }
 
@@ -188,6 +199,15 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         }, 75)
     }
 
+    private async takeScreenshot() {
+        const screen = await html2canvas(document.body, { allowTaint: true, useCORS: true }).then((canvas) => {
+            const dataURI = canvas.toDataURL("image/png");
+
+            return dataURI
+        })
+        this.props.sendScreenshot(screen);
+    }
+
     render() {
         const className = classList(
             'wc-console',
@@ -244,6 +264,11 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                         aria-label={this.props.strings.uploadFile}
                         role="button"
                     />
+                
+                }
+                {
+                    this.props.showUploadButton &&
+                    <button className="wc-upload-screenshot" onClick={() => { this.takeScreenshot() }}><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="camera" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#8a8a8a" d="M512 144v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V144c0-26.5 21.5-48 48-48h88l12.3-32.9c7-18.7 24.9-31.1 44.9-31.1h125.5c20 0 37.9 12.4 44.9 31.1L376 96h88c26.5 0 48 21.5 48 48zM376 288c0-66.2-53.8-120-120-120s-120 53.8-120 120 53.8 120 120 120 120-53.8 120-120zm-32 0c0 48.5-39.5 88-88 88s-88-39.5-88-88 39.5-88 88-88 88 39.5 88 88z"></path></svg></button>
                 }
                 {this.props.showAutoSuggest ? (
           <Downshift
@@ -341,8 +366,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
           </Downshift>
         ) : (
                 <div className="wc-textbox">
-                    <input
-                        type="text"
+                    <textarea
                         className="wc-shellinput"
                         ref={input => this.textInput = input}
                         autoFocus
@@ -354,7 +378,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                         disabled={this.props.disableInput}
                         aria-label={this.props.inputText ? null : placeholder}
                         aria-live="polite"
-                    />
+                    ></textarea>
                 </div>
                 )}
                 <button
@@ -434,6 +458,7 @@ export const Shell = connect(
     // helper functions
     sendMessage: (text: string) => dispatchProps.sendMessage(text, stateProps.user, stateProps.locale),
     sendFiles: (files: FileList, isDirectUpload: boolean) => dispatchProps.sendFiles(files, stateProps.user, stateProps.locale, isDirectUpload),
+    sendScreenshot: (screen: string) => dispatchProps.sendScreenshot(screen, stateProps.user, stateProps.locale),
     startListening: () => dispatchProps.startListening(),
     stopListening: () => dispatchProps.stopListening()
 }), {

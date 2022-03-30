@@ -4,7 +4,7 @@ require("expose-loader");
 
 const coreConfig = {
     devtool: "source-map",
-
+    
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".tsx", ".js", ".json"]
@@ -14,7 +14,7 @@ const coreConfig = {
         rules: [
             // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
             {
-                test: /\.tsx?$/,
+                test: /\.(tsx|ts)?$/,
                 loader: "awesome-typescript-loader"
             },
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
@@ -27,6 +27,14 @@ const coreConfig = {
             {
                 test: require.resolve('adaptivecards'),
                 use: [{ loader: 'expose-loader', options: 'AdaptiveCards' }]
+            },
+            {
+                test: /\.js$/,
+                include: /(node_modules\/engine.io-client|node_modules\/socket.io-client|node_modules\/smartsupp-websocket|device-detector-js)/,
+                loader: 'babel-loader',
+                options: {
+                    presets: ["es2015"]
+                }
             }
         ]
     }
@@ -35,7 +43,7 @@ const coreConfig = {
 const chatConfig = {
     entry: "./src/BotChat.ts",
     output: {
-        libraryTarget: "umd",
+        libraryTarget: "window",
         library: "BotChat",
         filename: "./botchat.js"
     }
@@ -44,7 +52,7 @@ const chatConfig = {
 const chatWithPolyfillConfig = {
     entry: "./src/BotChatWithPolyfill.ts",
     output: {
-        libraryTarget: "umd",
+        libraryTarget: "window",
         library: "BotChat",
         filename: "./botchat-es5.js"
     }
@@ -56,7 +64,7 @@ const featureConfig = {
         CognitiveServices: "./src/CognitiveServices/lib.ts"
     },
     output: {
-        libraryTarget: "umd",
+        libraryTarget: "window",
         library: "[name]",
         filename: "./[name].js",
     }

@@ -343,6 +343,23 @@ const localizedStrings: LocalizedStrings = {
         attachmentInfoQrOnly: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:",
         attachmentAlert: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:"
     },
+    'sk-sk': {
+        title: "Chat",
+        send: "Odoslať",
+        unknownFile: "[Soubor typu '%1']",
+        unknownCard: "[Neznámá karta '%1']",
+        receiptVat: "DPH",
+        receiptTax: "Daň z prod.",
+        receiptTotal: "Celkem",
+        messageRetry: "Opakovať",
+        messageFailed: "Nepodarilo sa odoslať",
+        messageSending: "Odosielanie",
+        timeSent: " v %1",
+        consolePlaceholder: "Prosím, napíšte svoju otázku",
+        listeningIndicator: "Poslouchám...",
+        uploadFile: "Nahrať súbor",
+        speak: "Použít hlas"
+    },
     'ko-kr': {
         title: "채팅",
         send: "전송",
@@ -444,7 +461,24 @@ const localizedStrings: LocalizedStrings = {
         listeningIndicator: "Kuuntelee...",
         uploadFile: "Lataa tiedosto",
         speak: "Puhu"
-    }
+    },
+    'ro-ro': {
+        title: "Conversație",
+        send: "Trimite",
+        unknownFile: "[File of type '%1']",
+        unknownCard: "[Unknown Card '%1']",
+        receiptVat: "VAT",
+        receiptTax: "Tax",
+        receiptTotal: "Total",
+        messageRetry: "repeta",
+        messageFailed: "Nu s-a putut trimite",
+        messageSending: "Se trimite",
+        timeSent: " în %1",
+        consolePlaceholder: "Scrie mesajul tău ...",
+        listeningIndicator: "Listening...",
+        uploadFile: "Incarca un fisier",
+        speak: "Speak"
+    },
 }
 
 export const defaultStrings = localizedStrings['en-us'];
@@ -494,8 +528,12 @@ function mapLocale(locale: string) {
         } else {
             return 'pt-pt';
         }
+    } else if (locale.startsWith('ro')) {
+        return 'ro-ro';
     } else if (locale.startsWith('ru')) {
         return 'ru-ru';
+    } else if (locale.startsWith('sk')) {
+        return 'sk-sk';
     } else if (locale.startsWith('sv')) {
         return 'sv-se';
     } else if (locale.startsWith('tr')) {
