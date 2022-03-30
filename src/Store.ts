@@ -677,17 +677,21 @@ const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
         return {
         type: "Toggle_Auto_Suggest",
         showAutoSuggest:
+            typeof action.activity.channelData === "object" &&
             action.activity.channelData.autosuggest &&
             ["google-city", "static"].includes(
             action.activity.channelData.autosuggest.type
             ),
         autoSuggestType:
+            typeof action.activity.channelData === "object" &&
             action.activity.channelData.autosuggest &&
             action.activity.channelData.autosuggest.type,
         autoSuggestItems:
+            typeof action.activity.channelData === "object" &&
             action.activity.channelData.autosuggest &&
             action.activity.channelData.autosuggest.answers,
         autoSuggestCountry:
+            typeof action.activity.channelData === "object" &&
             action.activity.channelData.autosuggest &&
             action.activity.channelData.autosuggest.countryCode,
         } as FormatAction;
