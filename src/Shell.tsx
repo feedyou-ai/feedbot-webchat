@@ -68,7 +68,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
             this.textInput.focus();
         }
 
-        if (this.props.attachmentUrl && (!this.state)) {
+        if (this.props.attachmentUrl && (!this.state.attachmentQrCode)) {
             QRCode.toDataURL(this.props.attachmentUrl, {
                 color: {
                     dark: '#000',
