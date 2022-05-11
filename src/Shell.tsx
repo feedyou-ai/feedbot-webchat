@@ -109,20 +109,17 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
       const replacedQueryString = queryString
         .normalize("NFKD")
         .replace(/[^\w]/g, "");
-      // const res = await fetch(
-      //   `https://${this.props.botId}.azurewebsites.net/webchat/autosuggest/${replacedQueryString}/${this.props.autoSuggestCountry}`
-      // );
-      // const data = await res.json();
-
-      const data = {value: [{"answer": "Pardubice"},{"answer": "Praha"},{"answer": "Prdel"},{"answer": "Brno"},{"answer": "Ostrava"}]}
+      const res = await fetch(
+        `https://${this.props.botId}.azurewebsites.net/webchat/autosuggest/${replacedQueryString}/${this.props.autoSuggestCountry}`
+      );
+      const data = await res.json();
   
-      // this.setState({
-      //   items: data.value.map((item: any) => ({
-      //     answer: item.terms[0].value,
-      //   })),
-      // });
+      this.setState({
+        items: data.value.map((item: any) => ({
+          answer: item.terms[0].value,
+        })),
+      });
 
-      this.setState({items: data.value})
     }, 500);
   
     private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
