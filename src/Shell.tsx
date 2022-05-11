@@ -334,7 +334,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                   {...getMenuProps()}
                 >
                   {isOpen
-                    ? (fuzzysort.go(inputValue, (this.props.autoSuggestItems.length > 0
+                    ? Array.from(fuzzysort.go(inputValue, (this.props.autoSuggestItems.length > 0
                         ? this.props.autoSuggestItems 
                         : this.state.items), {keys: ["answer"], limit: 5}))
                       .reverse()
