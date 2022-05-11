@@ -45,6 +45,7 @@
     "debounce": "^1.2.1",
     "device-detector-js": "^3.0.0",
     "downshift": "^6.1.7",
+    "fuzzysort": "^1.9.0",
     "html2canvas": "^1.0.0-rc.7",
     "isomorphic-fetch": "^3.0.0",
     "jspeech": "^0.1.1",

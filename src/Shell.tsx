@@ -11,8 +11,8 @@ import Downshift from "downshift";
 import { debounce } from "debounce";
 import { StyledDropZone } from 'react-drop-zone'
 import { ChatActions, ListeningState, sendMessage, sendFiles, sendScreenshot } from './Store';
-import { isSafari } from "./App"
 import * as html2canvas from 'html2canvas'
+import * as fuzzysort from 'fuzzysort'
 
 interface Props {
     botId: string,
@@ -40,6 +40,7 @@ interface Props {
 interface State {
   attachmentQrCode: string;
   items: any[];
+  lastAutosuggestSelection: string
 }
 
 export interface ShellFunctions {
@@ -51,15 +52,17 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     private fileInput: HTMLInputElement;
     private addFileTimeout: any
 
+
+
     constructor(props: Props) {
       super(props);
   
-      this.state = { attachmentQrCode: "", items: this.props.autoSuggestItems };
+      this.state = { attachmentQrCode: "", items: this.props.autoSuggestItems, lastAutosuggestSelection:"" };
     }
 
-    private sendMessage() {
-        if (this.props.inputText.trim().length > 0) {
-            this.props.sendMessage(this.props.inputText);
+    private sendMessage(forceText?: string) {
+        if ((forceText || "").trim().length > 0 || this.props.inputText.trim().length > 0) {
+            this.props.sendMessage((forceText || "").trim() || this.props.inputText);
         }
     }
 
@@ -76,6 +79,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                 }
             }).then((attachmentQrCode: string) => this.setState({ attachmentQrCode }))
         }
+        (window as any).props = this.props
     }
 
     private handleSendButtonKeyPress(evt: React.KeyboardEvent<HTMLButtonElement>) {
@@ -105,16 +109,20 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
       const replacedQueryString = queryString
         .normalize("NFKD")
         .replace(/[^\w]/g, "");
-      const res = await fetch(
-        `https://${this.props.botId}.azurewebsites.net/webchat/autosuggest/${replacedQueryString}/${this.props.autoSuggestCountry}`
-      );
-      const data = await res.json();
+      // const res = await fetch(
+      //   `https://${this.props.botId}.azurewebsites.net/webchat/autosuggest/${replacedQueryString}/${this.props.autoSuggestCountry}`
+      // );
+      // const data = await res.json();
+
+      const data = {value: [{"answer": "Pardubice"},{"answer": "Praha"},{"answer": "Prdel"},{"answer": "Brno"},{"answer": "Ostrava"}]}
   
-      this.setState({
-        items: data.value.map((item: any) => ({
-          answer: item.terms[0].value,
-        })),
-      });
+      // this.setState({
+      //   items: data.value.map((item: any) => ({
+      //     answer: item.terms[0].value,
+      //   })),
+      // });
+
+      this.setState({items: data.value})
     }, 500);
   
     private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -266,9 +274,11 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                 }
                 {this.props.showAutoSuggest ? (
           <Downshift
-            onChange={(selection) => {
-              return this.props.onChangeText(selection);
+            onChange={async (selection) => {
+              this.sendMessage(selection)
+              return 
             }}
+
             itemToString={(item) => {
               return item ? item : "";
             }}
@@ -293,8 +303,10 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                   ref={(input) => (this.textInput = input)}
                   autoFocus
                   value={this.props.inputText}
-                  onChange={async () => {
-                    return this.props.onChangeText(this.textInput.value);
+                  onBlur={async () => {
+                    if(this.props.autoSuggestType === "static") {
+                      return this.props.onChangeText("");
+                    }
                   }}
                   onKeyPress={(e) => {
                     this.onKeyPress(e);
@@ -322,23 +334,16 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                   {...getMenuProps()}
                 >
                   {isOpen
-                    ? (this.props.autoSuggestItems.length > 0
-                        ? this.props.autoSuggestItems
-                        : this.state.items
-                      )
-                        .filter(
-                          (item: any) =>
-                            !inputValue ||
-                            item.answer
-                              .toLowerCase()
-                              .includes(inputValue.toLowerCase())
-                        )
-                        .map((item: any, index: number) => (
-                          <li
+                    ? (fuzzysort.go(inputValue, (this.props.autoSuggestItems.length > 0
+                        ? this.props.autoSuggestItems 
+                        : this.state.items), {keys: ["answer"], limit: 5}))
+                      .reverse()
+                      .map((item: any, index: number) => {
+                          return <li
                             {...getItemProps({
-                              key: item.answer,
+                              key: item.obj.answer,
                               index,
-                              item: item.answer,
+                              item: item.obj.answer,
                               style: {
                                 backgroundColor:
                                   highlightedIndex === index
@@ -350,9 +355,9 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                               },
                             })}
                           >
-                            {item.answer}
+                            {item.obj.answer}
                           </li>
-                        ))
+                        })
                     : null}
                 </ul>
               </div>
