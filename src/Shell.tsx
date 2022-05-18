@@ -275,7 +275,13 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
               this.sendMessage(selection)
               return 
             }}
-
+            onInputValueChange={(inputValue) => {
+                if(this.props.autoSuggestType === "static") {
+                    return
+                }
+                this.props.onChangeText(inputValue)
+                return
+            }}
             itemToString={(item) => {
               return item ? item : "";
             }}
