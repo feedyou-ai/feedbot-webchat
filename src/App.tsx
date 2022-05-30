@@ -32,6 +32,7 @@ export type AppProps = ChatProps & {
   enableScreenshotUpload?: boolean;
   openUrlTarget: "new" | "same" | "same-domain";
   persist?: "user" | "conversation" | "none";
+  fileUpload?: "button" | "dnd-and-mobile" | "mobile";
   manualCloseExpireInMinutes?: number
 };
 
@@ -160,6 +161,11 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 
         if (config.introDialogId) {
           props.introDialog = {id: config.introDialogId}
+        }
+
+        if(config.fileUpload) {
+          props.uploadUsingQrCodeOnly = config.fileUpload === "mobile"
+          props.uploadUsingDndAndQrCode = config.fileUplaod === "dnd-and-mobile"
         }
 
         if (config.userData) {

@@ -60,6 +60,7 @@ export interface ChatProps {
     showUploadButton?: boolean,
     uploadUsingQrCodeOnly?: boolean
     disableInputWhenNotNeeded?: boolean,
+    uploadUsingDndAndQrCode?: boolean,
     formatOptions?: FormatOptions,
     resize?: 'none' | 'window' | 'detect',
     userData?: {},

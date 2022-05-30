@@ -179,6 +179,7 @@ export interface FormatState {
     autoSuggestCountry: string;
     attachmentUrl: string,
     uploadUsingQrCodeOnly: boolean,
+    uploadUsingDndAndQrCode: boolean,
     disableInput: boolean,
     disableInputWhenNotNeeded: boolean
     strings: Strings,
@@ -199,6 +200,7 @@ export type FormatAction = {
     showUploadButton: boolean
     attachmentUrl?: string
     uploadUsingQrCodeOnly?: boolean
+    uploadUsingDndAndQrCode?: boolean
 } | {
     type: "Toggle_Auto_Suggest";
     showAutoSuggest: boolean;
@@ -230,6 +232,7 @@ export const format: Reducer<FormatState> = (
         disableInput: false,
         disableInputWhenNotNeeded: false,
         uploadUsingQrCodeOnly: false,
+        uploadUsingDndAndQrCode: false,
         strings: defaultStrings,
         carouselMargin: undefined
     },
@@ -257,7 +260,8 @@ export const format: Reducer<FormatState> = (
                 ...state,
                 showUploadButton: action.showUploadButton,
                 attachmentUrl: action.attachmentUrl,
-                uploadUsingQrCodeOnly: action.hasOwnProperty('uploadUsingQrCodeOnly') ? action.uploadUsingQrCodeOnly : state.uploadUsingQrCodeOnly
+                uploadUsingQrCodeOnly: action.hasOwnProperty('uploadUsingQrCodeOnly') ? action.uploadUsingQrCodeOnly : state.uploadUsingQrCodeOnly,
+                uploadUsingDndAndQrCode: action.hasOwnProperty("uploadUsingDndAndQrCode") ? action.uploadUsingDndAndQrCode : state.uploadUsingDndAndQrCode
             };
         case "Toggle_Auto_Suggest":
             return {
