@@ -463,8 +463,6 @@ const localizedStrings: LocalizedStrings = {
         uploadFile: "Incarca un fisier",
         speak: "Speak"
     },
-	
-	
     'uk-ua': {
         title: "Чат",
         send: "Надіслати",
