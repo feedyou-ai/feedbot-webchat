@@ -266,6 +266,9 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         return (
             <div className={className}>
                 {
+                    console.log(this.props)
+                    }
+                    {
                     this.props.showUploadButton && (this.props.uploadUsingQrCodeOnly ? qrOnlyAttachment : this.props.uploadUsingDndAndQrCode ? localAndQrAttachment : buttonAttachment)
                 }
                 

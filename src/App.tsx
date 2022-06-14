@@ -45,6 +45,11 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     ...props.user
   };
 
+  console.log(props)
+
+  props.uploadUsingQrCodeOnly = props.fileUpload === "mobile"
+  props.uploadUsingDndAndQrCode = props.fileUpload === "dnd-and-mobile"
+
   // FEEDYOU fetch DL token from bot when no token or secret found
   const remoteConfig =
     props.bot &&
