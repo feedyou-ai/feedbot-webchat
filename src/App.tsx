@@ -32,12 +32,12 @@ export type AppProps = ChatProps & {
   enableScreenshotUpload?: boolean;
   openUrlTarget: "new" | "same" | "same-domain";
   persist?: "user" | "conversation" | "none";
-  manualCloseExpireInMinutes?: number
+  manualCloseExpireInMinutes?: number;
+  onCustomEvent?: (callback: (event: string, value: string) => void) => void
 };
 
 export const App = async (props: AppProps, container?: HTMLElement) => {
   konsole.log("BotChat.App props", props);
-
   // FEEDYOU generate user ID if not present in props, make sure its always string
   props.user = {
     name: "Uživatel",
