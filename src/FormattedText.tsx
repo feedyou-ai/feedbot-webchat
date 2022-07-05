@@ -62,7 +62,7 @@ const renderMarkdown = (
           // convert <br> tags to blank lines for markdown
           .replace(/<br\s*\/?>/ig, '\n')
           // URL encode all links
-          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (match, text, url, title) => `[${text}](${markdownIt.normalizeLink(url)}${title === undefined ? '' : title}){:target=${window.location.hostname === url.hostname || url.hostname.endsWith(`.${window.location.hostname}`) ? "_blank" : "_self"}}`);
+          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (match, text, url, title) => `[${text}](${markdownIt.normalizeLink(url)}${title === undefined ? '' : title}){:target=${window.location.hostname === url.hostname || url.hostname.endsWith(`.${window.location.hostname}`) ? "_self" : "_blank"}}`);
 
         const arr = src.split(/\n *\n|\r\n *\r\n|\r *\r/);
         const ma = arr.map(a => markdownIt.render(a));
