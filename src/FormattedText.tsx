@@ -62,7 +62,7 @@ const renderMarkdown = (
           // convert <br> tags to blank lines for markdown
           .replace(/<br\s*\/?>/ig, '\n')
           // URL encode all links
-          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (match, text, url, title) => `[${text}](${markdownIt.normalizeLink(url)}${title === undefined ? '' : title}){:target=${window.location.hostname === url.hostname || url.hostname.endsWith(`.${window.location.hostname}`) ? "_self" : "_blank"}}`);
+          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (_, text, url, title) => `[${text}]${getMarkdownLink(url, title)}${getURLTarget(url)}`);
 
         const arr = src.split(/\n *\n|\r\n *\r\n|\r *\r/);
         const ma = arr.map(a => markdownIt.render(a));
@@ -86,4 +86,13 @@ function escapeHtml(unsafe: string) {
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
+ }
+
+ function getMarkdownLink(url: string, title: string) {
+    return `(${markdownIt.normalizeLink(url)}${title === undefined ? '' : title})`
+ }
+
+ function getURLTarget(url: string) {
+    const urlObject = new URL(url)
+    return `{:target=${window.location.hostname === urlObject.hostname || urlObject.hostname.endsWith(`.${window.location.hostname}`) ? "_self" : "_blank"}}`
  }
