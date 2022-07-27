@@ -62,7 +62,7 @@ const renderMarkdown = (
           // convert <br> tags to blank lines for markdown
           .replace(/<br\s*\/?>/ig, '\n')
           // URL encode all links
-          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (_, text, url, title) => `[${text}]${getMarkdownLink(url, title)}${getURLTarget(url)}`);
+          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (_, text, url, title) => createMarkdownLink(text,determineLinkUrl(url, title), determineLinkTarget(url)));
 
         const arr = src.split(/\n *\n|\r\n *\r\n|\r *\r/);
         const ma = arr.map(a => markdownIt.render(a));
@@ -79,6 +79,17 @@ const renderMarkdown = (
     return <div className="format-markdown" dangerouslySetInnerHTML={{ __html }} />;
 }
 
+const createMarkdownLink = (text: string, url: string, target: "_self" | "_blank" = "_self") => {
+  return `[${text}](${url}){:target=${target}}`
+}
+
+const isUrlExternal = (url: string) => !new URL(url).hostname.endsWith(window.location.hostname)
+const determineLinkTarget = (url: string) => isUrlExternal(url) ? "_blank" : "_self"
+
+const determineLinkUrl = (url: string, title: string) => {
+  return title || markdownIt.normalizeLink(url)
+}
+
 function escapeHtml(unsafe: string) {
     return unsafe
          .replace(/&/g, "&amp;")
@@ -86,13 +97,4 @@ function escapeHtml(unsafe: string) {
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
- }
-
- function getMarkdownLink(url: string, title: string) {
-    return `(${markdownIt.normalizeLink(url)}${title === undefined ? '' : title})`
- }
-
- function getURLTarget(url: string) {
-    const urlObject = new URL(url)
-    return `{:target=${window.location.hostname === urlObject.hostname || urlObject.hostname.endsWith(`.${window.location.hostname}`) ? "_self" : "_blank"}}`
  }
