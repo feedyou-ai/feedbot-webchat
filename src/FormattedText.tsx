@@ -1,5 +1,6 @@
 import * as MarkdownIt from 'markdown-it';
 import * as React from 'react';
+import { getFeedyouParam } from './FeedyouParams.js';
 import { twemoji } from './lib.js'
 
 export interface IFormattedTextProps {
@@ -94,5 +95,5 @@ function escapeHtml(unsafe: string) {
 
  function getURLTarget(url: string) {
     const urlObject = new URL(url)
-    return `{:target=${window.location.hostname === urlObject.hostname || urlObject.hostname.endsWith(`.${window.location.hostname}`) ? "_self" : "_blank"}}`
+    return `{:target=${getFeedyouParam("openUrlTarget") === "same-domain" && window.location.hostname === urlObject.hostname || urlObject.hostname.endsWith(`.${window.location.hostname}`) ? "_self" : getFeedyouParam("openUrlTarget") === "same" ? "_self" : "_blank"}}`
  }
