@@ -1,6 +1,6 @@
 import * as MarkdownIt from 'markdown-it';
 import * as React from 'react';
-import { getFeedyouParam } from './FeedyouParams.js';
+import { getFeedyouParam } from './FeedyouParams';
 import { twemoji } from './lib.js'
 
 export interface IFormattedTextProps {
@@ -41,11 +41,14 @@ const defaultRender = markdownIt.renderer.rules.link_open || ((tokens, idx, opti
 markdownIt.renderer.rules.link_open = (tokens, idx, options, env, self) => {
     // If you are sure other plugins can't add `target` - drop check below
     const targetIndex = tokens[idx].attrIndex('target');
+    const hrefIndex = tokens[idx].attrIndex('href');
+    const href = hrefIndex >= 0 ? tokens[idx].attrs[hrefIndex][1] : ''
+    const target = determineLinkTarget(href)
 
     if (targetIndex < 0) {
-        tokens[idx].attrPush(['target', '_blank']); // add new attribute
+        tokens[idx].attrPush(['target', target]); // add new attribute
     } else {
-        tokens[idx].attrs[targetIndex][1] = '_blank';    // replace value of existing attr
+        tokens[idx].attrs[targetIndex][1] = target;    // replace value of existing attr
     }
 
     // pass token to default renderer.
@@ -63,7 +66,7 @@ const renderMarkdown = (
           // convert <br> tags to blank lines for markdown
           .replace(/<br\s*\/?>/ig, '\n')
           // URL encode all links
-          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (_, text, url, title) => createMarkdownLink(text,determineLinkUrl(url, title), determineLinkTarget(url)));
+          .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (match, text, url, title) => `[${text}](${markdownIt.normalizeLink(url)}${title === undefined ? '' : title})`);
 
         const arr = src.split(/\n *\n|\r\n *\r\n|\r *\r/);
         const ma = arr.map(a => markdownIt.render(a));
@@ -80,15 +83,19 @@ const renderMarkdown = (
     return <div className="format-markdown" dangerouslySetInnerHTML={{ __html }} />;
 }
 
-const createMarkdownLink = (text: string, url: string, target: "_self" | "_blank" = "_self") => {
-  return `[${text}](${url}){:target=${target}}`
+const isUrlExternal = (url: string) => {
+    try {
+        return !window.location.hostname || !(new URL(url)).hostname.endsWith(window.location.hostname)
+    } catch (err) {
+        return true
+    }
 }
-
-const isUrlExternal = (url: string) => !new URL(url).hostname.endsWith(window.location.hostname)
-const determineLinkTarget = (url: string) => getFeedyouParam("openUrlTarget") === "same" ? "_self" : !isUrlExternal(url) && getFeedyouParam("openUrlTarget") === "same-domain" ? "_self" : "_blank"
-
-const determineLinkUrl = (url: string, title: string) => {
-  return title || markdownIt.normalizeLink(url)
+const determineLinkTarget = (url: string) => {
+    return getFeedyouParam("openUrlTarget") === "same"
+        ? "_self"
+        : (!isUrlExternal(url) && getFeedyouParam("openUrlTarget") === "same-domain")
+            ? "_self"
+            : "_blank"
 }
 
 function escapeHtml(unsafe: string) {
@@ -98,13 +105,4 @@ function escapeHtml(unsafe: string) {
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
- }
-
- function getMarkdownLink(url: string, title: string) {
-    return `(${markdownIt.normalizeLink(url)}${title === undefined ? '' : title})`
- }
-
- function getURLTarget(url: string) {
-    const urlObject = new URL(url)
-    return `{:target=${getFeedyouParam("openUrlTarget") === "same-domain" && window.location.hostname === urlObject.hostname || urlObject.hostname.endsWith(`.${window.location.hostname}`) ? "_self" : getFeedyouParam("openUrlTarget") === "same" ? "_self" : "_blank"}}`
  }
