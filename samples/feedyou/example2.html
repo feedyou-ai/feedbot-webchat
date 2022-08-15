@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Chatbot</title>
+  <style>
+    html { 
+      height: 100%;
+      background-color: white;
+    }
+
+    body {
+      font-family: Helvetica, Arial;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- PUT THIS CODE RIGHT BEFORE THE </BODY> TAG (you can also use some tag manager like GTM for this) -->
+  <link href="https://feedyou.azureedge.net/webchat/latest/botchat.css" rel="stylesheet" />
+  <script src="https://feedyou.azureedge.net/webchat/latest/botchat-es5.js?v=2"></script>
+  <style>
+    body .feedbot-header, body .feedbot-wrapper {
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+    }
+  </style>
+  <script>
+    window.addEventListener('load', function (){
+      BotChat.App({
+        directLine: {secret: 'flYcEctmv88.cwA.PSk.iaausLq-Qu1ctHCDVtBStyXtukwWaKdmj9Tzp64J8Jo'},
+        bot: { id: 'feedbot-demo-webchat' },
+        theme: { mainColor: '#FFA626' },
+        header: { text: 'Chatbot' },
+        disableInputWhenNotNeeded: true,
+        autoExpandTimeout: 4000
+      })
+    })
+  </script>
+  <!------------------------------------------------------------------------------------------------------>
+</body>
+
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://feedyou.blob.core.windows.net/webchat/feature/skoda/botchat.css" rel="stylesheet" />
+  <link href="https://feedbotskodaonboardi9617.blob.core.windows.net/public/react-drop-zone.css" rel="stylesheet" />
+  <link href="https://feedyou.azureedge.net/webchat/latest/botchat-fullwindow.css" rel="stylesheet" />
+  <title>Chatbot</title>
+  <style>
+    html { 
+      height: 100%;
+      background-color: white;
+
+      /* background: url('https://feedyou.blob.core.windows.net/webchat/gray-background.jpg') no-repeat center center fixed; 
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover; */
+    }
+
+    body {
+      font-family: Helvetica, Arial;
+      padding: 30px;
+
+      display: -ms-flexbox;
+      display: -webkit-flex;
+      display: flex;
+      -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+      flex-direction: row;
+      -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+      -webkit-justify-content: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      -webkit-align-items: flex-end;
+      -ms-flex-align: end;
+      align-items: flex-end;
+    }
+
+    #logo {
+      height: 15%;
+
+      background-color: transparent;
+      text-align: center;
+      padding-top: 0px;
+      padding-bottom: 5px;
+    }
+
+    #logo img {
+      max-height: 95%;
+      max-width: 70%;
+      padding-top: 15px;
+      object-fit: contain;
+    }
+    
+    @media (min-width: 768px) {
+      .wc-adaptive-card {
+        width: 398px;  
+      }
+    }
+
+    .wc-adaptive-card {
+      border-radius: 8px;
+      padding: 2px 6px;
+    }
+
+    #bot-wrapper {
+      background-color: transparent;
+      width: 95%;
+      max-width: 900px;
+      min-width: 300px;
+      height: 96%;
+      max-height: 98.5%;
+      min-height: 500px;
+
+      /* IE11 fix flexbox bug*/
+      left: 50%;
+      transform: translateX(-50%);
+
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-direction: column;
+      flex-direction: column;
+      -ms-flex-pack: center;
+      justify-content: center;
+
+      position: absolute;
+      bottom: 0;
+    }
+
+    #bot-wrapper #bot {
+      position: relative;
+      height: 90%;
+    }
+
+    #bot-wrapper .wc-console svg {
+      fill: #2b2b2b
+    }
+
+    .wc-message-from.wc-message-from-bot {
+      visibility: hidden;
+      height: 2px;
+    }
+
+    .wc-message-wrapper:not([data-activity-id='retry']) .wc-message-from {
+      visibility: hidden;
+    }
+
+    .wc-message-wrapper:not([data-activity-id]) .wc-message-from {
+      visibility: visible;
+    }
+
+    .wc-message-content {
+      padding: 10px;
+      border-radius: 13px;
+    }
+
+    .wc-message-from-bot .wc-message-content {
+      color: #424242 !important;
+    }
+
+    .wc-carousel {
+      margin-top: 10px;
+    }
+
+    .wc-suggested-actions .wc-hscroll > ul > li {
+      margin: 6px;
+    }
+
+    .wc-message-pane .wc-suggested-actions {
+      position: absolute;
+      bottom: 0px;
+      z-index: 10000;
+      background-color: white;
+    }
+
+    .wc-message-pane.show-actions .wc-suggested-actions {
+      height: 70px;
+    }
+
+    .wc-console {
+      /*-webkit-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
+      -moz-box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
+      box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);*/
+
+      border-width: 0px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+    }
+
+    .wc-console .DropZone {
+      padding: 5px;
+      height: 60px;
+      position: relative;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      margin-right: 10px;
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wc-console .attachment-url {
+      max-width: 45%;
+      padding-right: 5px;
+      color: #626262;
+      font-size: 85%;
+    }
+
+    .wc-console .attachment-url span {
+      font-weight: bold;
+      padding-top: 5px;
+      display: block;
+    }
+
+    @media (max-width: 450px) {
+      .attachment-wrapper.qr-only a {
+        display: none;
+      }
+      .attachment-wrapper.qr-only .attachment-url {
+        padding-right: 0px !important;
+      }
+    }
+
+    .attachment-wrapper {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      max-width: 230px;
+      width: 100%;
+    }
+
+    .attachment-wrapper.qr-only {
+      max-width: none !important;
+      justify-content: center !important;
+    }
+    
+    .attachment-wrapper.qr-only .attachment-url {
+      max-width: none;
+      flex: 1;
+      padding-right: 100px;
+    }
+
+    .attachment-wrapper img {
+      height: 90px;
+      position: relative;
+      background-color: white;
+    }
+
+    .attachment-wrapper.qr-only:hover .attachment-url {
+      padding-right: 0px;
+    }
+
+    .attachment-wrapper:hover {
+      max-width: 320px;
+    }
+
+    .attachment-wrapper:hover img {
+      bottom: 27px;
+      height: 190px;
+    }
+
+    .wc-console.disable-input .attachment-wrapper {
+      justify-content: flex-end;
+    }
+
+    .attachment-wrapper span {
+      text-align: center;
+    }
+
+    .wc-message-pane.show-actions .wc-message-groups {
+      top: 0px;
+      transform: translateY(0px);
+    }
+
+    .wc-message-pane.has-upload-button .wc-message-groups {
+      transform: translateY(-30px);
+    }
+
+    .wc-console.has-upload-button {
+      height: 100px;
+    }
+
+    .wc-console.disable-input.has-upload-button .wc-textbox {
+      display: none;
+    }
+
+    .wc-console.disable-input.has-upload-button {
+      display: flex;
+    }
+
+    .wc-console.disable-input {
+      background-color: white !important;
+    }
+
+    #bot .wc-suggested-actions .wc-hscroll > ul > li button, .wc-app .wc-card button {
+      border-radius: 20px;
+    }
+
+    #bot .wc-suggested-actions .wc-hscroll > ul > li button:focus, .wc-console .wc-mic, .wc-console .wc-send, .wc-app .wc-card button {
+      outline:0;
+    }
+
+    .wc-console .wc-mic, .wc-console .wc-send {
+      top: auto;
+      position:relative;
+    }
+    
+    .wc-console .wc-mic.hidden, .wc-console .wc-send.hidden {
+      display: none;
+    }
+
+    .wc-console input[type=text], .wc-console textarea {
+      margin: 0px 15px;
+    }
+
+    .wc-textbox {
+      border-radius: 13px;
+      background-color: #eceff1;
+      height: 70%;
+      margin-bottom: 0px;
+      position: relative !important;
+      bottom: auto !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      flex: 1;
+    }
+
+    .wc-suggested-actions .wc-hscroll > ul {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .wc-message-from-bot .wc-message-content {
+     background-color: #f5f5f5;
+    }
+
+    .wc-message-from-bot svg.wc-message-callout path {
+      fill: #f5f5f5;
+    }
+
+    .wc-suggested-actions .wc-hscroll > ul > li {
+      max-width: 60%;
+    }
+
+    .wc-message-content {
+     box-shadow: none;
+    }
+
+    .wc-message .wc-list {
+      text-align: center;
+    }
+
+    .wc-app ::-webkit-scrollbar-thumb {
+      background-color: #ececec;
+    }
+
+    .wc-app h1, .wc-app h2, .wc-app h3, .wc-app h4, .wc-app p, .wc-app ul, .wc-app ol {
+      padding: 4px;
+    }
+
+    .wc-carousel button.scroll {
+      background-color: #00800D !important;
+      border-width: 0px !important;
+    }
+
+    #bot .wc-suggested-actions .wc-hscroll > ul > li button, .wc-app .wc-card button {
+      color: white !important;
+      background-color: #00800D !important;
+      border-color: #00800D !important;
+    }
+
+    #bot .wc-suggested-actions .wc-hscroll > ul > li button:active, .wc-app .wc-card button:active {
+      color: #00800D !important;
+      background-color: white !important;
+      border-color: #00800D !important;
+    }
+
+    #footer {
+      text-align: center;
+      color: #888;
+      font-size: 0.7em;
+      padding-bottom: 8px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div id="bot-wrapper">
+    <div id="logo">
+      <img src="https://feedbotskodaonboardi9617.blob.core.windows.net/public/logo.jpg" alt="Logo" />
+    </div>
+    <div id="bot"></div>
+    <div id="footer">Chatbot pracuje s důvěrnými informacemi • Chatbot works with confidential information</div>
+  </div>
+  <script src="https://feedyou.blob.core.windows.net/webchat/feature/skoda/botchat-es5.js?v=4"></script>
+  <script>
+    const forceInput = window.location.hash.substr(1) === 'feedbot-show-input'
+    var botConnection = new BotChat.DirectLine({ secret: '1IfP8oGaUP8.HVHkwo0WQzl90h7zJmiHfQCKENUlpg9x-srjCTorN7A' });
+
+    BotChat.App({
+      botConnection: botConnection,
+      locale: 'cs',
+      bot: { id: 'feedbot-skoda-onboarding', name: 'Chatbot' },
+      theme: { mainColor: '#00800D' },
+      disableInputWhenNotNeeded: !forceInput,
+      userData: {zarizeni: location.hash.substr(1)}, // vlastni-zarizeni   naborove-centrum
+      uploadUsingQrCodeOnly: location.hash.substr(1) == 'naborove-centrum'
+      
+      // SEE https://github.com/wearefeedyou/feedbot-webchat FOR OPTIONAL PARAMS
+    }, document.getElementById("bot"));
+
+    botConnection.activity$
+      .filter(function(activity){ return activity.type === "event" && activity.name === "reload" })
+      .subscribe(function(activity){ location.reload() })
+
+    botConnection.activity$
+      .filter(function(activity){ return activity.type === "event" && activity.name === "set-reload-timeout" })
+      .subscribe(function(activity){ setTimeout(function() {location.reload()}, parseInt(activity.value || 60000)) })
+  </script>
+</body>
+
+</html>

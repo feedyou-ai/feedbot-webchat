@@ -28,13 +28,14 @@ export const sendMessage = (text: string, from: User, locale: string) => ({
         timestamp: (new Date()).toISOString()
     }} as ChatActions);
 
-export const sendFiles = (files: FileList, from: User, locale: string) => ({
+export const sendFiles = (files: FileList, from: User, locale: string, isDirectUpload: boolean) => ({
     type: 'Send_Message',
     activity: {
         type: "message",
         attachments: attachmentsFromFiles(files),
         from,
-        locale
+        locale,
+        isDirectUpload
     }} as ChatActions);
 
 export const sendScreenshot = (screen: string, from: User, locale: string) => {
@@ -172,6 +173,13 @@ export interface FormatState {
     chatTitle: boolean | string,
     locale: string,
     showUploadButton: boolean,
+    showAutoSuggest: boolean;
+    autoSuggestType: string;
+    autoSuggestItems: any[];
+    autoSuggestCountry: string;
+    attachmentUrl: string,
+    uploadUsingQrCodeOnly: boolean,
+    uploadUsingDndAndQrCode: boolean,
     disableInput: boolean,
     disableInputWhenNotNeeded: boolean
     strings: Strings,
@@ -190,6 +198,15 @@ export type FormatAction = {
 } | {
     type: 'Toggle_Upload_Button',
     showUploadButton: boolean
+    attachmentUrl?: string
+    uploadUsingQrCodeOnly?: boolean
+    uploadUsingDndAndQrCode?: boolean
+} | {
+    type: "Toggle_Auto_Suggest";
+    showAutoSuggest: boolean;
+    autoSuggestType?: string;
+    autoSuggestItems?: any[];
+    autoSuggestCountry?: string;
 } | {
     type: 'Toggle_Disable_Input',
     disableInput: boolean
@@ -207,8 +224,15 @@ export const format: Reducer<FormatState> = (
         chatTitle: true,
         locale: 'en-us',
         showUploadButton: true,
+        attachmentUrl: null,
+        showAutoSuggest: false,
+        autoSuggestType: "",
+        autoSuggestItems: [],
+        autoSuggestCountry: "cs",
         disableInput: false,
         disableInputWhenNotNeeded: false,
+        uploadUsingQrCodeOnly: false,
+        uploadUsingDndAndQrCode: false,
         strings: defaultStrings,
         carouselMargin: undefined
     },
@@ -234,7 +258,18 @@ export const format: Reducer<FormatState> = (
         case 'Toggle_Upload_Button':
             return {
                 ...state,
-                showUploadButton: action.showUploadButton
+                showUploadButton: action.showUploadButton,
+                attachmentUrl: action.attachmentUrl,
+                uploadUsingQrCodeOnly: action.hasOwnProperty('uploadUsingQrCodeOnly') ? action.uploadUsingQrCodeOnly : state.uploadUsingQrCodeOnly,
+                uploadUsingDndAndQrCode: action.hasOwnProperty("uploadUsingDndAndQrCode") ? action.uploadUsingDndAndQrCode : state.uploadUsingDndAndQrCode
+            };
+        case "Toggle_Auto_Suggest":
+            return {
+                ...state,
+                showAutoSuggest: action.showAutoSuggest,
+                autoSuggestType: action.autoSuggestType || "",
+                autoSuggestItems: action.autoSuggestItems || [],
+                autoSuggestCountry: action.autoSuggestCountry || "cs"
             };
         case 'Toggle_Disable_Input':
             return {
@@ -312,7 +347,7 @@ export const connection: Reducer<ConnectionState> = (
         botConnection: undefined,
         selectedActivity: undefined,
         user: undefined,
-        bot: undefined
+        bot: {id: undefined}
     },
     action: ConnectionAction
 ) => {
@@ -689,13 +724,46 @@ const speakOnMessageReceivedEpic: Epic<ChatActions, ChatState> = (action$, store
 // TODO do not overwrite Chat.props.showUploadButton=true
 const showUploadBasedOnInputHint: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Receive_Message')
-    .map(action => ({ type: 'Toggle_Upload_Button', showUploadButton: action.activity.inputHint === 'expectingUpload' } as FormatAction))
+    .map(action => ({
+        type: 'Toggle_Upload_Button',
+        showUploadButton: action.activity.inputHint === 'expectingUpload',
+        attachmentUrl: action.activity.channelData && action.activity.channelData.attachmentUrl
+    } as FormatAction))
 
 // FEEDYOU disable/hide input prompt only when last message's inputHint=='ignoringInput'
 const disableInputBasedOnInputHint: Epic<ChatActions, ChatState> = (action$, store) => 
     action$.ofType('Receive_Message')
     .filter(action => (action.activity as Message) && store.getState().format.disableInputWhenNotNeeded)
-    .map(action => ({ type: 'Toggle_Disable_Input', disableInput: action.activity.inputHint === 'ignoringInput' } as FormatAction))
+    .map(action => ({ type: 'Toggle_Disable_Input', disableInput: action.activity.inputHint === 'ignoringInput' || action.activity.inputHint === 'expectingUpload' } as FormatAction))
+
+const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
+    action$,
+    store
+    ) => {
+    return action$.ofType("Receive_Message").map((action) => {
+        return {
+        type: "Toggle_Auto_Suggest",
+        showAutoSuggest:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            ["google-city", "static"].includes(
+            action.activity.channelData.autosuggest.type
+            ),
+        autoSuggestType:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.type,
+        autoSuggestItems:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.answers,
+        autoSuggestCountry:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.countryCode,
+        } as FormatAction;
+    });
+    };
 
 const stopSpeakingEpic: Epic<ChatActions, ChatState> = (action$) =>
     action$.ofType(
@@ -824,6 +892,7 @@ export const createStore = () =>
             speakSSMLEpic,
             speakOnMessageReceivedEpic,
             showUploadBasedOnInputHint,
+            showAutoSuggestBasedOnChannelData,
             disableInputBasedOnInputHint,
             startListeningEpic,
             stopListeningEpic,

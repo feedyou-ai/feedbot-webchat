@@ -26,14 +26,14 @@ declare const dataLayer: Array<Object>;
 
 interface GaEvent {
     eventCategory: string
-    eventAction:string
+    eventAction: string
     eventLabel?: string
     eventValue?: string
 }
 
 interface GtmEvent {
     event: string
-    variables?: Array<{name: string, value: string}>
+    variables?: Array<{ name: string, value: string }>
 }
 
 interface SmartsuppHandoffOptions {
@@ -58,11 +58,13 @@ export interface ChatProps {
     selectedActivity?: BehaviorSubject<ActivityOrID>,
     sendTyping?: boolean,
     showUploadButton?: boolean,
+    uploadUsingQrCodeOnly?: boolean,
+    uploadUsingDndAndQrCode?: boolean,
     disableInputWhenNotNeeded?: boolean,
     formatOptions?: FormatOptions,
     resize?: 'none' | 'window' | 'detect',
     userData?: {},
-    introDialog?: {id?: string},
+    introDialog?: { id?: string },
     startOverTrigger?: (trigger: () => void) => void,
     onConversationStarted?: (callback: (conversationId: string) => void) => void,
     typingDelay?: number
@@ -80,6 +82,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private fbPixelEventsSubscription: Subscription;
     private gaEventsSubscription: Subscription;
     private gtmEventsSubscription: Subscription;
+    private botEventsSubscribtion: Subscription;
     private handoffSubscription: Subscription;
     private webchatCollapseSubscribtion: Subscription;
     private redirectSubscribtion: Subscription;
@@ -146,7 +149,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             this.store.dispatch<ChatActions>({ type: 'Set_Chat_Title', chatTitle });
         }
 
-        this.store.dispatch<ChatActions>({ type: 'Toggle_Upload_Button', showUploadButton: props.showUploadButton !== false });
+        this.store.dispatch<ChatActions>({ type: 'Toggle_Upload_Button', showUploadButton: props.showUploadButton !== false, uploadUsingQrCodeOnly: !!props.uploadUsingQrCodeOnly, uploadUsingDndAndQrCode: !!props.uploadUsingDndAndQrCode });
 
         this.store.dispatch<ChatActions>({ type: 'Toggle_Disable_Input', disableInput: props.disableInputWhenNotNeeded });
 
@@ -262,7 +265,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         }
 
         botConnection.postActivityOriginal = botConnection.postActivity
-        
+
         botConnection.postActivity = (activity: any) => {
             // send userData only once during initial event
             if (activity.name === 'beginIntroDialog') {
@@ -306,7 +309,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - show typing on startup - if bot.id is set to the same value as value on server, it will be cleared by first message
         if (this.props.bot && this.props.bot.id) {
-            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot }, timestamp: new Date().toISOString()}});
+            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot }, timestamp: new Date().toISOString() } });
         }
 
         // FEEDYOU - support "start over" button
@@ -316,7 +319,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         window.addEventListener('feedbot:start-over', () => {
             startOver(botConnection, this.store, this.props)
         })
-        
+
         this.fbPixelEventsSubscription = botConnection.activity$
             .filter((activity: any) => activity.type === "event" && activity.name === "facebook-pixel-track-event")
             .subscribe((activity: any) => trackFacebookPixelEvent(activity.value))
@@ -368,7 +371,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                 name: 'beginIntroDialog',
                 type: 'event',
                 value: '',
-                channelData: introDialogId ? {id: introDialogId} : undefined
+                channelData: introDialogId ? { id: introDialogId } : undefined
             }).subscribe(function (id: any) {
                 konsole.log('"beginIntroDialog" event sent');
             });
@@ -381,7 +384,8 @@ export class Chat extends React.Component<ChatProps, {}> {
             let eventName: string
             let dialogId: string
             let userData: object = {}
-            let mode: string
+            let mode: string = ''
+            let cancelDialogId: string = ''
             if (typeof event.detail === 'string') {
                 dialogId = event.detail
                 eventName = 'beginIntroDialog'
@@ -389,38 +393,37 @@ export class Chat extends React.Component<ChatProps, {}> {
                 dialogId = event.detail.id
                 userData = event.detail.userData || {}
                 mode = event.detail.mode || ''
+                cancelDialogId = event.detail.cancelDialogId || ''
                 eventName = 'beginDialog' // new event supported from bot v1.7.419
             }
-            
+
             if (dialogId) {
                 botConnection.postActivity({
                     from: this.props.user,
                     name: eventName,
                     type: 'event',
                     value: '',
-                    channelData: {id: dialogId, userData, mode}
+                    channelData: { id: dialogId, userData, mode, cancelDialogId }
                 }).subscribe(function (id: any) {
-                    konsole.log('"'+eventName+'" event sent', dialogId, userData, mode);
+                    konsole.log('"' + eventName + '" event sent', dialogId, userData, mode);
                 });
             }
         })
 
-        this.connectionStatusSubscription = botConnection.connectionStatus$.subscribe((connectionStatus: any) =>{
-                if(this.props.speechOptions && this.props.speechOptions.speechRecognizer){
-                    let refGrammarId = botConnection.referenceGrammarId;
-                    if(refGrammarId)
-                        this.props.speechOptions.speechRecognizer.referenceGrammarId = refGrammarId;
-                }
-                this.store.dispatch<ChatActions>({ type: 'Connection_Change', connectionStatus })
-
-			// FEEDYOU
-			// sessionStorage is undefined in IE for file:// testing: https://stackoverflow.com/a/3392301/10467064
-			botConnection.conversationId && sessionStorage && sessionStorage.setItem("feedbotConversationId", botConnection.conversationId)
-                if (this.props.onConversationStarted && connectionStatus === ConnectionStatus.Online && botConnection.conversationId) {
-                    this.props.onConversationStarted(botConnection.conversationId)
-                }
-
+        this.connectionStatusSubscription = botConnection.connectionStatus$.subscribe((connectionStatus: any) => {
+            if (this.props.speechOptions && this.props.speechOptions.speechRecognizer) {
+                let refGrammarId = botConnection.referenceGrammarId;
+                if (refGrammarId)
+                    this.props.speechOptions.speechRecognizer.referenceGrammarId = refGrammarId;
             }
+            this.store.dispatch<ChatActions>({ type: 'Connection_Change', connectionStatus })
+
+            // FEEDYOU
+            if (this.props.onConversationStarted && connectionStatus === ConnectionStatus.Online && botConnection.conversationId) {
+                this.props.onConversationStarted(botConnection.conversationId)
+            }
+
+        }
         );
 
         this.activitySubscription = botConnection.activity$.subscribe(
@@ -488,6 +491,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         this.fbPixelEventsSubscription.unsubscribe();
         this.gaEventsSubscription.unsubscribe();
         this.gtmEventsSubscription.unsubscribe();
+        this.botEventsSubscribtion.unsubscribe();
         // this.handoffSubscription.unsubscribe();
         this.webchatCollapseSubscribtion.unsubscribe();
         this.redirectSubscribtion.unsubscribe();
@@ -542,28 +546,28 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // only render real stuff after we know our dimensions
         return (
-            <Provider store={ this.store }>
+            <Provider store={this.store}>
                 <div
                     className="wc-chatview-panel"
-                    onKeyDownCapture={ this._handleKeyDownCapture }
-                    ref={ this._saveChatviewPanelRef }
+                    onKeyDownCapture={this._handleKeyDownCapture}
+                    ref={this._saveChatviewPanelRef}
                 >
                     {
                         !!state.format.chatTitle &&
-                            <div className="wc-header">
-                                <span>{ typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title }</span>
-                            </div>
+                        <div className="wc-header">
+                            <span>{typeof state.format.chatTitle === 'string' ? state.format.chatTitle : state.format.strings.title}</span>
+                        </div>
                     }
                     <MessagePane>
                         <History
-                            onCardAction={ this._handleCardAction }
-                            ref={ this._saveHistoryRef }
+                            onCardAction={this._handleCardAction}
+                            ref={this._saveHistoryRef}
                         />
                     </MessagePane>
-                    <Shell ref={ this._saveShellRef } />
+                    <Shell ref={this._saveShellRef} />
                     {
                         this.props.resize === 'detect' &&
-                            <ResizeDetector onresize={ this.resizeListener } />
+                        <ResizeDetector onresize={this.resizeListener} />
                     }
                 </div>
             </Provider>
@@ -573,6 +577,22 @@ export class Chat extends React.Component<ChatProps, {}> {
 
 export interface IDoCardAction {
     (type: CardActionTypes, value: string | object): void;
+}
+
+export const sendPostBack = (botConnection: IBotConnection, text: string, value: object, from: User, locale: string) => {
+    botConnection.postActivity({
+        type: "message",
+        text,
+        value,
+        from,
+        locale,
+        timestamp: new Date().toISOString()
+    })
+        .subscribe(id => {
+            konsole.log("success sending postBack", id)
+        }, error => {
+            konsole.log("failed to send postBack", error);
+        });
 }
 
 export const doCardAction = (
@@ -619,27 +639,8 @@ export const doCardAction = (
             else {
                 loginWindow.location.href = text;
             }
-            break;
-
-        default:
-            konsole.log("unknown button type", type);
-        }
-}
-
-export const sendPostBack = (botConnection: IBotConnection, text: string, value: object, from: User, locale: string) => {
-    botConnection.postActivity({
-        type: "message",
-        text,
-        value,
-        from,
-        locale,
-        timestamp: new Date().toISOString()
-    })
-    .subscribe(id => {
-        konsole.log("success sending postBack", id)
-    }, error => {
-        konsole.log("failed to send postBack", error);
-    });
+            break;      
+    }
 }
 
 export const startOver = (botConnection: IBotConnection, store: ChatStore, props: ChatProps) => {
@@ -668,7 +669,7 @@ export const renderIfNonempty = (value: any, renderer: (value: any) => JSX.Eleme
         return renderer(value);
 }
 
-export const classList = (...args:(string | boolean)[]) => {
+export const classList = (...args: (string | boolean)[]) => {
     return args.filter(Boolean).join(' ');
 }
 
@@ -678,11 +679,11 @@ const ResizeDetector = (props: {
 }) =>
     // adapted to React from https://github.com/developit/simple-element-resize-detector
     <iframe
-        style={ { position: 'absolute', left: '0', top: '-100%', width: '100%', height: '100%', margin: '1px 0 0', border: 'none', opacity: 0, visibility: 'hidden', pointerEvents: 'none' } }
-        ref={ frame => {
+        style={{ position: 'absolute', left: '0', top: '-100%', width: '100%', height: '100%', margin: '1px 0 0', border: 'none', opacity: 0, visibility: 'hidden', pointerEvents: 'none' }}
+        ref={frame => {
             if (frame)
                 frame.contentWindow.onresize = props.onresize;
-        } }
+        }}
     />;
 
 // For auto-focus in some browsers, we synthetically insert keys into the chatbox.
@@ -705,17 +706,17 @@ function getGoogleAnalyticsUserData() {
     const tracker = (typeof ga !== 'undefined') && ga && ga.getAll && ga.getAll() && ga.getAll()[0]
     if (tracker) {
         const trackingId = tracker.get('trackingId')
-        return {googleAnalyticsTrackingId: trackingId} || {}
+        return { googleAnalyticsTrackingId: trackingId } || {}
     }
     return {}
 }
 
 function getReferrerUserData() {
-    return {referrerUrl: window.location.href}
+    return { referrerUrl: window.location.href }
 }
 
 function getLocaleUserData(locale?: string) {
-    return locale ? {locale: locale.replace(/-.*/,'')} : {}
+    return locale ? { locale: locale.replace(/-.*/, '') } : {}
 }
 
 function trackFacebookPixelEvent(eventName: string) {
@@ -729,7 +730,7 @@ function trackFacebookPixelEvent(eventName: string) {
 }
 
 function trackGoogleAnalyticsEvent(event: GaEvent) {
-    const eventInfo = 'ga("'+event.eventCategory+'", "'+event.eventAction+'", '+(event.eventLabel || 'undefined')+', '+(event.eventValue ? parseInt(event.eventValue) : 'undefined')+')'
+    const eventInfo = 'ga("' + event.eventCategory + '", "' + event.eventAction + '", ' + (event.eventLabel || 'undefined') + ', ' + (event.eventValue ? parseInt(event.eventValue) : 'undefined') + ')'
     if (typeof ga === 'function') {
         console.log('Tracking GA custom event ' + eventInfo, event)
         ga(event.eventCategory, event.eventAction, event.eventLabel || undefined, event.eventValue ? parseInt(event.eventValue) : undefined)
@@ -738,8 +739,8 @@ function trackGoogleAnalyticsEvent(event: GaEvent) {
     }
 }
 
-function trackGoogleTagManagerEvent({event, variables}: GtmEvent) {
-    const data = (variables || []).reduce((data, variable) => ({...data, [variable.name]: variable.value}), {event})
+function trackGoogleTagManagerEvent({ event, variables }: GtmEvent) {
+    const data = (variables || []).reduce((data, variable) => ({ ...data, [variable.name]: variable.value }), { event })
     if (typeof dataLayer === 'object') {
         console.log('Tracking GTM custom event dataLayer.push(...)', data)
         dataLayer.push(data)
