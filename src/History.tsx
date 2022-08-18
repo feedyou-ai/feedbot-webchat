@@ -4,9 +4,9 @@ import { ChatState, FormatState, SizeState } from './Store';
 import { connect } from 'react-redux';
 import { ActivityView } from './ActivityView';
 import { classList, doCardAction, IDoCardAction } from './Chat';
-import * as konsole from './Konsole';
 import { sendMessage } from './Store';
 import { activityWithSuggestedActions } from './activityWithSuggestedActions';
+import * as konsole  from './Konsole'
 
 export interface HistoryProps {
     format: FormatState,
@@ -26,37 +26,94 @@ export interface HistoryProps {
     doCardAction: IDoCardAction
 }
 
+let loggingEnabled = false
+let triggerAutoscrollAfterEveryChangeInWebchatContentSize = false
+let detectionTolerance = 1
+
+export const log = (...params: any[]) => {
+	if (loggingEnabled) {
+		(console.log as any)(...params)
+	}
+}
+
+;(window as any).enableLogging = () => loggingEnabled = true
+;(window as any).disableLogging = () => loggingEnabled = false
+
+;(window as any).enableObserverWorkaround = () => triggerAutoscrollAfterEveryChangeInWebchatContentSize = true
+;(window as any).disableObserverWorkaround = () => triggerAutoscrollAfterEveryChangeInWebchatContentSize = false
+
+;(window as any).enableDetectionToleranceWorkaround = () => detectionTolerance = 10
+;(window as any).disableDetectionToleranceWorkaround = () => detectionTolerance = 1
+;(window as any).setDetectionTolerance = (val: number) => detectionTolerance = val
+
+const logDistanceFromBottom = (component: HistoryView, label = "") => {
+	const { scrollHeight, scrollTop, offsetHeight} = component.scrollMe
+	const distance = scrollHeight - scrollTop - offsetHeight
+	log(`  └─ Distance from bottom ${label}: `, distance, { scrollHeight, scrollTop, offsetHeight})
+}
+
 export class HistoryView extends React.Component<HistoryProps, {}> {
-    private scrollMe: HTMLDivElement;
-    private scrollContent: HTMLDivElement;
-    private scrollToBottom = true;
-    private lastRenderScrollHeight = 0
+    scrollMe: HTMLDivElement;
+    scrollContent: HTMLDivElement;
+    scrollToBottom = true;
+    lastRenderScrollHeight = 0
 
-    private carouselActivity: WrappedActivity;
-    private largeWidth: number;
-
+    carouselActivity: WrappedActivity;
+    largeWidth: number;
+		
+		resizeObserver: ResizeObserver
+	
     constructor(props: HistoryProps) {
         super(props);
+	
+	    this.resizeObserver = new ResizeObserver((entries)=> {
+		    log("---> scrollMe size changed: ", entries)
+		
+		    if(triggerAutoscrollAfterEveryChangeInWebchatContentSize) {
+			    log("Triggering autoscroll function from resize observer")
+			    logDistanceFromBottom(this)
+			    this.autoscroll()
+		    } else {
+			    log("\n")
+		    }
+	    });
     }
-
-    componentWillUpdate(nextProps: HistoryProps) {
-        let scrollToBottomDetectionTolerance = 1;
+		
+		componentDidMount() {
+			const elToObserve = this.scrollMe.querySelector(".wc-message-group-content")
+			this.resizeObserver.observe(elToObserve)
+		}
+	
+		componentWillUnmount() {
+			this.resizeObserver.disconnect()
+		}
+	
+	componentWillUpdate(nextProps: HistoryProps) {
+        let scrollToBottomDetectionTolerance = detectionTolerance;
 
         if (!this.props.hasActivityWithSuggestedActions && nextProps.hasActivityWithSuggestedActions) {
             scrollToBottomDetectionTolerance = 70; // this should be in-sync with $actionsHeight scss var
         }
-
-        this.scrollToBottom = this.shouldScrollToBottom(scrollToBottomDetectionTolerance)
+				
+	      log("Autoscroll function triggered from componentDidUpdate")
+		    logDistanceFromBottom(this)
+		    this.scrollToBottom = this.shouldScrollToBottom(scrollToBottomDetectionTolerance)
     }
     
     shouldScrollToBottom = (detectionTolerance: number) => {
       const didContentSizeChangeExternallyFromLastRender = this.scrollMe.scrollHeight !== this.lastRenderScrollHeight
       
       if(didContentSizeChangeExternallyFromLastRender) {
+				log("  └─ Should scroll to bottom: ", this.scrollToBottom, "because content size changed since last render")
+	      logDistanceFromBottom(this)
         return this.scrollToBottom  // Carry value from last render cycle
       }
-      
-      return Math.abs(this.scrollMe.scrollHeight - this.scrollMe.scrollTop - this.scrollMe.offsetHeight) <= detectionTolerance
+			const distanceFromBottom = Math.abs(this.scrollMe.scrollHeight - this.scrollMe.scrollTop - this.scrollMe.offsetHeight)
+			const isScrolledToBottom = distanceFromBottom <= detectionTolerance
+	    log("  └─ Should scroll to bottom: ", isScrolledToBottom, " because distance from bottom is ", distanceFromBottom, " and detection tolerance is ", detectionTolerance)
+	    logDistanceFromBottom(this)
+	
+	    return isScrolledToBottom
     }
 
     componentDidUpdate() {
@@ -99,8 +156,15 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
 
         // Validating if we are at the bottom of the list or the last activity was triggered by the user.
         if (this.scrollToBottom || lastActivityFromMe) {
+						log("Executing scroll - scrollToBottom: ", this.scrollToBottom, " lastActivityFromMe: ", lastActivityFromMe)
+	          logDistanceFromBottom(this, "BEFORE SCROLL")
             this.scrollMe.scrollTop = this.scrollMe.scrollHeight - this.scrollMe.offsetHeight;
+	          logDistanceFromBottom(this, "AFTER SCROLL")
+        } else {
+	          log("NOT Executing scroll - scrollToBottom: ", this.scrollToBottom, " lastActivityFromMe: ", lastActivityFromMe)
+	          logDistanceFromBottom(this)
         }
+				log("\n")
     }
 
     // In order to do their cool horizontal scrolling thing, Carousels need to know how wide they can be.
@@ -168,12 +232,17 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                                 size={ this.props.size }
                                 activity={ activity }
                                 onCardAction={ (type: CardActionTypes, value: string | object) => this.doCardAction(type, value) }
-                                onImageLoad={ () => this.autoscroll() }
+                                onImageLoad={ (param: any) => {
+	                                log("Autoscroll function triggered from onImageLoad - ", param )
+	                                logDistanceFromBottom(this)
+	                                this.autoscroll()
+                                } }
                                 isLast={ index === this.props.activities.length - 1  }
                             />
                         </WrappedActivity>
                 );
             }
+						
         }
 
         const groupsClassName = classList('wc-message-groups', !this.props.format.chatTitle && 'no-header');
@@ -185,6 +254,7 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                 role="log"
                 tabIndex={ 0 }
             >
+
                 <div className="wc-message-group-content" ref={ div => { if (div) this.scrollContent = div }}>
                     { content }
                 </div>

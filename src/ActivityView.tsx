@@ -14,7 +14,7 @@ const Attachments = (props: {
     size: SizeState,
     tiles?: Tile[]
     onCardAction: IDoCardAction,
-    onImageLoad: () => void
+    onImageLoad: (params: any) => void
 }) => {
     const { attachments, attachmentLayout, ... otherProps } = props;
     if (!attachments || attachments.length === 0)
@@ -57,7 +57,7 @@ export interface ActivityViewProps {
     size: SizeState,
     activity: Activity,
     onCardAction: IDoCardAction,
-    onImageLoad: () => void,
+    onImageLoad: (params: any) => void,
     isLast: boolean
 }
 

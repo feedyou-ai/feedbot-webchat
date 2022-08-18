@@ -18,7 +18,7 @@ export interface Props {
     nativeCard?: AdaptiveCard,
     onCardAction: IDoCardAction,
     onClick?: (e: React.MouseEvent<HTMLElement>) => void,
-    onImageLoad?: () => any,
+    onImageLoad?: (params: any) => any,
 }
 
 export interface State {
@@ -104,7 +104,7 @@ class AdaptiveCardContainer extends React.Component<Props, State> {
             const openUrlTarget = getFeedyouParam("openUrlTarget")
             
             if(openUrlTarget === "same-domain"){
-                const actionUrl = decodeActionUrl(action.url)    
+                const actionUrl = decodeActionUrl(action.url)
                 const url = new URL(actionUrl)
                 console.log('openUrl same-domain', actionUrl, window.location.hostname, url.hostname)
 
@@ -268,7 +268,7 @@ function decodeActionUrl(actionUrl: string): string {
                 const decodedUrl = atob(decodeURIComponent(parts[5]))
                 return decodedUrl || actionUrl
             }
-        }    
+        }
     } catch (err) {}
     
     return actionUrl

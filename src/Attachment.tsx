@@ -1,12 +1,17 @@
-import * as React from 'react';
-import * as CardBuilder from './CardBuilder';
-import { HorizontalAlignment, IAdaptiveCard, TextSize, TextWeight } from 'adaptivecards';
-import { Attachment, CardAction, CardImage, KnownMedia, UnknownMedia } from 'botframework-directlinejs';
-import { renderIfNonempty, IDoCardAction } from './Chat';
-import { FormatState } from './Store';
-import { default as AdaptiveCardContainer } from './AdaptiveCardContainer';
-import * as konsole from './Konsole';
-import { Tile } from './Types';
+import * as React from 'react'
+import * as CardBuilder from './CardBuilder'
+import { HorizontalAlignment, IAdaptiveCard, TextSize, TextWeight } from 'adaptivecards'
+import {
+	Attachment,
+	CardAction,
+	CardImage,
+	KnownMedia,
+	UnknownMedia,
+} from 'botframework-directlinejs'
+import { IDoCardAction } from './Chat'
+import { FormatState } from './Store'
+import { default as AdaptiveCardContainer } from './AdaptiveCardContainer'
+import { Tile } from './Types'
 
 const regExpCard = /\^application\/vnd\.microsoft\.card\./i;
 
@@ -72,7 +77,7 @@ interface VideoProps {
     poster?: string,
     autoPlay?: boolean,
     loop?: boolean,
-    onLoad?: () => void,
+    onLoad?: (params: any) => void,
     onClick?: (e: React.MouseEvent<HTMLElement>) => void
 }
 
@@ -112,7 +117,7 @@ const Media = (props: {
     autoPlay?: boolean,
     loop?: boolean,
     alt?: string,
-    onLoad?: () => void,
+    onLoad?: (params: any) => void,
     onClick?: (e: React.MouseEvent<HTMLElement>) => void
 }) => {
     switch (props.type) {
@@ -148,7 +153,7 @@ export const AttachmentView = (props: {
     attachment: Attachment,
     tiles?: Tile[],
     onCardAction: IDoCardAction,
-    onImageLoad: () => void
+    onImageLoad: (params: any) => void
 }) => {
     if (!props.attachment) return;
     const attachment = props.attachment as KnownMedia;
@@ -160,7 +165,7 @@ export const AttachmentView = (props: {
     const attachedImage = (
         images: CardImage[]
     ) => images && images.length > 0 &&
-        <Media src={ images[0].url } onLoad={ props.onImageLoad } onClick={ onCardAction(images[0].tap) } alt={ images[0].alt } />;
+        <Media src={ images[0].url } onLoad={ () => props.onImageLoad(images[0].url) } onClick={ onCardAction(images[0].tap) } alt={ images[0].alt } />;
     const getRichCardContentMedia = (
         type: 'image' | 'video' | 'audio' | { (url: string): 'image' | 'video' | 'audio' },
         content: {
@@ -208,7 +213,7 @@ export const AttachmentView = (props: {
             heroCardBuilder.addCommon(attachment.content, props.tiles)
             
             return (
-                <AdaptiveCardContainer className="wc-hero" nativeCard={ heroCardBuilder.card } onImageLoad={ props.onImageLoad } onCardAction={ props.onCardAction } onClick={ onCardAction(attachment.content.tap) } />
+                <AdaptiveCardContainer className="wc-hero" nativeCard={ heroCardBuilder.card } onImageLoad={ () => props.onImageLoad(props.tiles) } onCardAction={ props.onCardAction } onClick={ onCardAction(attachment.content.tap) } />
             );
 
         case "application/vnd.microsoft.card.thumbnail":
@@ -336,11 +341,11 @@ export const AttachmentView = (props: {
         case "image/jpg":
         case "image/jpeg":
         case "image/gif":
-            return <Media src={ attachment.contentUrl } onLoad={ props.onImageLoad } alt={attachment.name} />;
+            return <Media src={ attachment.contentUrl } onLoad={ () => props.onImageLoad(attachment.contentUrl) } alt={attachment.name} />;
 
         case "audio/mpeg":
         case "audio/mp4":
-            return <Media type='audio' src={ attachment.contentUrl } alt={attachment.name} />;
+            return <Media type='audio' src={ attachment.contentUrl } alt={attachment.name} onLoad={ () => props.onImageLoad(attachment.contentUrl) }/>;
 
         case "video/mp4":
             return <Media type='video' poster={ attachment.thumbnailUrl } src={ attachment.contentUrl } onLoad={ props.onImageLoad } alt={attachment.name} />;

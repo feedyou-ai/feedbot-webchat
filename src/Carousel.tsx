@@ -11,7 +11,7 @@ export interface CarouselProps {
     size: SizeState,
     attachments: Attachment[],
     onCardAction: IDoCardAction,
-    onImageLoad: () => void
+    onImageLoad: (params: any) => void
 }
 
 export class Carousel extends React.PureComponent<CarouselProps, {}> {
@@ -65,7 +65,7 @@ export interface CarouselAttachmentProps {
     format: FormatState,
     attachments: Attachment[],
     onCardAction: IDoCardAction,
-    onImageLoad: () => void
+    onImageLoad: (params: any) => void
 }
 
 class CarouselAttachments extends React.PureComponent<CarouselAttachmentProps, {}> {

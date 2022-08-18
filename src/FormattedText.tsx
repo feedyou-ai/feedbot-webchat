@@ -6,7 +6,7 @@ import { twemoji } from './lib.js'
 export interface IFormattedTextProps {
     text: string,
     format: string,
-    onImageLoad: () => void
+    onImageLoad: (params: any) => void
 }
 
 export const FormattedText = (props: IFormattedTextProps) => {
@@ -18,7 +18,7 @@ export const FormattedText = (props: IFormattedTextProps) => {
             return renderPlainText(props.text);
         case "xml":
         default:
-            return renderMarkdown(props.text, props.onImageLoad);
+            return renderMarkdown(props.text, () => props.onImageLoad(`Text, ${props.text}` ));
     }
 }
 
@@ -57,7 +57,7 @@ markdownIt.renderer.rules.link_open = (tokens, idx, options, env, self) => {
 
 const renderMarkdown = (
     text: string,
-    onImageLoad: () => void
+    onImageLoad: (params: any) => void
 ) => {
     let __html;
 
