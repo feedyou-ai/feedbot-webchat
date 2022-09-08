@@ -22,7 +22,7 @@ import { Shell, ShellFunctions } from './Shell';
 import getDeviceData from './utils/getDeviceData'
 
 declare const fbq: Function;
-declare const dataLayerDRMAX: Array<Object>;
+declare const dataLayer: Array<Object>;
 
 interface GaEvent {
     eventCategory: string
@@ -740,11 +740,11 @@ function trackGoogleAnalyticsEvent(event: GaEvent) {
 
 function trackGoogleTagManagerEvent({event, variables}: GtmEvent) {
     const data = (variables || []).reduce((data, variable) => ({...data, [variable.name]: variable.value}), {event})
-    if (typeof dataLayerDRMAX === 'object') {
-        console.log('Tracking GTM custom event dataLayerDRMAX.push(...)', data)
-        dataLayerDRMAX.push(data)
+    if (typeof dataLayer === 'object') {
+        console.log('Tracking GTM custom event dataLayer.push(...)', data)
+        dataLayer.push(data)
     } else {
-        console.warn('dataLayerDRMAX is undefined - cannot track GTM custom event dataLayerDRMAX.push(...)', data)
+        console.warn('dataLayer is undefined - cannot track GTM custom event dataLayer.push(...)', data)
     }
 }
 
