@@ -61,8 +61,8 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 			return
 		}
 		
-		if (autoExpandTimeout === 0) {
-			// Backwards compatability
+		// For backwards compatability, this should cover all falsy values
+		if (!autoExpandTimeout) {
 			return
 		}
 		
