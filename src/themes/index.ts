@@ -12,7 +12,7 @@ export type Theme = {
 		type?: string,
 		headerText?: string,
 		collapsedHeaderText?: string,
-		introMessage?: {
+		popupMessage?: {
 			title: string,
 			description: string,
 			timeout: number

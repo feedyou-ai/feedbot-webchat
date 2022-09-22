@@ -20,7 +20,13 @@ export const renderWebchatApp = (props: AppProps, container: HTMLElement) => {
 			ReactDOM.render(<FullscreenTemplate {...props} />, reactEntryPoint)
 			break
 		default:
-			ReactDOM.render(<ExpandableTemplate {...props} />, reactEntryPoint)
+			ReactDOM.render(
+				<ExpandableTemplate
+					{...props}
+					enablePopupMessage={props.theme.template.type === "expandable-knob"}
+				/>,
+				reactEntryPoint
+			)
 	}
 }
 

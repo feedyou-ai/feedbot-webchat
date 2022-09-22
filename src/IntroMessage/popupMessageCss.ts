@@ -1,10 +1,12 @@
-export const introMessageCss = `
-.intro-message {
+export const popupMessageCss = `
+.popup-message {
     font-family: 'Segoe UI', sans-serif;
-
+    transition: 300ms all ease-in-out;
+		opacity: 1;
+	
     position: absolute;
     left: 0;
-    bottom: 0;
+    bottom: 24px;
     transform: translateX(-100%);
     margin-left: -10px;
     
@@ -20,24 +22,30 @@ export const introMessageCss = `
     border-radius: 10px 10px 10px 4px;
 }
 
-.intro-message__title {
+.popup-message.popup-message--initial {
+  left: 8px;
+  bottom: 17px;
+  opacity: 0;
+}
+
+.popup-message__title {
     font-size: 15px;
     font-weight: bold;
     margin-bottom: 8px;
     padding-right: 20px;
 }
 
-.intro-message__message {
+.popup-message__message {
     font-size: 14px;
 }
 
-.intro-message__close-icon {
+.popup-message__close-icon {
     position: absolute;
     top: 4px;
     right: 4px;
 }
 
-.intro-message__click-zone {
+.popup-message__click-zone {
     width: 100%;
     height: 100%;
 }

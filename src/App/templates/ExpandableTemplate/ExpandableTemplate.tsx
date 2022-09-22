@@ -11,9 +11,9 @@ import {
 	shouldRestorePreviousConversation,
 } from '../../../utils/shouldRestorePreviousConversation'
 import { Chat } from '../../../Chat'
-import { IntroMessage } from '../../../IntroMessage/IntroMessage'
+import { PopupMessage } from '../../../IntroMessage/PopupMessage'
 
-export type Props = AppProps
+export type Props = AppProps & { enablePopupMessage: boolean }
 
 type State = {
 	collapsed: boolean,
@@ -61,8 +61,8 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 			return
 		}
 		
-		if (autoExpandTimeout === 0) {
-			// Backwards compatability
+		// For backwards compatability, this should cover all falsy values
+		if (!autoExpandTimeout) {
 			return
 		}
 		
@@ -70,11 +70,11 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 	}
 	
 	render() {
-		const { theme, bot, user } = this.props
+		const { theme, bot, enablePopupMessage, user } = this.props
 		const { collapsed, initialized } = this.state
 		
-		const { signature, showSignature, template } = theme || {} as typeof theme
-		const { introMessage } = theme.template || {} as typeof template
+		const { signature, showSignature, template = {} } = theme || {} as typeof theme
+		const { popupMessage } = template
 		
 		return (
 			<div
@@ -91,12 +91,12 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 					<Signature signature={signature} botId={bot.id} />
 				}
 				
-				{!initialized && introMessage && (
-					<IntroMessage
-					  userId={user.id}
-						title={introMessage.title}
-						message={introMessage.description}
-						showAfterMs={introMessage.timeout}
+				{enablePopupMessage && !initialized && popupMessage && (
+					<PopupMessage
+						userId={user.id}
+						title={popupMessage.title}
+						message={popupMessage.description}
+						showAfterMs={popupMessage.timeout}
 						onTrigger={this.expand}
 					/>
 				)}
