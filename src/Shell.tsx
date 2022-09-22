@@ -213,14 +213,14 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
             'wc-console',
             this.props.inputText.length > 0 && 'has-text',
             this.props.showUploadButton && 'has-upload-button',
-            this.props.disableInput && 'disable-input'
+            this.props.disableInput && (this.props.uploadUsingDndAndQrCode || this.props.uploadUsingQrCodeOnly) && 'disable-input'
         );
 
         const showMicButton = this.props.listeningState !== ListeningState.STOPPED || (Speech.SpeechRecognizer.speechIsAvailable() && !this.props.inputText.length);
 
         const sendButtonClassName = classList(
             'wc-send',
-            showMicButton || (this.props.showUploadButton && this.props.disableInput) && 'hidden'
+            showMicButton || (this.props.showUploadButton && this.props.disableInput) && (this.props.uploadUsingDndAndQrCode || this.props.uploadUsingQrCodeOnly) && 'hidden'
         );
 
         const micButtonClassName = classList(
@@ -247,8 +247,9 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
             </div>
         ]
 
-        const buttonAttachment = [
-                <div>
+        const buttonAttachment = 
+                [
+                    <label className="wc-upload" htmlFor="wc-upload-input" tabIndex={0}><svg><path d="M19.96 4.79m-2 0a2 2 0 0 1 4 0 2 2 0 0 1-4 0zM8.32 4.19L2.5 15.53 22.45 15.53 17.46 8.56 14.42 11.18 8.32 4.19ZM1.04 1L1.04 17 24.96 17 24.96 1 1.04 1ZM1.03 0L24.96 0C25.54 0 26 0.45 26 0.99L26 17.01C26 17.55 25.53 18 24.96 18L1.03 18C0.46 18 0 17.55 0 17.01L0 0.99C0 0.45 0.47 0 1.03 0Z"></path></svg></label>,
                     <input
                         id="wc-upload-input"
                         tabIndex={-1}
@@ -258,10 +259,10 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                         onChange={() => this.onChangeFile()}
                         aria-label={this.props.strings.uploadFile}
                         role="button"
-                    />
+                    />,
                     <button className="wc-upload-screenshot" onClick={() => { this.takeScreenshot() }}><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="camera" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#8a8a8a" d="M512 144v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V144c0-26.5 21.5-48 48-48h88l12.3-32.9c7-18.7 24.9-31.1 44.9-31.1h125.5c20 0 37.9 12.4 44.9 31.1L376 96h88c26.5 0 48 21.5 48 48zM376 288c0-66.2-53.8-120-120-120s-120 53.8-120 120 53.8 120 120 120 120-53.8 120-120zm-32 0c0 48.5-39.5 88-88 88s-88-39.5-88-88 39.5-88 88-88 88 39.5 88 88z"></path></svg></button>
-                </div>
                 ]
+                
 
         return (
             <div className={className}>
