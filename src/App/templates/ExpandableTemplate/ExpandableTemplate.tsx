@@ -13,7 +13,7 @@ import {
 import { Chat } from '../../../Chat'
 import { PopupMessage } from '../../../IntroMessage/PopupMessage'
 
-export type Props = AppProps
+export type Props = AppProps & { enablePopupMessage: boolean }
 
 type State = {
 	collapsed: boolean,
@@ -70,7 +70,7 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 	}
 	
 	render() {
-		const { theme, bot } = this.props
+		const { theme, bot, enablePopupMessage } = this.props
 		const { collapsed, initialized } = this.state
 		
 		const { signature, showSignature, template = {} } = theme || {} as typeof theme
@@ -91,7 +91,7 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 					<Signature signature={signature} botId={bot.id} />
 				}
 				
-				{!initialized && popupMessage && (
+				{enablePopupMessage && !initialized && popupMessage && (
 					<PopupMessage
 						title={popupMessage.title}
 						message={popupMessage.description}
