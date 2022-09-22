@@ -11,7 +11,7 @@ import {
 	shouldRestorePreviousConversation,
 } from '../../../utils/shouldRestorePreviousConversation'
 import { Chat } from '../../../Chat'
-import { IntroMessage } from '../../../IntroMessage/IntroMessage'
+import { PopupMessage } from '../../../IntroMessage/PopupMessage'
 
 export type Props = AppProps
 
@@ -73,8 +73,8 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 		const { theme, bot } = this.props
 		const { collapsed, initialized } = this.state
 		
-		const { signature, showSignature, template } = theme || {} as typeof theme
-		const { introMessage } = theme.template || {} as typeof template
+		const { signature, showSignature, template = {} } = theme || {} as typeof theme
+		const { popupMessage } = template
 		
 		return (
 			<div
@@ -91,11 +91,11 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 					<Signature signature={signature} botId={bot.id} />
 				}
 				
-				{!initialized && introMessage && (
-					<IntroMessage
-						title={introMessage.title}
-						message={introMessage.description}
-						showAfterMs={introMessage.timeout}
+				{!initialized && popupMessage && (
+					<PopupMessage
+						title={popupMessage.title}
+						message={popupMessage.description}
+						showAfterMs={popupMessage.timeout}
 						onTrigger={this.expand}
 					/>
 				)}
