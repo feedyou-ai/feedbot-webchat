@@ -28,7 +28,8 @@ export class PopupMessage extends React.Component<Props, State> {
 		this.props.onTrigger()
 	}
 	
-	dismiss = () => {
+	dismiss = (event: React.MouseEvent<HTMLDivElement>) => {
+		event.stopPropagation()
 		this.hideMessage()
 		logDismissalInDatabase()
 	}
