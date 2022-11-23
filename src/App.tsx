@@ -654,7 +654,7 @@ const Sidebar = (theme: Theme) => `
     height: 35px;
     width: 35px;
     position: absolute;
-    right: 10px;
+    right: 20px;
     top: 20px;
 
     border-radius: 40px;
@@ -707,7 +707,14 @@ const Sidebar = (theme: Theme) => `
   /* slightly transparent fallback */
   .feedbot-wrapper {
     max-height: 100%;
-    background: rgb(255, 255, 255);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  /* slightly darker messages from bot fallback */
+  .wc-message-from-bot .wc-message-content {
+    border-radius: 0 16px 16px 16px;
+    padding: 14px;
+    background: linear-gradient(-45deg, rgba(219, 222, 225,0.5), rgba(240, 240, 240,0.9)) !important;
   }
 
   /* if backdrop support: very transparent and blurred */
@@ -717,6 +724,10 @@ const Sidebar = (theme: Theme) => `
       background: linear-gradient(45deg, ${getSidebarBackgroundColor(theme)}33,  #E1E1E1CE);
       backdrop-filter: blur(40px);
       -webkit-backdrop-filter: blur(40px);
+    }
+
+    .wc-message-from-bot .wc-message-content {
+      background: linear-gradient(-45deg, rgba(255,255,255,0.5), rgba(255,255,255,0.9)) !important;
     }
   }
 
@@ -735,12 +746,6 @@ const Sidebar = (theme: Theme) => `
   .wc-message-content {
     padding: 12px 14px;
     line-height: 1.25em;
-  }
-
-  .wc-message-from-bot .wc-message-content {
-    border-radius: 0 16px 16px 16px;
-    padding: 14px;
-    background: linear-gradient(-45deg, rgba(255,255,255,0.5), rgba(255,255,255,0.9)) !important;
   }
 
   .wc-message-from-me .wc-message-content {
@@ -868,6 +873,10 @@ const ExpandableBarTheme = (theme: Theme) => `
 `;
 
 const BaseTheme = (theme: Theme) => `
+    html {
+      -ms-overflow-style: scrollbar;
+    }
+
     body.feedbot-disabled div.feedbot {
         display: none;
     }
@@ -1052,7 +1061,9 @@ const BaseTheme = (theme: Theme) => `
     }
 
     .wc-list.tiles .ac-pushButton {
-      flex-basis: 44% !important;
+      width: auto;
+      flex: auto !important;
+      min-width: 44% !important;
       min-height: 120px !important;
       margin: 3% !important;
       flex-direction: column !important;
