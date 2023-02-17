@@ -17,16 +17,16 @@ export const getPopupMessageCloseTimestamp = () => {
 }
 
 export const wasPopupMessageRecentlyClosed = () => {
-	const closedTimestamp = getPopupMessageCloseTimestamp()
+	const closeTimestamp = getPopupMessageCloseTimestamp()
 	
-	if(!closedTimestamp) {
+	if(!closeTimestamp) {
 		return false
 	}
 	
-	const minutesSinceClosed = getMinutesBetweenTimestamps(Number(closedTimestamp), Date.now())
+	const minutesSinceClose = getMinutesBetweenTimestamps(Number(closeTimestamp), Date.now())
 	const MINUTES_IN_A_DAY = 60 * 24
 	
-	if (minutesSinceClosed <= MINUTES_IN_A_DAY) {
+	if (minutesSinceClose <= MINUTES_IN_A_DAY) {
 		return true
 	}
 	
