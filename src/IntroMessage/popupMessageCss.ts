@@ -31,7 +31,7 @@ export const popupMessageCss = `
 .popup-message__title {
     font-size: 15px;
     font-weight: bold;
-		margin-bottom: 5px;
+    margin-bottom: 5px;
     padding-right: 20px;
 }
 
