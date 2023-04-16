@@ -189,7 +189,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         try {
             // After the user click on any card action, we will "blur" the focus, by setting focus on message pane
             // This is for after click on card action, the user press "A", it should go into the chat box
-            const historyDOM = findDOMNode(this.historyRef) as HTMLElement;
+            const historyDOM = this.getHistoryDOMNode();
             if (historyDOM) {
                 historyDOM.focus();
             }
@@ -202,6 +202,16 @@ export class Chat extends React.Component<ChatProps, {}> {
         }
     }
 
+		// https://github.com/microsoft/BotFramework-WebChat/issues/970
+		// https://github.com/microsoft/BotFramework-WebChat/issues/1156
+		private getHistoryDOMNode(): HTMLDivElement | null {
+		  	try {
+					return findDOMNode(this.historyRef) as HTMLDivElement
+			  } catch(e) {
+					return null
+			  }
+	  } 
+		
     private handleKeyDownCapture(evt: React.KeyboardEvent<HTMLDivElement>) {
         const target = evt.target as HTMLElement;
         const tabIndex = getTabIndex(target);
@@ -219,7 +229,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         }
 
         if (
-            target === findDOMNode(this.historyRef)
+            target === this.getHistoryDOMNode()
             || typeof tabIndex !== 'number'
             || tabIndex < 0
         ) {
@@ -245,7 +255,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private saveHistoryRef(historyWrapper: any) {
         this.historyRef = historyWrapper && historyWrapper.getWrappedInstance();
     }
-
+		
     private saveShellRef(shellWrapper: any) {
         this.shellRef = shellWrapper && shellWrapper.getWrappedInstance();
     }
