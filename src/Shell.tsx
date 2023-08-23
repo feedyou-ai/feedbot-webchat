@@ -343,7 +343,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                   {isOpen
                     ? Array.from(fuzzysort.go(inputValue, (this.props.autoSuggestItems.length > 0
                         ? this.props.autoSuggestItems 
-                        : this.state.items), {keys: ["answer"], limit: 5}))
+                        : this.state.items), {keys: ["answer"], limit: 10}))
                       .reverse()
                       .map((item: any, index: number) => {
                           return <li
