@@ -95,7 +95,6 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
       props.botConnection = new DirectLine({
         ...directLine,
         token: body.token,
-        domain: 'https://europe.directline.botframework.com/v3/directline'
       });
       delete props.directLine;
 
