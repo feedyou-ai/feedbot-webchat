@@ -19,7 +19,6 @@ import { ConnectionStatus } from 'botframework-directlinejs';
 import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
-import getDeviceData from './utils/getDeviceData'
 
 declare const fbq: Function;
 
@@ -288,9 +287,8 @@ export class Chat extends React.Component<ChatProps, {}> {
                             ...(this.props.userData || {}),
                             ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
                             ...getLocaleUserData(this.props.locale),
-                            ...getReferrerUserData(),
-							"user-device": getDeviceData()
-                        }
+                            ...getReferrerUserData()
+												}
                     }
                 };
                 return botConnection.postActivityOriginal(newActivity);
