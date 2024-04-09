@@ -287,7 +287,8 @@ export class Chat extends React.Component<ChatProps, {}> {
                             ...(this.props.userData || {}),
                             ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
                             ...getLocaleUserData(this.props.locale),
-                            ...getReferrerUserData()
+                            ...getReferrerUserData(), 
+	                          "user-agent":  navigator.userAgent
 												}
                     }
                 };
