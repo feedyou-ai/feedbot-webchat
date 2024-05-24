@@ -66,6 +66,7 @@ export interface ChatProps {
     startOverTrigger?: (trigger: () => void) => void,
     onConversationStarted?: (callback: (conversationId: string) => void) => void,
     onEvent?: {[event: string]: (activity: Activity) => void},
+    onMessage?: (activity: Activity) => void,
     typingDelay?: number
 }
 
@@ -310,9 +311,15 @@ export class Chat extends React.Component<ChatProps, {}> {
         if (this.props.onEvent) {
             Object.keys(this.props.onEvent).forEach((eventName) => {
                 botConnection.activity$
-                    .filter((activity: any) => activity.type === 'event' && activity.name === eventName)
+                    .filter((activity: Activity) => activity.type === 'event' && activity.name === eventName)
                     .subscribe(this.props.onEvent[eventName]);
             });
+        }
+
+        if (this.props.onMessage) {
+            botConnection.activity$
+                .filter((activity: Activity) => activity.type === 'message' )
+                .subscribe(this.props.onMessage);
         }
 
         if (this.props.resize === 'window')
