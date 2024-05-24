@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Chatbot</title>
+	</head>
+	<body>
+		<!-- href="https://cdn.feedyou.ai/webchat/latest/botchat.css
+        t.src = 'https://cdn.feedyou.ai/webchat/latest/botchat-es5.js';
+    
+-->
+		<link href="../../botchat-redesign.css" rel="stylesheet" />
+		<script type="text/javascript">
+			(function (f, y, b, o, t, s) {
+				(t = y.createElement(b)), (s = y.getElementsByTagName(b)[0]);
+				t.async = 1;
+				t.src = '../../botchat-es5.js';
+				t.onload = function () {
+					BotChat.App({
+						bot: { id: 'feedbot-demo-feedie-podmelle-lukas' },
+						channel: { id: 'jtuqsq' },
+					});
+				};
+				s.parentNode.insertBefore(t, s);	
+			})(window, document, 'script');
+		</script>
+		<!-- druhý bot na testing: feedbot-demo-webchat, gvyddu -->
+	</body>
+</html>
