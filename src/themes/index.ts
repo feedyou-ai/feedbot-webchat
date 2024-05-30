@@ -5,13 +5,15 @@ import { SidebarTheme } from './SidebarTheme'
 import { ExpandableKnobThemeV2 } from './ExpandableKnobThemeV2'
 import { SidebarThemeV2 } from './SidebarThemeV2'
 
+export type TemplateType = 'expandable-bar' | 'full-screen'| 'expandable-knob'| 'sidebar'| 'expandable-knob-v2'| 'sidebar-v2'
+
 export type Theme = {
 	mainColor: string;
 	template?: {
 		// Dost možná tu nějaký propy chyběj,
 		// tak je neváhej připsat! :)
 		autoExpandTimeout?: number,
-		type?: string,
+		type?: TemplateType,
 		headerText?: string,
 		collapsedHeaderText?: string,
 		popupMessage?: {
@@ -24,10 +26,10 @@ export type Theme = {
 		logoUrl?: string,
 		avatar?: string;
 		supportiveTitle?: string;
-		persistentMenu?: [{
+		persistentMenu?: {
 			title: string;
 			dialog: string;
-		}]
+		}[]
 	};
 	customCss?: string;
 	showSignature?: boolean,

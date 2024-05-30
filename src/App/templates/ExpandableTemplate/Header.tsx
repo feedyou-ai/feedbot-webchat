@@ -40,7 +40,7 @@ export class Header extends React.Component<Props, State> {
 
 		const avatar =
 			template.avatar ||
-			"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36' fill='none'%3E%3Cpath d='M36 18c0 9.941-8.059 18-18 18S0 27.941 0 18 8.059 0 18 0s18 8.059 18 18Z' fill='%23F7F9FB'/%3E%3Cpath d='M14.024 18.026h-.003v-.005h.004l.001.002v.001l-.002.002Zm3.978 0v-.001l.001-.002v-.002h-.006v.004l.002.001h.003Zm3.976 0h-.003l-.001-.002v-.002l.001-.001h.004v.003l-.001.002Z' fill='%23385B75'/%3E%3Cpath fillRule='evenodd' clipRule='evenodd' d='M18.718 9.023a8.912 8.912 0 0 1 5.669 2.59 8.91 8.91 0 0 1-10.583 14.12l-3.073 1.182a1.274 1.274 0 0 1-1.646-1.646l1.182-3.073a8.91 8.91 0 0 1 8.45-13.173ZM14.023 17a1.024 1.024 0 1 0 0 2.047 1.024 1.024 0 0 0 0-2.047Zm3.409.172a1.023 1.023 0 1 1 1.136 1.702 1.023 1.023 0 0 1-1.136-1.702ZM21.977 17a1.023 1.023 0 1 0 0 2.047 1.023 1.023 0 0 0 0-2.047Z' fill='%23385B75'/%3E%3C/svg%3E";
+			"https://feedyou.blob.core.windows.net/webchat/chatbot-default-avatar-v2.svg";
 
 		const startOverIcon = (
 			<svg
@@ -87,7 +87,7 @@ export class Header extends React.Component<Props, State> {
 
 				<div className="feedbot-header-actions">
 					{(template.type === 'expandable-knob-v2' || template.type === 'sidebar-v2') &&
-					(checkFeedbotTestMode() || template.persistentMenu.length > 0) ? (
+					(checkFeedbotTestMode() || (template.persistentMenu && template.persistentMenu.length > 0)) ? (
 						<div className="feedbot-persistent-menu" onClick={handlePersistentMenuToggle}>
 							<a className="feedbot-persistent-menu-toggle">
 								<svg
