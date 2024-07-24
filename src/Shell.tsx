@@ -106,26 +106,28 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         }
     }
 
-    debounceCall = debounce(async (queryString: string) => {
+    debounceCall = debounce(async (queryString: string, type: string) => {
       const replacedQueryString = queryString
         .normalize("NFKD")
         .replace(/[^\w]/g, "");
+
+      const action = type === "repository" ? "autosuggest-repository" : "autosuggest";
       const res = await fetch(
-        `https://${this.props.botId}.azurewebsites.net/webchat/autosuggest/${replacedQueryString}/${this.props.autoSuggestCountry}`
+        `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${replacedQueryString}/test`
       );
       const data = await res.json();
   
       this.setState({
         items: data.value.map((item: any) => ({
-          answer: item.terms[0].value,
+          answer: item && item.terms && item.terms[0] && item.terms[0].value ? item.terms[0].value : item,
         })),
       });
 
     }, 500);
   
     private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (this.props.autoSuggestType === "google-city") {
-        this.debounceCall(e.currentTarget.value);
+      if (this.props.autoSuggestType === "google-city" || this.props.autoSuggestType === "repository") {
+        this.debounceCall(e.currentTarget.value, this.props.autoSuggestType);
       }
     };
 
