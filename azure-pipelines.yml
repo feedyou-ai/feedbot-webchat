@@ -1,7 +1,7 @@
 name: $(SourceBranchName).$(Date:yyMMdd)$(Rev:.r)
 
 pool:
-  name: 'Private VM'
+  name: 'Private VM 2'
 
 pr: none
 
