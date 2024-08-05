@@ -24,6 +24,7 @@ interface Props {
     autoSuggestType: string;
     autoSuggestItems: string[];
     autoSuggestCountry: string;
+    autoSuggestSource: string;
     attachmentUrl: string,
     uploadUsingQrCodeOnly: boolean,
     uploadUsingDndAndQrCode: boolean,
@@ -126,8 +127,11 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     }, 500);
   
     private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (this.props.autoSuggestType === "google-city" || this.props.autoSuggestType === "repository") {
+      if (this.props.autoSuggestType === "google-city") {
         this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestCountry);
+      }
+      if(this.props.autoSuggestType === "repository") {
+        this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestSource)
       }
     };
 
@@ -432,6 +436,7 @@ export const Shell = connect(
         autoSuggestType: state.format.autoSuggestType,
         autoSuggestItems: state.format.autoSuggestItems,
         autoSuggestCountry: state.format.autoSuggestCountry,
+        autoSuggestSource: state.format.autoSuggestSource,
         disableInput: state.format.disableInput,
         uploadUsingQrCodeOnly: state.format.uploadUsingQrCodeOnly,
         uploadUsingDndAndQrCode: state.format.uploadUsingDndAndQrCode,
@@ -458,6 +463,7 @@ export const Shell = connect(
     autoSuggestType: stateProps.autoSuggestType,
     autoSuggestItems: stateProps.autoSuggestItems,
     autoSuggestCountry: stateProps.autoSuggestCountry,
+    autoSuggestSource: stateProps.autoSuggestSource,
     disableInput: stateProps.disableInput,
     uploadUsingQrCodeOnly: stateProps.uploadUsingQrCodeOnly,
     uploadUsingDndAndQrCode: stateProps.uploadUsingDndAndQrCode,

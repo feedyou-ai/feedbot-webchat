@@ -177,6 +177,7 @@ export interface FormatState {
     autoSuggestType: string;
     autoSuggestItems: any[];
     autoSuggestCountry: string;
+    autoSuggestSource: string;
     attachmentUrl: string,
     uploadUsingQrCodeOnly: boolean,
     uploadUsingDndAndQrCode: boolean,
@@ -207,6 +208,7 @@ export type FormatAction = {
     autoSuggestType?: string;
     autoSuggestItems?: any[];
     autoSuggestCountry?: string;
+    autoSuggestSource?: string;
 } | {
     type: 'Toggle_Disable_Input',
     disableInput: boolean
@@ -229,6 +231,7 @@ export const format: Reducer<FormatState> = (
         autoSuggestType: "",
         autoSuggestItems: [],
         autoSuggestCountry: "cs",
+        autoSuggestSource: "",
         disableInput: false,
         disableInputWhenNotNeeded: false,
         uploadUsingQrCodeOnly: false,
@@ -269,7 +272,8 @@ export const format: Reducer<FormatState> = (
                 showAutoSuggest: action.showAutoSuggest,
                 autoSuggestType: action.autoSuggestType || "",
                 autoSuggestItems: action.autoSuggestItems || [],
-                autoSuggestCountry: action.autoSuggestCountry || "cs"
+                autoSuggestCountry: action.autoSuggestCountry || "cs",
+                autoSuggestSource: action.autoSuggestSource || ""
             };
         case 'Toggle_Disable_Input':
             return {
