@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { ChatProps } from '../Chat'
 import { renderWebchatApp } from './renderWebchatApp'
 import { DirectLine } from 'botframework-directlinejs'

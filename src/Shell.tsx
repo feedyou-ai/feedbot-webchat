@@ -1,19 +1,28 @@
 import * as React from 'react';
-import { ChatState, FormatState } from './Store';
-import { User } from 'botframework-directlinejs';
+import { ChatState} from './Store';
 import { classList } from './Chat';
-import { Dispatch, connect } from 'react-redux';
+import { connect } from 'react-redux';
 import { Strings } from './Strings';
 import { Speech } from './SpeechModule'
 import { ChatActions, ListeningState, sendMessage, sendFiles, sendScreenshot } from './Store';
 
 import * as html2canvas from 'html2canvas'
+import {debounce} from "debounce";
+import Downshift from "downshift";
+import fuzzysort =  require('fuzzysort');
 
 interface Props {
+    botId: string
     inputText: string,
     strings: Strings,
     listeningState: ListeningState,
     showUploadButton: boolean,
+    showAutoSuggest: boolean;
+    autoSuggestType: string;
+    autoSuggestItems: string[];
+    autoSuggestCountry: string;
+    autoSuggestSource: string;
+    attachmentUrl: string,
     uploadCapture: 'image/*' | 'video/*' | 'audio/*' | string,
     disableInput: boolean
 
@@ -26,23 +35,35 @@ interface Props {
     startListening: () => void
 }
 
+interface State {
+    attachmentQrCode: string;
+    items: any[];
+    lastAutosuggestSelection: string
+  }
+
 export interface ShellFunctions {
     focus: (appendKey?: string) => void
 }
 
-class ShellContainer extends React.Component<Props> implements ShellFunctions {
-    private textInput: HTMLTextAreaElement;
+class ShellContainer extends React.Component<Props, State> implements ShellFunctions {
+    private textInput: HTMLTextAreaElement | HTMLInputElement;
     private fileInput: HTMLInputElement;
+
+    constructor(props: Props) {
+        super(props);
+  
+        this.state = { attachmentQrCode: "", items: this.props.autoSuggestItems, lastAutosuggestSelection:"" };
+      }
+  
+      private sendMessage(forceText?: string) {
+          if ((forceText || "").trim().length > 0 || this.props.inputText.trim().length > 0) {
+              this.props.sendMessage((forceText || "").trim() || this.props.inputText);
+          }
+      }
 
     componentDidUpdate(prevProps: Props) {
         if (prevProps.disableInput === true && this.props.disableInput === false) {
             this.textInput.focus();
-        }
-    }
-
-    private sendMessage() {
-        if (this.props.inputText.trim().length > 0) {
-            this.props.sendMessage(this.props.inputText);
         }
     }
 
@@ -61,13 +82,41 @@ class ShellContainer extends React.Component<Props> implements ShellFunctions {
         }
     }
 
-    private onKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    private onKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) {
         if (e.key === 'Enter' && !e.shiftKey) {
             this.sendMessage();
             e.stopPropagation()
             e.preventDefault()
         }
     }
+
+    debounceCall = debounce(async (queryString: string, type: string, param: string) => {
+        const replacedQueryString = queryString
+          .normalize("NFKD")
+          .replace(/[^\w]/g, "");
+  
+        const action = type === "repository" ? "autosuggest-repository" : "autosuggest";
+        const res = await fetch(
+          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${replacedQueryString}/${param}`
+        );
+        const data = await res.json();
+  
+        this.setState({
+          items: data.value.map((item: any) => ({
+            answer: item && item.terms && item.terms[0] && item.terms[0].value ? item.terms[0].value : item,
+          })),
+        });
+  
+      }, 500);
+  
+      private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (this.props.autoSuggestType === "google-city") {
+          this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestCountry);
+        }
+        if(this.props.autoSuggestType === "repository") {
+          this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestSource)
+        }
+      };
 
     private onClickSend() {
         this.sendMessage();
@@ -168,21 +217,121 @@ class ShellContainer extends React.Component<Props> implements ShellFunctions {
                     this.props.showUploadButton &&
                     <button className="wc-upload-screenshot" onClick={() => { this.takeScreenshot() }}><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="camera" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#8a8a8a" d="M512 144v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V144c0-26.5 21.5-48 48-48h88l12.3-32.9c7-18.7 24.9-31.1 44.9-31.1h125.5c20 0 37.9 12.4 44.9 31.1L376 96h88c26.5 0 48 21.5 48 48zM376 288c0-66.2-53.8-120-120-120s-120 53.8-120 120 53.8 120 120 120 120-53.8 120-120zm-32 0c0 48.5-39.5 88-88 88s-88-39.5-88-88 39.5-88 88-88 88 39.5 88 88z"></path></svg></button>
                 }
-                <div className="wc-textbox">
-                    <textarea
-                        className="wc-shellinput"
-                        ref={input => this.textInput = input}
-                        autoFocus
-                        value={this.props.inputText}
-                        onChange={_ => this.props.onChangeText(this.textInput.value)}
-                        onKeyPress={e => this.onKeyPress(e)}
-                        onFocus={() => this.onTextInputFocus()}
-                        placeholder={placeholder}
-                        disabled={this.props.disableInput}
-                        aria-label={this.props.inputText ? null : placeholder}
-                        aria-live="polite"
-                    ></textarea>
-                </div>
+
+{this.props.showAutoSuggest ? (
+          <Downshift
+            onChange={async (selection) => {
+              this.sendMessage(selection)
+              return 
+            }}
+            onInputValueChange={(inputValue) => {
+                if(this.props.autoSuggestType === "static") {
+                    return
+                }
+                this.props.onChangeText(inputValue)
+                return
+            }}
+            itemToString={(item) => {
+              return item ? item : "";
+            }}
+          >
+            {({
+              getInputProps,
+              getItemProps,
+              getMenuProps,
+              isOpen,
+              inputValue,
+              highlightedIndex,
+              selectedItem,
+              getRootProps,
+            }) => (
+              <div
+                className="wc-textbox"
+                {...getRootProps({ refKey: "" }, { suppressRefError: true })}
+              >
+                <input
+                  type="text"
+                  className="wc-shellinput"
+                  ref={(input) => (this.textInput = input)}
+                  autoFocus
+                  value={this.props.inputText}
+                  onBlur={async () => {
+                    if(this.props.autoSuggestType === "static") {
+                      return this.props.onChangeText("");
+                    }
+                  }}
+                  onKeyPress={(e) => {
+                    this.onKeyPress(e);
+                  }}
+                  onKeyUp={this.autoSuggestOnKeyUp}
+                  onFocus={() => this.onTextInputFocus()}
+                  placeholder={placeholder}
+                  disabled={this.props.disableInput}
+                  aria-label={this.props.inputText ? null : placeholder}
+                  aria-live="polite"
+                  {...getInputProps()}
+                />
+                <ul
+                  style={{
+                    position: "absolute",
+                    bottom: "100%",
+                    left: 13,
+                    minWidth: 200,
+                    borderTopLeftRadius: "13px",
+                    borderTopRightRadius: "13px",
+                    padding: 0,
+                    overflow: "hidden",
+                    backgroundColor: "#eceff1",
+                  }}
+                  {...getMenuProps()}
+                >
+                  {isOpen
+                    ? Array.from(fuzzysort.go(inputValue, (this.props.autoSuggestItems.length > 0
+                        ? this.props.autoSuggestItems 
+                        : this.state.items), {keys: ["answer"], limit: 10}))
+                      .reverse()
+                      .map((item: any, index: number) => {
+                          return <li
+                            {...getItemProps({
+                              key: item.obj.answer,
+                              index,
+                              item: item.obj.answer,
+                              style: {
+                                backgroundColor:
+                                  highlightedIndex === index
+                                    ? "lightgray"
+                                    : "transparent",
+                                fontWeight:
+                                  selectedItem === item ? "bold" : "normal",
+                                padding: "10px",
+                              },
+                            })}
+                          >
+                            {item.obj.answer}
+                          </li>
+                        })
+                    : null}
+                </ul>
+              </div>
+            )}
+          </Downshift>
+
+        ) : ( <div className="wc-textbox">
+        <textarea
+            className="wc-shellinput"
+            ref={input => this.textInput = input}
+            autoFocus
+            value={this.props.inputText}
+            onChange={_ => this.props.onChangeText(this.textInput.value)}
+            onKeyPress={e => this.onKeyPress(e)}
+            onFocus={() => this.onTextInputFocus()}
+            placeholder={placeholder}
+            disabled={this.props.disableInput}
+            aria-label={this.props.inputText ? null : placeholder}
+            aria-live="polite"
+        ></textarea>
+    </div> )}
+                
                 <button
                     className={sendButtonClassName}
                     onClick={() => this.onClickSend()}
@@ -215,11 +364,22 @@ class ShellContainer extends React.Component<Props> implements ShellFunctions {
     }
 }
 
+
+
 export const Shell = connect(
-    (state: ChatState) => ({
+    (state: ChatState) => {
+      console.log(state)
+      return {
         // passed down to ShellContainer
+        botId: state.connection.bot ? state.connection.bot.id : "",
         inputText: state.shell.input,
         showUploadButton: state.format.showUploadButton,
+        attachmentUrl: state.format.attachmentUrl,
+        showAutoSuggest: state.format.showAutoSuggest,
+        autoSuggestType: state.format.autoSuggestType,
+        autoSuggestItems: state.format.autoSuggestItems,
+        autoSuggestCountry: state.format.autoSuggestCountry,
+        autoSuggestSource: state.format.autoSuggestSource,
         uploadCapture: state.format.uploadCapture,
         disableInput: state.format.disableInput,
         strings: state.format.strings,
@@ -227,7 +387,7 @@ export const Shell = connect(
         locale: state.format.locale,
         user: state.connection.user,
         listeningState: state.shell.listeningState
-    }), {
+    }}, {
     // passed down to ShellContainer
     onChangeText: (input: string) => ({ type: 'Update_Input', input, source: "text" } as ChatActions),
     stopListening: () => ({ type: 'Listening_Stopping' }),
@@ -238,8 +398,15 @@ export const Shell = connect(
     sendScreenshot
 }, (stateProps: any, dispatchProps: any, ownProps: any): Props => ({
     // from stateProps
+    botId: stateProps.botId,
     inputText: stateProps.inputText,
     showUploadButton: stateProps.showUploadButton,
+    attachmentUrl: stateProps.attachmentUrl,
+    showAutoSuggest: stateProps.showAutoSuggest,
+    autoSuggestType: stateProps.autoSuggestType,
+    autoSuggestItems: stateProps.autoSuggestItems,
+    autoSuggestCountry: stateProps.autoSuggestCountry,
+    autoSuggestSource: stateProps.autoSuggestSource,
     uploadCapture: stateProps.uploadCapture,
     disableInput: stateProps.disableInput,
     strings: stateProps.strings,
