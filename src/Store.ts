@@ -173,6 +173,14 @@ export interface FormatState {
     locale: string,
     showUploadButton: boolean,
     uploadCapture: 'image/*' | 'video/*' | 'audio/*' | string,
+    showAutoSuggest: boolean;
+    autoSuggestType: string;
+    autoSuggestItems: any[];
+    autoSuggestCountry: string;
+    autoSuggestSource: string;
+    attachmentUrl: string,
+    uploadUsingQrCodeOnly: boolean,
+    uploadUsingDndAndQrCode: boolean,
     disableInput: boolean,
     disableInputWhenNotNeeded: boolean
     strings: Strings,
@@ -191,6 +199,13 @@ export type FormatAction = {
 } | {
     type: 'Toggle_Upload_Button',
     showUploadButton: boolean
+} | {
+    type: "Toggle_Auto_Suggest";
+    showAutoSuggest: boolean;
+    autoSuggestType?: string;
+    autoSuggestItems?: any[];
+    autoSuggestCountry?: string;
+    autoSuggestSource?: string;
 } | {
     type: 'Set_Upload_Capture',
     uploadCapture: string
@@ -211,9 +226,17 @@ export const format: Reducer<FormatState> = (
         chatTitle: true,
         locale: 'en-us',
         showUploadButton: true,
+        attachmentUrl: null,
+        showAutoSuggest: false,
+        autoSuggestType: "",
+        autoSuggestItems: [],
+        autoSuggestCountry: "cs",
+        autoSuggestSource: "",
         uploadCapture: '',
         disableInput: false,
         disableInputWhenNotNeeded: false,
+        uploadUsingQrCodeOnly: false,
+        uploadUsingDndAndQrCode: false,
         strings: defaultStrings,
         carouselMargin: undefined
     },
@@ -240,6 +263,15 @@ export const format: Reducer<FormatState> = (
             return {
                 ...state,
                 showUploadButton: action.showUploadButton
+            };
+        case "Toggle_Auto_Suggest":
+            return {
+                ...state,
+                showAutoSuggest: action.showAutoSuggest,
+                autoSuggestType: action.autoSuggestType || "",
+                autoSuggestItems: action.autoSuggestItems || [],
+                autoSuggestCountry: action.autoSuggestCountry || "cs",
+                autoSuggestSource: action.autoSuggestSource || ""
             };
         case 'Set_Upload_Capture':
             return {
@@ -707,6 +739,35 @@ const disableInputBasedOnInputHint: Epic<ChatActions, ChatState> = (action$, sto
     .filter(action => (action.activity as Message) && store.getState().format.disableInputWhenNotNeeded)
     .map(action => ({ type: 'Toggle_Disable_Input', disableInput: action.activity.inputHint === 'ignoringInput' } as FormatAction))
 
+const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
+    action$,
+    store
+    ) => {
+    return action$.ofType("Receive_Message").map((action) => {
+        return {
+        type: "Toggle_Auto_Suggest",
+        showAutoSuggest:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            ["google-city", "static", "repository"].includes(
+            action.activity.channelData.autosuggest.type
+            ),
+        autoSuggestType:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.type,
+        autoSuggestItems:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.answers,
+        autoSuggestCountry:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.countryCode,
+        } as FormatAction;
+    });
+    };
+
 const stopSpeakingEpic: Epic<ChatActions, ChatState> = (action$) =>
     action$.ofType(
         'Update_Input',
@@ -807,6 +868,7 @@ const sendTypingEpic: Epic<ChatActions, ChatState> = (action$, store) =>
         .catch(error => Observable.of(nullAction))
     );
 
+
 // Now we put it all together into a store with middleware
 
 import { Store, createStore as reduxCreateStore, combineReducers } from 'redux';
@@ -834,6 +896,7 @@ export const createStore = () =>
             speakSSMLEpic,
             speakOnMessageReceivedEpic,
             showUploadBasedOnInputHint,
+            showAutoSuggestBasedOnChannelData,
             disableInputBasedOnInputHint,
             startListeningEpic,
             stopListeningEpic,
