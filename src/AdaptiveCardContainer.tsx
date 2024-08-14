@@ -167,6 +167,7 @@ class AdaptiveCardContainer extends React.Component<Props, State> {
         if (!this.props.nativeCard && this.props.jsonCard) {
             this.props.jsonCard.version = this.props.jsonCard.version || '0.5';
             adaptiveCard.parse(cardWithoutHttpActions(this.props.jsonCard));
+            errors = adaptiveCard.validate();
         }
 
         adaptiveCard.onExecuteAction = (action) => this.onExecuteAction(action);
