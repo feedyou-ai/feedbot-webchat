@@ -179,8 +179,6 @@ export interface FormatState {
     autoSuggestCountry: string;
     autoSuggestSource: string;
     attachmentUrl: string,
-    uploadUsingQrCodeOnly: boolean,
-    uploadUsingDndAndQrCode: boolean,
     disableInput: boolean,
     disableInputWhenNotNeeded: boolean
     strings: Strings,
@@ -235,8 +233,6 @@ export const format: Reducer<FormatState> = (
         uploadCapture: '',
         disableInput: false,
         disableInputWhenNotNeeded: false,
-        uploadUsingQrCodeOnly: false,
-        uploadUsingDndAndQrCode: false,
         strings: defaultStrings,
         carouselMargin: undefined
     },
