@@ -611,6 +611,10 @@
             box-sizing: initial;
         }
 
+        input[type=text] {
+            padding-top: 7px !important;
+        }
+
         &.has-text .wc-send svg {
             fill: $c07;
         }

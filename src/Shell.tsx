@@ -368,7 +368,6 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
 
 export const Shell = connect(
     (state: ChatState) => {
-      console.log(state)
       return {
         // passed down to ShellContainer
         botId: state.connection.bot ? state.connection.bot.id : "",

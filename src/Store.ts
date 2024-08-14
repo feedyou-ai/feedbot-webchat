@@ -764,6 +764,10 @@ const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
             typeof action.activity.channelData === "object" &&
             action.activity.channelData.autosuggest &&
             action.activity.channelData.autosuggest.countryCode,
+        autoSuggestSource:
+            typeof action.activity.channelData === "object" &&
+            action.activity.channelData.autosuggest &&
+            action.activity.channelData.autosuggest.source,
         } as FormatAction;
     });
     };
