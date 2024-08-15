@@ -98,7 +98,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         const action = type === "repository" ? "autosuggest-repository" : "autosuggest";
         // use replaced query string with old autosuggest
         const useReplacedQueryString = action === "autosuggest"
-        const query = useReplacedQueryString ? replacedQueryString : queryString
+        const query = useReplacedQueryString ? replacedQueryString : encodeURIComponent(queryString)
 
         const res = await fetch(
           `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${query}/${param}`
