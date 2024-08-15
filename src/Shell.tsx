@@ -94,10 +94,14 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         const replacedQueryString = queryString
           .normalize("NFKD")
           .replace(/[^\w]/g, "");
-  
+          
         const action = type === "repository" ? "autosuggest-repository" : "autosuggest";
+        // use replaced query string with old autosuggest
+        const useReplacedQueryString = action === "autosuggest"
+        const query = useReplacedQueryString ? replacedQueryString : encodeURIComponent(queryString)
+
         const res = await fetch(
-          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${replacedQueryString}/${param}`
+          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${query}/${param}`
         );
         const data = await res.json();
   
