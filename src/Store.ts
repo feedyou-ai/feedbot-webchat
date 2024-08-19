@@ -28,13 +28,14 @@ export const sendMessage = (text: string, from: User, locale: string) => ({
         timestamp: (new Date()).toISOString()
     }} as ChatActions);
 
-export const sendFiles = (files: FileList, from: User, locale: string) => ({
+export const sendFiles = (files: File[], from: User, locale: string, isDirectUpload: boolean) => ({
     type: 'Send_Message',
     activity: {
         type: "message",
         attachments: attachmentsFromFiles(files),
         from,
-        locale
+        locale,
+        isDirectUpload
     }} as ChatActions);
 
 export const sendScreenshot = (screen: string, from: User, locale: string) => {
@@ -55,7 +56,7 @@ export const sendScreenshot = (screen: string, from: User, locale: string) => {
   } as ChatActions;
 };
     
-const attachmentsFromFiles = (files: FileList) => {
+const attachmentsFromFiles = (files: File[]) => {
     const attachments: Media[] = [];
     for (let i = 0, numFiles = files.length; i < numFiles; i++) {
         const file = files[i];
@@ -179,6 +180,8 @@ export interface FormatState {
     autoSuggestCountry: string;
     autoSuggestSource: string;
     attachmentUrl: string,
+    uploadUsingQrCodeOnly: boolean,
+    uploadUsingDndAndQrCode: boolean,
     disableInput: boolean,
     disableInputWhenNotNeeded: boolean
     strings: Strings,
@@ -197,6 +200,9 @@ export type FormatAction = {
 } | {
     type: 'Toggle_Upload_Button',
     showUploadButton: boolean
+    attachmentUrl?: string
+    uploadUsingQrCodeOnly?: boolean
+    uploadUsingDndAndQrCode?: boolean
 } | {
     type: "Toggle_Auto_Suggest";
     showAutoSuggest: boolean;
@@ -233,6 +239,8 @@ export const format: Reducer<FormatState> = (
         uploadCapture: '',
         disableInput: false,
         disableInputWhenNotNeeded: false,
+        uploadUsingQrCodeOnly: false,
+        uploadUsingDndAndQrCode: false,
         strings: defaultStrings,
         carouselMargin: undefined
     },
@@ -258,7 +266,10 @@ export const format: Reducer<FormatState> = (
         case 'Toggle_Upload_Button':
             return {
                 ...state,
-                showUploadButton: action.showUploadButton
+                showUploadButton: action.showUploadButton,
+                attachmentUrl: action.attachmentUrl,
+                uploadUsingQrCodeOnly: action.hasOwnProperty('uploadUsingQrCodeOnly') ? action.uploadUsingQrCodeOnly : state.uploadUsingQrCodeOnly,
+                uploadUsingDndAndQrCode: action.hasOwnProperty("uploadUsingDndAndQrCode") ? action.uploadUsingDndAndQrCode : state.uploadUsingDndAndQrCode
             };
         case "Toggle_Auto_Suggest":
             return {
@@ -727,13 +738,17 @@ const speakOnMessageReceivedEpic: Epic<ChatActions, ChatState> = (action$, store
 // TODO do not overwrite Chat.props.showUploadButton=true
 const showUploadBasedOnInputHint: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Receive_Message')
-    .map(action => ({ type: 'Toggle_Upload_Button', showUploadButton: action.activity.inputHint === 'expectingUpload' } as FormatAction))
+    .map(action => ({
+        type: 'Toggle_Upload_Button', 
+        showUploadButton: action.activity.inputHint === 'expectingUpload',
+        attachmentUrl: action.activity.channelData && action.activity.channelData.attachmentUrl
+    } as FormatAction))
 
 // FEEDYOU disable/hide input prompt only when last message's inputHint=='ignoringInput'
 const disableInputBasedOnInputHint: Epic<ChatActions, ChatState> = (action$, store) => 
     action$.ofType('Receive_Message')
     .filter(action => (action.activity as Message) && store.getState().format.disableInputWhenNotNeeded)
-    .map(action => ({ type: 'Toggle_Disable_Input', disableInput: action.activity.inputHint === 'ignoringInput' } as FormatAction))
+    .map(action => ({ type: 'Toggle_Disable_Input', disableInput: action.activity.inputHint === 'ignoringInput' || action.activity.inputHint === 'expectingUpload' } as FormatAction))
 
 const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
     action$,
