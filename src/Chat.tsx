@@ -47,6 +47,8 @@ export interface ChatProps {
     selectedActivity?: BehaviorSubject<ActivityOrID>,
     sendTyping?: boolean,
     showUploadButton?: boolean,
+    uploadUsingQrCodeOnly?: boolean,
+    uploadUsingDndAndQrCode?: boolean,
     uploadCapture?: 'image/*' | 'video/*' | 'audio/*',
     disableInputWhenNotNeeded?: boolean,
     formatOptions?: FormatOptions,
