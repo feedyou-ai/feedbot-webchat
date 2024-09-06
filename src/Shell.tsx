@@ -235,6 +235,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                 this.props.onChangeText(inputValue)
                 return
             }}
+            inputValue={this.props.inputText}
             itemToString={(item) => {
               return item ? item : "";
             }}
@@ -258,7 +259,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                   className="wc-shellinput"
                   ref={(input) => (this.textInput = input)}
                   autoFocus
-                  value={this.props.inputText}
+                  value={inputValue}
                   onBlur={async () => {
                     if(this.props.autoSuggestType === "static") {
                       return this.props.onChangeText("");
