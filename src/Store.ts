@@ -488,8 +488,8 @@ export const history: Reducer<HistoryState> = (
             if (i === -1) return state;
 
             const activity = state.activities[i];
-            //@ts-ignore
-            if(action.type === "Send_Message_Fail" && activity.attachments) {
+
+            if(action.type === "Send_Message_Fail" && activity.type === "message" && activity?.attachments) {
                 alert(defaultStrings.uploadFileFailedSize)
                 return state
             }
