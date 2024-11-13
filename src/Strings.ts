@@ -39,7 +39,7 @@ export interface Strings {
       uploadFile: 'Upload file',
       speak: 'Speak',
       uploadFileFailedSize:
-        'The file is too large to upload. Please choose a smaller file.',
+        'The file is too large to upload. The maximum allowed size is 4 MB. Please choose a smaller file.',
     },
     'ja-jp': {
       title: 'チャット',
