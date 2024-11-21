@@ -90,18 +90,13 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         }
     }
 
-    debounceCall = debounce(async (queryString: string, type: string, param: string) => {
+    debounceCall = debounce(async (queryString: string, action: string, param: string) => {
         const replacedQueryString = queryString
           .normalize("NFKD")
           .replace(/[^\w]/g, "");
-          
-        const action = type === "repository" ? "autosuggest-repository" : "autosuggest";
-        // use replaced query string with old autosuggest
-        const useReplacedQueryString = action === "autosuggest"
-        const query = useReplacedQueryString ? replacedQueryString : encodeURIComponent(queryString)
 
         const res = await fetch(
-          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${query}/${param}`
+          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${replacedQueryString}/${param}`
         );
         const data = await res.json();
   
@@ -114,11 +109,12 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
       }, 500);
   
       private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (this.props.autoSuggestType === "google-city") {
+        if (this.props.autoSuggestType === "autosuggest-google-city") {
           this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestCountry);
         }
-        if(this.props.autoSuggestType === "repository") {
-          this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestSource)
+        if(this.props.autoSuggestType === "autosuggest-repository") {
+          const queryString = encodeURIComponent(e.currentTarget.value)
+          this.debounceCall(queryString, this.props.autoSuggestType, this.props.autoSuggestSource)
         }
       };
 
