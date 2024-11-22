@@ -225,7 +225,6 @@ export const BaseTheme = (theme: Theme) => `
     @media (max-width: 450px) {
       .feedbot-wrapper .wc-card {
         border: 1px solid #d2dde5;
-        width: 198px;
       }
       .feedbot-wrapper .wc-list.tiles .wc-card {
         border: none;
