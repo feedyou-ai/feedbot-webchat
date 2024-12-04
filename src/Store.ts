@@ -751,7 +751,7 @@ const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
         showAutoSuggest:
             typeof action.activity.channelData === "object" &&
             action.activity.channelData.autosuggest &&
-            ["autosuggest-google-city", "static", "autosuggest-repository"].includes(
+            ["google-places-city", "static", "repository"].includes(
             action.activity.channelData.autosuggest.type
             ),
         autoSuggestType:
