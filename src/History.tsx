@@ -8,6 +8,8 @@ import * as konsole from './Konsole';
 import { sendMessage } from './Store';
 import { activityWithSuggestedActions } from './activityWithSuggestedActions';
 
+declare var bootbox: any;
+
 export interface HistoryProps {
     format: FormatState,
     size: SizeState,
@@ -264,11 +266,12 @@ export interface WrappedActivityProps {
     onClickRetry: React.MouseEventHandler<HTMLAnchorElement>
 }
 
-export class WrappedActivity extends React.Component<WrappedActivityProps, {}> {
+export class WrappedActivity extends React.Component<WrappedActivityProps, {ratingInProgress: boolean, rated: boolean}> {
     public messageDiv: HTMLDivElement;
 
     constructor(props: WrappedActivityProps) {
         super(props);
+        this.state = {ratingInProgress: false, rated: false};
     }
 
     render () {
@@ -306,12 +309,30 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {}> {
 
         const contentClassName = classList(
             'wc-message-content',
-            this.props.selected && 'selected'
+            this.props.selected && 'selected',
+            'wc-message-content-type-'+this.props.activity.type
         );
+
+        const rate = (value: -1 | 1, explanation = '') => {
+            console.log('Rating ' + value + ' for query ' + this.props.activity.channelData.queryId);
+            this.setState({ratingInProgress: false});
+
+            // TODO URL + explanation
+            fetch('https://feedbot-pardubickykraj-app.azurewebsites.net/api/messages/kb/KB/queries/'+this.props.activity.channelData.queryPartition+'/'+this.props.activity.channelData.queryId+'/rating',{
+                method: 'POST',
+                body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
+            }).then(() => {
+                this.setState({ratingInProgress: false, rated: true});
+            }).catch((err) => {
+                console.error('Failed to rate query', err);
+                this.setState({ratingInProgress: false});
+            })
+
+        }
 
         return (
             <div data-activity-id={ this.props.activity.id } className={ wrapperClassName } onClick={ this.props.onClickActivity }>
-                <div className={ 'wc-message wc-message-from-' + who } ref={ div => this.messageDiv = div }>
+                <div className={ 'wc-message wc-message-from-' + who + ' wc-message-type-' + this.props.activity.type } ref={ div => this.messageDiv = div }>
                     <div className={ contentClassName }>
                         <svg className="wc-message-callout">
                             <path className="point-left" d="m0,6 l6 6 v-12 z" />
@@ -319,6 +340,11 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {}> {
                         </svg>
                         { this.props.children }
                     </div>
+                    {this.props.activity.channelData && this.props.activity.channelData.queryId && !this.props.fromMe && this.props.activity.type === 'message' && <div className={'wc-message-buttons' + (this.state.ratingInProgress ? ' wc-rating-in-progress' : '') }>
+                        {this.props.activity.channelData.info && <div onClick={() => {bootbox.dialog({title: "Query details", buttons: {cancel: {label: "Close",callback: function(){}}}, message: this.props.activity.channelData.info});}} className='wc-message-button-info'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></div>}
+                        {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => {!this.state.ratingInProgress && rate(1)}} className='wc-message-button-vote-up'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg></div>}
+                        {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => {!this.state.ratingInProgress && bootbox.prompt("We’d love your feedback—how can we improve?", (explanation: string) => rate(-1, explanation))}} className='wc-message-button-vote-down'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 479.1c26-5.2 42.9-30.5 37.7-56.5l-2.3-11.4c-5.3-26.7-15.1-52.1-28.8-75.2l144 0c26.5 0 48-21.5 48-48c0-18.5-10.5-34.6-25.9-42.6C497 236.6 504 223.1 504 208c0-23.4-16.8-42.9-38.9-47.1c4.4-7.3 6.9-15.8 6.9-24.9c0-21.3-13.9-39.4-33.1-45.6c.7-3.3 1.1-6.8 1.1-10.4c0-26.5-21.5-48-48-48l-97.5 0c-19 0-37.5 5.6-53.3 16.1L202.7 73.8C176 91.6 160 121.6 160 153.7l0 38.3 0 48 0 24.9c0 29.2 13.3 56.7 36 75l7.4 5.9c26.5 21.2 44.6 51 51.2 84.2l2.3 11.4c5.2 26 30.5 42.9 56.5 37.7zM32 384l64 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32L32 96C14.3 96 0 110.3 0 128L0 352c0 17.7 14.3 32 32 32z"/></svg></div>}
+                    </div>}
                 </div>
                 <div className={ 'wc-message-from wc-message-from-' + who }>{ timeLine }</div>
             </div>

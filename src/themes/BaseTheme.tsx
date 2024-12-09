@@ -332,7 +332,79 @@ export const BaseTheme = (theme: Theme) => `
       width: 0;
       height: 0;
     }
-  
+
+    .wc-message-from-bot .wc-message-content-type-message {
+      float: left;
+      max-width: calc(100% - 140px);
+    }
+
+    .wc-message-type-message.wc-message-from-bot {
+      width: 100%;
+    }
+    
+    .wc-message-buttons {
+      float: left;
+      padding-left: 16px;
+    }
+
+    .wc-message-buttons>div {
+      width: 20px;
+      height: 20px;
+      padding: 10px 6px 12px 6px;
+      float: left;
+      fill: #d5d7d8;
+      visibility: hidden;
+      cursor: pointer;
+    }
+
+    .wc-message-buttons>div:hover {
+      fill: #b0b1b1;
+    }
+
+    .wc-message-buttons.wc-rating-in-progress>.wc-message-button-vote-up, .wc-message-buttons.wc-rating-in-progress>.wc-message-button-vote-down {
+      fill: #e5e5e5 !important;
+      visibility: visible;
+      cursor: wait;
+    }
+
+    .wc-message-buttons.wc-rating-in-progress>.wc-message-button-info {
+      visibility: visible;
+    }
+
+    .wc-message-wrapper:hover .wc-message-buttons>div {
+      visibility: visible;
+    }
+
+    .wc-message-button-vote-down {
+      padding: 13px 6px 8px 6px !important;
+    }
+
+    .wc-message-button-info {
+      padding: 12px 6px 12px 6px !important;
+    }
+
+    .bootbox .modal-dialog {
+      max-width: 80% !important;
+    }
+
+    .bootbox .modal-dialog .bootbox-body {
+      margin-top: -2rem;
+    }
+
+    .bootbox .modal-dialog h2 {
+      font-size: 1.5rem;
+      margin-top: 2rem;
+    } 
+
+    .bootbox .modal-dialog h3 {
+      font-size: 1.3rem;
+      margin-top: 1.5rem;
+    } 
+
+    .bootbox .form-control {
+      width: calc(100% - 25px);
+    }
+
     ${theme.enableScreenshotUpload && !isSafari() ? `
       .wc-upload-screenshot {
         display: inline-block !important;
