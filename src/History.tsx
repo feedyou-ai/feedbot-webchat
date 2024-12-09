@@ -314,8 +314,12 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {rati
         );
 
         const rate = (value: -1 | 1, explanation = '') => {
+            if (value === -1 && !explanation) {
+                return
+            }
+
             console.log('Rating ' + value + ' for query ' + this.props.activity.channelData.queryId);
-            this.setState({ratingInProgress: false});
+            this.setState({ratingInProgress: true});
 
             // TODO URL + explanation
             fetch('https://feedbot-pardubickykraj-app.azurewebsites.net/api/messages/kb/KB/queries/'+this.props.activity.channelData.queryPartition+'/'+this.props.activity.channelData.queryId+'/rating',{
