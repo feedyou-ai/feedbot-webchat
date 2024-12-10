@@ -325,6 +325,7 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {rati
             // TODO URL + explanation
             fetch('https://feedbot-pardubickykraj-app.azurewebsites.net/api/messages/kb/KB/queries/'+this.props.activity.channelData.queryPartition+'/'+this.props.activity.channelData.queryId+'/rating',{
                 method: 'POST',
+                headers: { accept: 'application/json', 'content-type': 'application/json' },
                 body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
             }).then(() => {
                 this.setState({ratingInProgress: false, rated: true});
