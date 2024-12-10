@@ -383,7 +383,7 @@ export const BaseTheme = (theme: Theme) => `
       padding: 12px 6px 12px 6px !important;
     }
 
-    .bootbox .modal-dialog {
+    .bootbox .modal-xl {
       max-width: 80% !important;
     }
 
