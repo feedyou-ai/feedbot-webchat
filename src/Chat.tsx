@@ -379,7 +379,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             .filter((activity: any) => activity.type === "event" && activity.name === "log")
             .subscribe((activity: any) => {
                 if (Array.isArray(activity.value)) {
-                    const logs: any[] = activity.value
+                    const logs: any[] = [].concat(activity.value) // unfreeeze so unshift will not fail
                     logs.unshift('Feedyou WebChat log')
                     console.log.apply(this, logs)
                 } else {
