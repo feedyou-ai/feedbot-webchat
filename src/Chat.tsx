@@ -20,6 +20,8 @@ import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
 
+declare var bootbox: any;
+declare var $: any;
 declare const fbq: Function;
 
 interface GaEvent {
@@ -96,6 +98,8 @@ export class Chat extends React.Component<ChatProps, {}> {
 
     private resizeListener = () => this.setSize();
 
+    private _handleCardRating = this.handleCardRating.bind(this);
+    private _handleCardInfo = this.handleCardInfo.bind(this);
     private _handleCardAction = this.handleCardAction.bind(this);
     private _handleKeyDownCapture = this.handleKeyDownCapture.bind(this);
     private _saveChatviewPanelRef = this.saveChatviewPanelRef.bind(this);
@@ -185,6 +189,45 @@ export class Chat extends React.Component<ChatProps, {}> {
             type: 'Set_Size',
             width: this.chatviewPanelRef.offsetWidth,
             height: this.chatviewPanelRef.offsetHeight
+        });
+    }
+
+    private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
+        if (rating === -1) {
+            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback))
+        } else {
+            this.rate(activity, rating, '', callback)
+        }
+    }
+
+    private rate(activity: Activity, value: number, explanation = '', callback: (rated: boolean) => void) {
+        if (value === -1 && !explanation) {
+            callback(false)
+            return
+        }
+
+        console.log('Rating ' + value + ' for query ' + activity.channelData.queryId);
+
+        fetch('https://'+this.props.bot.id+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
+            method: 'POST',
+            headers: { accept: 'application/json', 'content-type': 'application/json' },
+            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
+        }).then(() => {
+            callback(true)
+        }).catch((err) => {
+            console.error('Failed to rate query', err);
+            bootbox.alert('Bohužel se nepodařilo odeslat vaši zpětnou vazbu. Budeme moc rádi, pokud ji zkusíte předat jiným způsobem.');
+            callback(false)
+        })
+
+    }
+
+    private handleCardInfo(activity: Activity) {
+        bootbox.dialog({
+            title: "Query details",
+            size: 'lg',
+            buttons: {cancel: {label: "Close",callback: function(){}}},
+            message: activity.channelData.info
         });
     }
 
@@ -586,6 +629,8 @@ export class Chat extends React.Component<ChatProps, {}> {
                           <MessagePane>
                               <History
                                   onCardAction={ this._handleCardAction }
+                                  onCardRating={ this._handleCardRating }
+                                  onCardInfo={ this._handleCardInfo }
                                   ref={ this._saveHistoryRef }
                               />
                           </MessagePane>
@@ -786,4 +831,45 @@ function getIntroDialogId(props: ChatProps): string | undefined {
     }
 
     return props.introDialog && props.introDialog.id ? props.introDialog.id : undefined
+}
+
+function getExplanation(callback: (explanation: string) => void) {
+    bootbox.dialog({
+        title: "Zpětná vazba",
+        message: `
+            <p style="margin-top:32px;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný, abychom řešení mohli postupně vylepšovat.</p>
+            <form id="multiInputForm">
+                <div class="form-group">
+                    <label for="problem"><b>Stručně prosím popište, v čem je u vygenerované odpovědi problém a ideálně i to, jak by správná odpověď měla vypadat.</b></label>
+                    <textarea class="form-control" id="problem" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="sources"><b>Prosíme také o uvedení místa (např. URL adresa) ve zdrojových datech, kde se nacházejí podklady, ze které se má při sestavování odpovědi čerpat.</b></label>
+                    <textarea class="form-control" id="sources" rows="3"></textarea>
+                </div>
+            </form>
+        `,
+        buttons: {
+            cancel: {
+                label: "Zrušit",
+                className: "btn-secondary"
+            },
+            save: {
+                label: "Odeslat",
+                className: "btn-primary",
+                callback: function() {
+                    const problem = String($('#problem').val()).trim();
+                    const sources = String($('#sources').val()).trim();
+
+                    if (!problem || !sources) {
+                        bootbox.alert('Prosím vyplňte obě pole.');
+                        return false
+                    }
+
+                    callback(problem + '\n\n' + sources);
+                    return true; // close the dialog
+                }
+            }
+        }
+    });
 }

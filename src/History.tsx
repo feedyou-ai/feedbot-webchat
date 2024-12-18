@@ -25,6 +25,8 @@ export interface HistoryProps {
     isSelected: (activity: Activity) => boolean,
     onClickActivity: (activity: Activity) => React.MouseEventHandler<HTMLDivElement>,
 
+    onCardRating: (activity: Activity, rating: number, callback: (rated: boolean) => void) => boolean,
+    onCardInfo: (activity: Activity) => void,
     onCardAction: () => void,
     doCardAction: IDoCardAction
 }
@@ -122,6 +124,9 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
             fromMe={ false }
             onClickActivity={ null }
             onClickRetry={ null }
+            onClickInfo={ null }
+            onClickRatingUp={ null }
+            onClickRatingDown={ null }
             selected={ false }
             showTimestamp={ false }
         >
@@ -165,6 +170,9 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                                 e.stopPropagation();
                                 this.props.onClickRetry(activity)
                             } }
+                            onClickInfo={() => this.props.onCardInfo(activity)}
+                            onClickRatingUp={() => this.props.onCardRating(activity, 1, (rated) => this.setState({rated}))}
+                            onClickRatingDown={() => this.props.onCardRating(activity, -1, (rated) => this.setState({rated}))}
                         >
                             <ActivityView
                                 format={ this.props.format }
@@ -229,7 +237,9 @@ export const History = connect(
         isFromMe: (activity: Activity) => activity.from.id === stateProps.user.id,
         isSelected: (activity: Activity) => activity === stateProps.selectedActivity,
         onClickActivity: (activity: Activity) => stateProps.connectionSelectedActivity && (() => stateProps.connectionSelectedActivity.next({ activity })),
-        onCardAction: ownProps.onCardAction
+        onCardAction: ownProps.onCardAction,
+        onCardRating: ownProps.onCardRating,
+        onCardInfo: ownProps.onCardInfo
     }), {
         withRef: true
     }
@@ -264,7 +274,10 @@ export interface WrappedActivityProps {
     fromMe: boolean,
     format: FormatState,
     onClickActivity: React.MouseEventHandler<HTMLDivElement>,
-    onClickRetry: React.MouseEventHandler<HTMLAnchorElement>
+    onClickRetry: React.MouseEventHandler<HTMLAnchorElement>,
+    onClickRatingUp: () => boolean,
+    onClickRatingDown: () => boolean,
+    onClickInfo: () => void,
 }
 
 export class WrappedActivity extends React.Component<WrappedActivityProps, {ratingInProgress: boolean, rated: boolean}> {
@@ -314,28 +327,6 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {rati
             'wc-message-content-type-'+this.props.activity.type
         );
 
-        const rate = (value: -1 | 1, explanation = '') => {
-            if (value === -1 && !explanation) {
-                return
-            }
-
-            console.log('Rating ' + value + ' for query ' + this.props.activity.channelData.queryId);
-            this.setState({ratingInProgress: true});
-
-            fetch('https://feedbot-pardubickykraj-app.azurewebsites.net/api/messages/kb/KB/queries/'+this.props.activity.channelData.queryPartition+'/'+this.props.activity.channelData.queryId+'/rating',{
-                method: 'POST',
-                headers: { accept: 'application/json', 'content-type': 'application/json' },
-                body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
-            }).then(() => {
-                this.setState({ratingInProgress: false, rated: true});
-            }).catch((err) => {
-                console.error('Failed to rate query', err);
-                bootbox.alert('Bohužel se nepodařilo odeslat vaši zpětnou vazbu. Budeme moc rádi, pokud ji zkusíte předat jiným způsobem.');
-                this.setState({ratingInProgress: false});
-            })
-
-        }
-
         return (
             <div data-activity-id={ this.props.activity.id } className={ wrapperClassName } onClick={ this.props.onClickActivity }>
                 <div className={ 'wc-message wc-message-from-' + who + ' wc-message-type-' + this.props.activity.type } ref={ div => this.messageDiv = div }>
@@ -347,54 +338,13 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {rati
                         { this.props.children }
                     </div>
                     {this.props.activity.channelData && this.props.activity.channelData.queryId && !this.props.fromMe && this.props.activity.type === 'message' && <div className={'wc-message-buttons' + (this.state.ratingInProgress ? ' wc-rating-in-progress' : '') }>
-                        {location.href.endsWith('?developer') && this.props.activity.channelData.info && <div onClick={() => {bootbox.dialog({title: "Query details", size: 'lg', buttons: {cancel: {label: "Close",callback: function(){}}}, message: this.props.activity.channelData.info});}} className='wc-message-button-info'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></div>}
-                        {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => {!this.state.ratingInProgress && rate(1)}} className='wc-message-button-vote-up'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg></div>}
-                        {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => {!this.state.ratingInProgress && getExplanation((explanation: string) => rate(-1, explanation))}} className='wc-message-button-vote-down'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 479.1c26-5.2 42.9-30.5 37.7-56.5l-2.3-11.4c-5.3-26.7-15.1-52.1-28.8-75.2l144 0c26.5 0 48-21.5 48-48c0-18.5-10.5-34.6-25.9-42.6C497 236.6 504 223.1 504 208c0-23.4-16.8-42.9-38.9-47.1c4.4-7.3 6.9-15.8 6.9-24.9c0-21.3-13.9-39.4-33.1-45.6c.7-3.3 1.1-6.8 1.1-10.4c0-26.5-21.5-48-48-48l-97.5 0c-19 0-37.5 5.6-53.3 16.1L202.7 73.8C176 91.6 160 121.6 160 153.7l0 38.3 0 48 0 24.9c0 29.2 13.3 56.7 36 75l7.4 5.9c26.5 21.2 44.6 51 51.2 84.2l2.3 11.4c5.2 26 30.5 42.9 56.5 37.7zM32 384l64 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32L32 96C14.3 96 0 110.3 0 128L0 352c0 17.7 14.3 32 32 32z"/></svg></div>}
+                        {location.href.endsWith('?developer') && this.props.activity.channelData.info && <div onClick={this.props.onClickInfo} className='wc-message-button-info'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></div>}
+                        {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => !this.state.ratingInProgress && this.props.onClickRatingUp()} className='wc-message-button-vote-up'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg></div>}
+                        {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => !this.state.ratingInProgress && this.props.onClickRatingDown()} className='wc-message-button-vote-down'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 479.1c26-5.2 42.9-30.5 37.7-56.5l-2.3-11.4c-5.3-26.7-15.1-52.1-28.8-75.2l144 0c26.5 0 48-21.5 48-48c0-18.5-10.5-34.6-25.9-42.6C497 236.6 504 223.1 504 208c0-23.4-16.8-42.9-38.9-47.1c4.4-7.3 6.9-15.8 6.9-24.9c0-21.3-13.9-39.4-33.1-45.6c.7-3.3 1.1-6.8 1.1-10.4c0-26.5-21.5-48-48-48l-97.5 0c-19 0-37.5 5.6-53.3 16.1L202.7 73.8C176 91.6 160 121.6 160 153.7l0 38.3 0 48 0 24.9c0 29.2 13.3 56.7 36 75l7.4 5.9c26.5 21.2 44.6 51 51.2 84.2l2.3 11.4c5.2 26 30.5 42.9 56.5 37.7zM32 384l64 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32L32 96C14.3 96 0 110.3 0 128L0 352c0 17.7 14.3 32 32 32z"/></svg></div>}
                     </div>}
                 </div>
                 <div className={ 'wc-message-from wc-message-from-' + who }>{ timeLine }</div>
             </div>
         );
     }
-}
-
-function getExplanation(callback: (explanation: string) => void) {
-    bootbox.dialog({
-        title: "Zpětná vazba",
-        message: `
-            <p style="margin-top:32px;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný, abychom řešení mohli postupně vylepšovat.</p>
-            <form id="multiInputForm">
-                <div class="form-group">
-                    <label for="problem"><b>Stručně prosím popište, v čem je u vygenerované odpovědi problém a ideálně i to, jak by správná odpověď měla vypadat.</b></label>
-                    <textarea class="form-control" id="problem" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="sources"><b>Prosíme také o uvedení URL adresy (může být jedna i více) z webu https://www.pardubickykraj.cz, ze které se má při sestavování odpovědi čerpat.</b></label>
-                    <textarea class="form-control" id="sources" rows="3"></textarea>
-                </div>
-            </form>
-        `,
-        buttons: {
-            cancel: {
-                label: "Zrušit",
-                className: "btn-secondary"
-            },
-            save: {
-                label: "Odeslat",
-                className: "btn-primary",
-                callback: function() {
-                    const problem = String($('#problem').val()).trim();
-                    const sources = String($('#sources').val()).trim();
-
-                    if (!problem || !sources) {
-                        bootbox.alert('Prosím vyplňte obě pole.');
-                        return false
-                    }
-
-                    callback(problem + '\n\n' + sources);
-                    return true; // close the dialog
-                }
-            }
-        }
-    });
 }
