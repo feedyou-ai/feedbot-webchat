@@ -837,7 +837,7 @@ function getExplanation(callback: (explanation: string) => void) {
     bootbox.dialog({
         title: "Zpětná vazba",
         message: `
-            <p style="margin-top:32px;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný, abychom řešení mohli postupně vylepšovat.</p>
+            <p style="margin-top:32px;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný.</p>
             <form id="multiInputForm">
                 <div class="form-group">
                     <label for="problem"><b>Stručně prosím popište, v čem je u vygenerované odpovědi problém a ideálně i to, jak by správná odpověď měla vypadat.</b></label>
