@@ -844,7 +844,7 @@ function getExplanation(callback: (explanation: string) => void) {
                     <textarea class="form-control" id="problem" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="sources"><b>Prosíme také o uvedení místa (např. URL adresa) ve zdrojových datech, kde se nacházejí podklady, ze které se má při sestavování odpovědi čerpat.</b></label>
+                    <label for="sources"><b>Prosíme také o uvedení dokumentu (ideálně konkrétní kapitoly) popřípadě URL adresy, kde se nachází informace, ze kterých bychom měli při sestavování správné odpovědi čerpat.</b></label>
                     <textarea class="form-control" id="sources" rows="3"></textarea>
                 </div>
             </form>
