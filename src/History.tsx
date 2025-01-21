@@ -153,7 +153,18 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                 this.largeWidth = this.props.size.width * 2;
                 content = <this.measurableCarousel/>;
             } else {
-                content = this.props.activities.map((activity, index) =>
+                content = this.props.activities.reduce((out, activity) => {
+                    if (activity.channelData && activity.channelData.streamId && activity.type === 'message') {
+                        const firstStreamIndex = out.findIndex(a => a.channelData && a.channelData.streamId === activity.channelData.streamId)
+                        const firstStreamActivity = out[firstStreamIndex]
+                        if (firstStreamActivity && firstStreamActivity.type === 'message') {
+                            firstStreamActivity.text = firstStreamActivity.text+' '+activity.text
+                            return out
+                        }
+                    }
+                    out.push(Object.assign({}, activity))
+                    return out
+                }, []).map((activity, index) =>
                     (activity.type !== 'message' || activity.text || (activity.attachments && activity.attachments.length)) &&
                         <WrappedActivity
                             format={ this.props.format }
