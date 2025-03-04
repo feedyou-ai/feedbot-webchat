@@ -870,8 +870,8 @@ function getExplanation(callback: (explanation: string) => void) {
                     const problem = String($('#problem').val()).trim();
                     const sources = String($('#sources').val()).trim();
 
-                    if (!problem || !sources) {
-                        bootbox.alert('Prosím vyplňte obě pole.');
+                    if (!problem) {
+                        bootbox.alert('Prosím vyplňte alespoň první pole.');
                         return false
                     }
 
