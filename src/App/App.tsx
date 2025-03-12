@@ -53,6 +53,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
       const body = await response.json();
       konsole.log("Feedyou WebChat init", body);
 
+      setFeedyouParam("directLineBotId", body && body.directLineBotId)
       setFeedyouParam("openUrlTarget", props.openUrlTarget || (body.config && body.config.openUrlTarget))
 
       if(props.typingDelay) {

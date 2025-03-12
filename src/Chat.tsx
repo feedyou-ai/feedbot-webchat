@@ -19,6 +19,7 @@ import { ConnectionStatus } from 'botframework-directlinejs';
 import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
+import { getFeedyouParam } from './FeedyouParams';
 
 declare const fbq: Function;
 
@@ -333,8 +334,9 @@ export class Chat extends React.Component<ChatProps, {}> {
         // this.handleIncomingActivity({ id: 'maintenance', type: 'message', from: { name: "Chatbot", ...this.props.bot }, text: "Dobrý den, aktuálně mám technické problémy, které kolegové intenzivně řeší. Je možné, že nebudu reagovat úplně správně, moc se za to omlouvám. Prosím zkuste si se mnou popovídat později.", timestamp: new Date().toISOString()});
 
         // FEEDYOU - show typing on startup - if bot.id is set to the same value as value on server, it will be cleared by first message
-        if (this.props.bot && this.props.bot.id) {
-            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot }, timestamp: new Date().toISOString()}});
+        const directLineBotId = getFeedyouParam("directLineBotId") || this.props.bot.id
+        if (this.props.bot && directLineBotId) {
+            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot, id: directLineBotId }, timestamp: new Date().toISOString()}});
         }
 
         // FEEDYOU - support "start over" button
