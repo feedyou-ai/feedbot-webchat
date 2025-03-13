@@ -209,7 +209,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
   
   // FEEDYOU configurable theming
   if (props.theme || !container) {
-    const theme = { mainColor: "#D83838", ...props.theme };
+    const theme = { mainColor: "#0063f8", ...props.theme };
     props.theme && (props.theme.enableScreenshotUpload = !!props.enableScreenshotUpload)
     const themeStyle = document.createElement("style");
     themeStyle.type = "text/css";

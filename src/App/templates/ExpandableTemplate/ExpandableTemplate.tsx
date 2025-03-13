@@ -71,7 +71,7 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 	
 	doesTemplateSupportPopupMsg = () => {
 		const templateType = this.props.theme.template && this.props.theme.template.type
-		return ["expandable-knob", "sidebar"].includes(templateType)
+		return ["expandable-knob", "sidebar", "expandable-knob-v2", "sidebar-v2"].includes(templateType)
 		
 	}
 	
@@ -94,7 +94,7 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 				</div>
 				
 				{signature && showSignature &&
-					<Signature signature={signature} botId={bot.id} />
+					<Signature signature={signature} botId={bot.id} appProps={this.props} />
 				}
 				
 				{this.doesTemplateSupportPopupMsg() && !initialized && popupMessage && (

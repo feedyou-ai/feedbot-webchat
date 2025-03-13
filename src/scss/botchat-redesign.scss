@@ -1,0 +1,1186 @@
+@import 'includes/card-size';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+// Colors
+$black: #16364d;
+$white: #ffffff;
+$silver: #c7d0d7;
+$silverLight: #f7f9fb;
+$silverMedium: #dae0e5;
+$grey: #628198;
+$greyDark: #385b75;
+$blue: #0063f8;
+$blueLight: #ebf6ff;
+$blueDark: #0a4fbd;
+$shadow: rgba(0, 0, 0, 0.05);
+$c_messageFromMe: $blue;
+$c_messageFromThem: $white;
+
+// Settings
+$chatWindowWidth: 420px;
+$chatWindowHeight: 620px;
+
+$actionsHeight: 40px;
+$consoleHeight: 70px;
+
+$fontFamily: 'Inter', sans-serif;
+$fontSize: 15px;
+
+$headerTotalHeight: 38px;
+
+$actionTransition: 0.2s cubic-bezier(0, 0, 0.5, 1);
+
+$card_narrow: 216px;
+$card_normal: 320px;
+$card_wide: 416px;
+
+$card_borderWidth: 1px;
+$card_padding: 8px;
+
+.feedbot-wrapper {
+	width: $chatWindowWidth;
+	height: $chatWindowHeight;
+	bottom: 24px;
+	right: 24px;
+	border-radius: 10px;
+	background-color: $white;
+	min-width: 275px;
+	max-width: 87%;
+	max-height: 90%;
+	position: fixed;
+	z-index: 100000;
+}
+.feedbot-wrapper:not(.collapsed) {
+	border: 1px solid $silverMedium;
+}
+.feedbot-header {
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	color: $greyDark;
+	z-index: 10;
+	padding: 18px;
+	font-size: 1em;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-family: $fontFamily;
+}
+.feedbot-header .feedbot-title {
+	font-weight: 500;
+	flex-grow: 1;
+}
+.feedbot-header .feedbot-minimize {
+	font-weight: bolder;
+	font-family: Verdana;
+	color: $greyDark;
+	font-size: 1.2em;
+	line-height: 0.9em;
+}
+.feedbot-header .feedbot-minimize:hover {
+	color: $black;
+}
+.feedbot-wrapper .wc-chatview-panel {
+	border-bottom-right-radius: 10px;
+	border-bottom-left-radius: 10px;
+	border-top: 1px solid $silverMedium;
+}
+.wc-app .wc-chatview-panel {
+	top: 75px;
+}
+.wc-app .wc-header {
+	display: none;
+}
+.wc-message-wrapper:not([data-activity-id='retry']) .wc-message-from {
+	display: none;
+}
+.wc-carousel
+	.wc-hscroll
+	> ul
+	> li
+	> .wc-card
+	> div
+	> .ac-container
+	> .ac-container
+	.ac-image {
+	border-radius: 10px 10px 0 0;
+}
+.wc-carousel .wc-hscroll ul {
+	display: flex;
+	align-items: stretch;
+}
+.wc-carousel .wc-hscroll > ul > li > .wc-card,
+.wc-carousel .wc-hscroll > ul > li > .wc-card > div {
+	height: 100%;
+}
+.feedbot-wrapper .wc-adaptive-card,
+.feedbot-wrapper .wc-card {
+	max-width: 100%;
+}
+.wc-carousel .wc-hscroll > ul > li > .wc-card > div > .ac-container {
+	padding: 0 0 10px 0 !important;
+	height: 100%;
+	justify-content: space-between !important;
+}
+.wc-carousel
+	.wc-hscroll
+	> ul
+	> li
+	> .wc-card
+	> div
+	> .ac-container
+	> .ac-container
+	.ac-textBlock {
+	padding: 0px 13px;
+	white-space: unset !important;
+	text-overflow: unset !important;
+	overflow: unset !important;
+	font-family: $fontFamily !important;
+}
+.wc-carousel .wc-hscroll > ul > li > .wc-card > div .ac-actionSet {
+	margin: 4px 13px 13px !important;
+}
+.feedbot-wrapper .wc-app .wc-card button,
+.feedbot-wrapper .wc-app .wc-card button > div {
+	text-overflow: initial !important;
+	white-space: initial !important;
+}
+.feedbot-wrapper .wc-suggested-actions .wc-hscroll > ul > li button:focus,
+.feedbot-wrapper .wc-console .wc-mic,
+.wc-console .wc-send,
+.feedbot-wrapper .wc-app .wc-card button {
+	outline: 0;
+}
+.wc-carousel .wc-hscroll > ul > li {
+	padding: 4px !important;
+}
+.feedbot-wrapper.collapsed {
+	border-radius: 40px;
+	width: 75px;
+	min-width: auto;
+	height: 75px;
+	bottom: 24px;
+	right: 24px;
+}
+.feedbot-wrapper.collapsed .feedbot-header {
+	border-radius: 40px;
+	height: 100%;
+	width: 100%;
+	padding: 0px;
+	cursor: pointer;
+	text-indent: 999%;
+	white-space: nowrap;
+	overflow: hidden;
+	font-size: 0px;
+	/* background image (chat icon) is set in redesign themes (./themes) */
+	background-size: 45px;
+	background-position: center;
+	background-repeat: no-repeat;
+	transition: transform 0.3s ease;
+}
+.feedbot-wrapper.collapsed .feedbot-header:hover {
+	transform: scale(1.05);
+	transition: transform 0.3s ease;
+}
+.feedbot-wrapper.collapsed .wc-chatview-panel {
+	display: none;
+}
+.feedbot-wrapper.collapsed .feedbot-signature,
+.feedbot-wrapper.collapsed .feedbot-header .feedbot-extra-html,
+.feedbot-disabled div.feedbot {
+	display: none;
+}
+.wc-list.tiles .ac-actionSet {
+	flex-direction: row !important;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.wc-list.tiles .ac-container {
+	padding-top: 0px;
+	margin-top: -5px;
+}
+
+.wc-list.tiles .ac-pushButton {
+	flex-basis: 44% !important;
+	min-height: 120px !important;
+	margin: 3% !important;
+	flex-direction: column !important;
+	position: relative;
+	padding: 16px;
+	top: 0;
+}
+
+.feedbot-wrapper .wc-app .wc-list.tiles .wc-card .ac-pushButton:active {
+	background-color: unset;
+}
+
+.wc-list.tiles .ac-pushButton img {
+	width: 36px !important;
+	height: 36px !important;
+	margin-right: 0px !important;
+	margin-bottom: 10px !important;
+}
+
+.wc-list.tiles .ac-pushButton div {
+	overflow: unset !important;
+	text-overflow: unset !important;
+	white-space: unset !important;
+}
+
+@media (max-width: 450px) {
+	.feedbot-wrapper .wc-list.tiles .wc-card {
+		border: none;
+		width: 100%;
+	}
+	.wc-list.tiles .ac-pushButton {
+		min-height: 95px !important;
+	}
+	.wc-list.tiles .ac-container {
+		padding: 0 !important;
+		margin-top: 0 !important;
+	}
+}
+.wc-upload-screenshot {
+	display: none !important;
+}
+.feedbot-wrapper.collapsed .feedbot-signature {
+	display: none;
+}
+
+.feedbot-signature {
+	position: absolute;
+	opacity: 0.3;
+	color: $black;
+	font-family: $fontFamily;
+	/* positioning is set in redesign themes (./themes) */
+	height: 22px;
+	display: block;
+	align-items: center;
+	-webkit-transition: opacity 0.3s ease-in-out;
+	-moz-transition: opacity 0.3s ease-in-out;
+	-ms-transition: opacity 0.3s ease-in-out;
+	-o-transition: opacity 0.3s ease-in-out;
+	transition: opacity 0.3s ease-in-out;
+}
+
+.feedbot-wrapper .feedbot-signature:hover {
+	opacity: 0.8;
+}
+
+.feedbot-signature a {
+	color: $black;
+	text-decoration: none;
+	margin: 0 4px;
+	display: flex;
+	align-items: center;
+}
+
+.feedbot-signature a:hover {
+	cursor: pointer;
+	color: $black;
+	text-decoration: underline;
+}
+
+.feedbot-signature a img {
+	height: 22px;
+}
+
+.feedbot-signature-row {
+	display: flex;
+	align-items: center;
+	height: 100%;
+}
+/*
+*
+*
+/* reset */
+body .wc-app,
+.wc-app button,
+.wc-app input,
+.wc-app textarea,
+.popup-message {
+	font-family: $fontFamily;
+	font-size: $fontSize;
+}
+
+.wc-app button {
+	background-color: $white;
+	border: 1px solid $silverMedium;
+	border-radius: 1px;
+	color: $blueDark;
+	cursor: pointer;
+	transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.wc-app h1,
+.wc-app h2,
+.wc-app h3,
+.wc-app h4,
+.wc-app p,
+.wc-app ul,
+.wc-app ol {
+	margin: 0;
+	padding: 0;
+}
+
+.wc-app audio,
+.wc-app video {
+	display: block;
+}
+
+/* docking */
+
+.wc-hidden {
+	visibility: hidden;
+}
+
+.wc-time {
+	color: $silver;
+	margin-bottom: 10px;
+}
+
+.wc-message-groups {
+	background: $silverLight;
+	bottom: $consoleHeight;
+	left: 0;
+	transform: translateY(0);
+	outline: 0;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	padding: 10px 5px 0px 10px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	transition: transform $actionTransition;
+
+	&.no-header {
+		top: 0;
+	}
+}
+
+.wc-message-group-content {
+	overflow: hidden;
+}
+
+.wc-suggested-actions {
+	background-color: $silverLight;
+	bottom: $consoleHeight;
+	height: 0;
+	left: 0;
+	overflow: hidden;
+	position: absolute;
+	right: 0;
+	transition: height $actionTransition;
+
+	.wc-hscroll > ul {
+		height: $actionsHeight;
+		padding: 0px 18px;
+
+		> li {
+			display: inline-block;
+			margin-right: 6px;
+			max-width: 40%;
+
+			button {
+				background-color: $white;
+				color: $blueDark;
+				min-height: 40px;
+				overflow: hidden;
+				padding: 0 16px;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				width: 100%;
+				border-radius: 5px;
+				border-width: 1px;
+				font-weight: bold;
+			}
+
+			button:focus,
+			button:hover {
+				background-color: $blueLight;
+				border-color: $blueDark;
+				border-width: 1px;
+				color: $blueDark;
+			}
+
+			button:active {
+				background-color: $blueLight;
+				border-color: $blueDark;
+				border-width: 1px;
+				color: $blueDark;
+			}
+		}
+	}
+
+	button.scroll {
+		background-color: $silver;
+		height: $actionsHeight;
+		overflow: hidden;
+		padding: 0;
+		position: absolute;
+		top: 0;
+		width: 28px;
+	}
+
+	button.scroll:disabled {
+		display: none;
+	}
+
+	button.scroll:focus,
+	button.scroll:hover {
+		background-color: $grey;
+	}
+
+	button.scroll svg {
+		fill: $white;
+
+		//TODO: use proper svg coords in the path data
+		path {
+			transform: translateY(6px);
+		}
+	}
+
+	button.scroll.previous {
+		left: 0;
+	}
+
+	button.scroll.next {
+		right: 0;
+	}
+}
+
+.wc-message-pane.show-actions {
+	.wc-message-groups {
+		top: $headerTotalHeight + $actionsHeight;
+		transform: translateY(-$actionsHeight);
+	}
+	.wc-suggested-actions {
+		height: $actionsHeight;
+	}
+}
+
+/* views */
+
+.wc-chatview-panel {
+	overflow: hidden;
+	position: absolute;
+	right: 0;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	background: $silverLight;
+}
+
+/* messages */
+
+.wc-message-wrapper {
+	animation: animationFrames 2s;
+	animation-iteration-count: 1;
+	clear: both;
+	margin-bottom: 10px;
+	overflow: hidden;
+	position: relative;
+	/*transition: max-height 2s ease-in-out;*/
+}
+
+@keyframes animationFrames {
+	0% {
+		/*max-height: 0;*/
+		opacity: 0;
+	}
+	20% {
+		opacity: 1;
+	}
+	100% {
+		/*max-height: 2000px;*/
+	}
+}
+
+.wc-message {
+	position: relative;
+}
+
+.wc-message-wrapper.carousel .wc-message {
+	max-width: none;
+	padding-right: 8px;
+}
+
+.wc-message svg.wc-message-callout {
+	display: none;
+}
+
+.wc-message-content {
+	box-shadow: 0px 1px 2px 0px $shadow;
+	padding: 13px;
+	word-break: break-word;
+	border: 1px solid $silverMedium;
+}
+
+.wc-message-content.clickable {
+	cursor: pointer;
+}
+
+.wc-message-content.selected {
+	box-shadow: 0px 1px 1px 0px $blueDark;
+}
+
+.wc-message-content img {
+	max-height: 320px;
+	max-width: 100%;
+	border-radius: 4px;
+}
+
+.wc-message-content .video iframe {
+	border: 0;
+}
+
+.wc-message-content audio,
+.wc-message-content video {
+	max-width: 100%;
+}
+
+.wc-message-content audio + h1,
+.wc-message-content video + h1 {
+	margin-top: 11px;
+}
+
+.wc-message-from {
+	clear: both;
+	color: $silver;
+	font-size: 11px;
+	margin-top: 5px;
+}
+
+/* cards */
+
+.wc-card {
+	background-color: $white;
+	border-radius: 10px;
+	border: 1px solid $silverMedium;
+
+	.non-adaptive-content {
+		margin: $card_padding $card_padding 0 $card_padding;
+	}
+
+	button {
+		border: 1px solid $silverMedium;
+		color: $blueDark;
+		background: $white;
+		font-weight: bold;
+		min-height: 40px;
+		border-radius: 5px;
+		flex: auto;
+	}
+
+	button:hover {
+		background-color: $blueLight;
+		border: 2px solid $blueDark;
+		color: $blueDark;
+	}
+
+	button:active {
+		background-color: $blueLight;
+		border: 2px solid $blueDark;
+		color: $blueDark;
+	}
+
+	&.receipt table {
+		border-collapse: collapse;
+		width: 100%;
+	}
+
+	&.receipt th,
+	&.receipt td {
+		text-align: right;
+		vertical-align: top;
+	}
+
+	&.receipt th:first-child,
+	&.receipt td:first-child {
+		text-align: left;
+	}
+
+	&.receipt th {
+		color: $grey;
+		font-size: inherit;
+		font-weight: normal;
+		line-height: 1.75;
+	}
+
+	&.receipt thead tr:last-child th {
+		padding-bottom: 16px;
+	}
+
+	&.receipt th[colspan='2'] {
+		color: inherit;
+		font-size: 15px;
+		font-weight: 700;
+	}
+
+	&.receipt td {
+		padding: 4px 8px 0 8px;
+	}
+
+	&.receipt td img {
+		float: left;
+		margin: 5px 8px 8px 0;
+		max-height: 50px;
+		max-width: 50px;
+	}
+
+	&.receipt div.title {
+		font-weight: bolder;
+	}
+
+	&.receipt div.subtitle {
+		font-weight: lighter;
+	}
+
+	&.receipt tbody tr,
+	&.receipt tfoot tr {
+		border-top: 1px solid $silver;
+	}
+
+	&.receipt tbody tr:first-child,
+	&.receipt tfoot tr:first-child {
+		border-top-width: 2px;
+	}
+
+	&.receipt tfoot td {
+		line-height: 2.25;
+	}
+
+	&.receipt tfoot .total {
+		font-weight: bold;
+	}
+
+	&.thumbnail img {
+		float: right;
+		margin-bottom: 10px;
+		margin-left: 10px;
+		width: 100px;
+	}
+
+	&.signin h1 {
+		margin: 10px 24px 16px 14px;
+	}
+
+	&.error {
+		text-align: center;
+
+		.error-icon {
+			fill: $silver;
+			height: 56px;
+			margin-bottom: 2px;
+			margin-top: 20px;
+			padding-left: 12px;
+		}
+
+		.error-text {
+			color: $silver;
+			font-weight: 600;
+			letter-spacing: 0.5px;
+			margin-bottom: 20px;
+			text-align: inherit;
+		}
+	}
+}
+
+/* alternate chat sizes */
+
+.wc-message {
+	max-width: 91%;
+}
+
+@include card-size($card_normal);
+
+.wc-wide {
+	@include card-size($card_wide);
+}
+
+.wc-narrow {
+	@include card-size($card_narrow);
+}
+
+/* adaptive card adjustments from wc-card */
+.wc-adaptive-card {
+	p {
+		margin-left: 0;
+		margin-right: 0;
+	}
+}
+
+/* list */
+.wc-list {
+	.ac-container {
+		padding: 0 !important;
+	}
+}
+.wc-list > img {
+	margin-top: 10px;
+}
+
+.wc-list > .wc-card {
+	margin-top: 8px;
+	border: 0 !important;
+}
+
+.wc-list > .wc-card:first-child {
+	margin-top: 0;
+}
+
+/* horizontal scroll */
+
+.wc-hscroll-outer {
+	/* allow horizontal scrolling but hide the scrollbar */
+	overflow: hidden;
+}
+
+.wc-hscroll {
+	/* allow horizontal scrolling but hide the scrollbar */
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+
+.wc-hscroll > ul {
+	white-space: nowrap;
+}
+
+.wc-hscroll > ul > li {
+	display: inline-block;
+	vertical-align: top;
+	white-space: normal;
+}
+
+/* carousel */
+
+.wc-carousel {
+	position: relative;
+	margin-top: 8px;
+
+	button.scroll {
+		background-color: $blue;
+		height: 31px;
+		overflow: hidden;
+		padding: 0px;
+		position: absolute;
+		top: 50%;
+		width: 43px;
+		border-radius: 100px;
+		border: 2px solid $blueDark;
+	}
+
+	button.scroll:disabled {
+		display: none;
+	}
+
+	button.scroll:focus,
+	button.scroll:hover {
+		background-color: $blueDark;
+		border: 2px solid $blueDark;
+	}
+
+	button.scroll svg {
+		fill: $white;
+	}
+
+	button.scroll.previous {
+		left: -16px;
+	}
+
+	button.scroll.next {
+		right: -16px;
+	}
+
+	.wc-hscroll > ul {
+		margin-left: -4px;
+	}
+
+	.wc-hscroll > ul > li {
+		padding: 0 4px;
+	}
+
+	.wc-hscroll > ul > li:last-child {
+		padding-right: 0;
+	}
+
+	li {
+		p {
+			min-height: 4em;
+			white-space: normal;
+		}
+
+		.wc-adaptive-card p {
+			min-height: initial;
+		}
+
+		.wc-adaptive-card-content > div > div > .ac-textBlock:first-child {
+			margin-top: 8px;
+		}
+	}
+}
+
+/* from me */
+
+.wc-message-from-me {
+	float: right;
+	margin-right: 6px;
+}
+
+.wc-message-from-me.wc-message-from {
+	text-align: right;
+}
+
+.wc-message-from-me .wc-message-content {
+	background-color: $c_messageFromMe;
+	border: 1px solid $blueDark;
+	color: $white;
+	border-radius: 10px 10px 4px 10px;
+}
+
+/* from bot */
+
+.wc-message-from-bot {
+	float: left;
+	margin-left: 8px;
+}
+
+.wc-message-from-bot .wc-message-content {
+	background-color: $c_messageFromThem;
+	color: $black;
+	border-radius: 10px 10px 10px 4px;
+}
+
+/* console */
+
+.wc-console {
+	background: #ffffff;
+	border: 1px solid #c7d0d7;
+	border-radius: 5px;
+	margin: 18px;
+	bottom: 0;
+	box-sizing: border-box;
+	height: 45px;
+	left: 0;
+	position: absolute;
+	right: 0;
+	box-shadow: 0px 1px 2px 0px $shadow;
+
+	> .wc-upload,
+	> .wc-textbox,
+	> .wc-send,
+	> .wc-mic {
+		position: absolute;
+		top: 0;
+		vertical-align: middle;
+	}
+
+	label,
+	button {
+		cursor: pointer;
+		display: inline-block;
+		height: 43px;
+	}
+
+	svg {
+		fill: $silver;
+		margin: 9px;
+	}
+
+	input[type='text'],
+	textarea {
+		border: none;
+		height: calc(100% - 12px);
+		outline: none;
+		padding: 0;
+		resize: none;
+		width: 100%;
+		padding-top: 12px;
+		background-color: transparent;
+		color: $black;
+		min-height: initial;
+		box-shadow: none;
+		line-height: initial;
+		box-sizing: initial;
+	}
+
+	textarea::placeholder {
+		color: $silver;
+	}
+
+	&.has-text .wc-send svg {
+		fill: $blue;
+	}
+	&.has-text {
+		border: 1px solid $grey;
+	}
+
+	.wc-upload {
+		cursor: pointer;
+		position: relative;
+
+		svg {
+			height: 25px;
+			width: 25px;
+		}
+	}
+
+	#wc-upload-input {
+		font-size: 0;
+		height: 0;
+		left: 0;
+		opacity: 0;
+		outline: 0;
+		position: absolute;
+		top: 0;
+		width: 0;
+	}
+
+	.wc-send {
+		right: 0;
+	}
+
+	.wc-send.hidden {
+		visibility: hidden;
+	}
+
+	&.has-upload-button .wc-textbox {
+		left: 48px;
+	}
+
+	.wc-textbox {
+		bottom: 0;
+		left: 11px;
+		right: 49px;
+
+		input {
+			background-color: transparent;
+			word-break: break-word;
+		}
+	}
+
+	.wc-mic,
+	.wc-send {
+		background-color: transparent;
+		border: 0;
+		padding: 0;
+		right: 0;
+
+		&.hidden {
+			visibility: hidden;
+		}
+	}
+
+	.wc-send {
+		svg {
+			height: 25px;
+			width: 25px;
+		}
+	}
+
+	.wc-mic {
+		&.active path#micFilling {
+			fill: rgb(78, 55, 135);
+		}
+
+		&.inactive path#micFilling {
+			visibility: hidden;
+		}
+	}
+}
+
+.wc-console.disable-input {
+	display: none;
+}
+
+.wc-console.has-text .wc-send svg {
+	fill: $blue;
+}
+
+/* animation */
+
+.wc-typing {
+	background-image: url("https://feedyou.blob.core.windows.net/webchat/chatbot-typing-indicator-v2.gif");
+	background-repeat: no-repeat;
+	height: 22px;
+	width: 50px;
+	background-size: contain;
+	background-position: center;
+}
+
+.wc-animate-scroll {
+	left: 0;
+	position: absolute;
+	transition: left 0.8s ease;
+}
+
+.wc-animate-scroll-rapid {
+	left: 0;
+	position: absolute;
+	transition: left 0.4s ease;
+}
+
+.wc-animate-scroll-near {
+	left: 0;
+	position: absolute;
+	transition: left 0.3s ease-in-out;
+}
+
+/* text formats */
+
+.format-markdown > p {
+	margin-bottom: 0px;
+}
+
+.format-markdown code {
+	white-space: pre-wrap;
+}
+
+.format-markdown ol {
+	padding-left: 30px !important; /* numbers are right-aligned to the period */
+}
+
+.format-markdown ul {
+	padding-left: 33px !important;
+}
+
+/* browser scrollbar customization */
+
+.wc-app ::-webkit-scrollbar {
+	width: 8px;
+}
+
+.wc-app ::-webkit-scrollbar * {
+	background-color: transparent;
+}
+
+.wc-app ::-webkit-scrollbar-thumb {
+	background-color: $silver;
+}
+
+/* download button for Unknown media */
+
+.wc-icon-download {
+	display: inline-block;
+	height: 20px;
+	margin-left: 12px;
+	vertical-align: middle;
+	width: 15px;
+
+	background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none"><path d="M12 15.7828V1.78278" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 15.7828V22.7828C23 23.048 22.8946 23.3023 22.7071 23.4899C22.5196 23.6774 22.2652 23.7828 22 23.7828H2C1.73478 23.7828 1.48043 23.6774 1.29289 23.4899C1.10536 23.3023 1 23.048 1 22.7828V15.7828" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 10.7828L12 15.7828L7 10.7828" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+
+.wc-text-download {
+	display: inline-block;
+	font-weight: 500;
+	text-decoration: none;
+	color: $white;
+}
+
+.ac-textBlock img.emoji {
+	width: auto !important;
+}
+
+/* redesigned header */
+.feedbot-header {
+	.feedbot-header-name {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.feedbot-avatar,
+	.feedbot-avatar img {
+		width: 40px;
+		height: 40px;
+		border-radius: 100px;
+		background-position: center;
+		background-size: cover;
+		aspect-ratio: 1/1;
+	}
+}
+.feedbot-wrapper.collapsed .feedbot-avatar {
+	display: none;
+}
+.feedbot-name {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+.feedbot-supportive-title {
+	max-width: 20em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	font-size: 13px;
+	color: $grey;
+}
+.feedbot-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+	user-select: none;
+}
+.feedbot-persistent-menu-toggle {
+	color: $greyDark;
+	padding: 5px 5px;
+	cursor: pointer;
+}
+.feedbot-persistent-menu-toggle:hover {
+	color: $black;
+}
+.feedbot-persistent-menu {
+	line-height: 0.9em;
+	position: relative;
+}
+.feedbot-persistent-menu-links {
+    position: absolute;
+    top: 35px;
+    right: -35px;
+    background-color: $white;
+	border: 1px solid $silver;
+	border-radius: 6px;
+	box-shadow: 0px 1px 2px 0px $shadow;
+    z-index: 1;
+    list-style: none;
+	padding: 10px 0;
+    margin: 0;
+	min-width: 11em;
+	max-width: 17em;
+	font-size: 15px;
+}
+.feedbot-wrapper.collapsed .feedbot-persistent-menu-links {
+	display: none;
+}
+.feedbot-persistent-menu-links a {
+    padding: 10px 20px;
+    display: block;
+	box-sizing: border-box;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	cursor: pointer;
+	transition: background-color .2s ease, border .2 ease;
+}
+.feedbot-persistent-menu-links a:hover {
+	background-color: $blueLight;
+	outline: 2px solid $blueDark;
+	border-radius: 4px;
+	transition: background-color .2s ease, border .2 ease;
+}
+.feedbot-persistent-menu-debug a {
+	display: flex !important;
+	justify-content: space-between;
+	gap: 14px;
+}
+.feedbot-persistent-menu-debug svg {
+	color: $blue;
+}
+// .feedbot-persistent-menu-debug:last-child::after {
+//     content: '';
+//     display: block;
+//     border-bottom: 1px solid $silver;
+//     margin: 10px 0;
+// }
