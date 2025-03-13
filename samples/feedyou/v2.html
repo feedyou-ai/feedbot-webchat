@@ -10,7 +10,7 @@
         t.src = 'https://cdn.feedyou.ai/webchat/latest/botchat-es5.js';
     
 -->
-		<link href="../../botchat-redesign.css" rel="stylesheet" />
+		<link href="../../botchat.css" rel="stylesheet" />
 		<script type="text/javascript">
 			(function (f, y, b, o, t, s) {
 				(t = y.createElement(b)), (s = y.getElementsByTagName(b)[0]);
@@ -18,8 +18,8 @@
 				t.src = '../../botchat-es5.js';
 				t.onload = function () {
 					BotChat.App({
-						bot: { id: 'feedbot-demo-feedie-podmelle-lukas' },
-						channel: { id: 'jtuqsq' },
+						bot: { id: 'feedbot-demo-webchat' },
+						theme: { template: {type:'expandable-knob-v2' }},
 					});
 				};
 				s.parentNode.insertBefore(t, s);	
