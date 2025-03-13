@@ -19,7 +19,7 @@ import { ConnectionStatus } from 'botframework-directlinejs';
 import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
-import getDeviceData from './utils/getDeviceData'
+import { getFeedyouParam } from './FeedyouParams';
 
 declare const fbq: Function;
 
@@ -67,6 +67,7 @@ export interface ChatProps {
     startOverTrigger?: (trigger: () => void) => void,
     onConversationStarted?: (callback: (conversationId: string) => void) => void,
     onEvent?: {[event: string]: (activity: Activity) => void},
+    onMessage?: (activity: Activity) => void,
     typingDelay?: number
 }
 
@@ -288,9 +289,9 @@ export class Chat extends React.Component<ChatProps, {}> {
                             ...(this.props.userData || {}),
                             ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
                             ...getLocaleUserData(this.props.locale),
-                            ...getReferrerUserData(),
-							"user-device": getDeviceData()
-                        }
+                            ...getReferrerUserData(), 
+	                          "user-agent":  navigator.userAgent
+												}
                     }
                 };
                 return botConnection.postActivityOriginal(newActivity);
@@ -311,9 +312,15 @@ export class Chat extends React.Component<ChatProps, {}> {
         if (this.props.onEvent) {
             Object.keys(this.props.onEvent).forEach((eventName) => {
                 botConnection.activity$
-                    .filter((activity: any) => activity.type === 'event' && activity.name === eventName)
+                    .filter((activity: Activity) => activity.type === 'event' && activity.name === eventName)
                     .subscribe(this.props.onEvent[eventName]);
             });
+        }
+
+        if (this.props.onMessage) {
+            botConnection.activity$
+                .filter((activity: Activity) => activity.type === 'message' )
+                .subscribe(this.props.onMessage);
         }
 
         if (this.props.resize === 'window')
@@ -327,8 +334,9 @@ export class Chat extends React.Component<ChatProps, {}> {
         // this.handleIncomingActivity({ id: 'maintenance', type: 'message', from: { name: "Chatbot", ...this.props.bot }, text: "Dobrý den, aktuálně mám technické problémy, které kolegové intenzivně řeší. Je možné, že nebudu reagovat úplně správně, moc se za to omlouvám. Prosím zkuste si se mnou popovídat později.", timestamp: new Date().toISOString()});
 
         // FEEDYOU - show typing on startup - if bot.id is set to the same value as value on server, it will be cleared by first message
-        if (this.props.bot && this.props.bot.id) {
-            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot }, timestamp: new Date().toISOString()}});
+        const directLineBotId = getFeedyouParam("directLineBotId") || this.props.bot.id
+        if (this.props.bot && directLineBotId) {
+            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot, id: directLineBotId }, timestamp: new Date().toISOString()}});
         }
 
         // FEEDYOU - support "start over" button
@@ -373,7 +381,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             .filter((activity: any) => activity.type === "event" && activity.name === "log")
             .subscribe((activity: any) => {
                 if (Array.isArray(activity.value)) {
-                    const logs: any[] = activity.value
+                    const logs: any[] = [].concat(activity.value) // unfreeeze so unshift will not fail
                     logs.unshift('Feedyou WebChat log')
                     console.log.apply(this, logs)
                 } else {

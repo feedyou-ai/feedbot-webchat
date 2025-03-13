@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { ChatProps } from '../Chat'
 import { renderWebchatApp } from './renderWebchatApp'
 import { DirectLine } from 'botframework-directlinejs'
@@ -38,26 +37,23 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
   if (remoteConfig) {
     // TODO test IE11 https://github.com/matthew-andrews/isomorphic-fetch
     try {
-      const template = props.theme && props.theme.template && props.theme.template.type ? {type: props.theme.template.type} : null
-      const response = await fetch(
-        `https://${props.bot.id}.azurewebsites.net/webchat/config`,
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json;charset=UTF-8",
-          },
-          body: JSON.stringify({
-            user: props.user,
-            channel: props.channel,
-            referrer: window.location.href,
-            template
-          }),
-        }
-      );
+      let response: Response
+      try {
+        response = await fetchConfig(props.bot.id, props)
+      } catch (err) {
+        // try to fetch from webapp as fallback
+        response = await fetchConfig(props.bot.id+'-app', props)
+      }
+
+      if (!response || !response.ok) {
+        console.warn("Failed to fetch Feedyou WebChat remote config");
+        return
+      }
+      
       const body = await response.json();
       konsole.log("Feedyou WebChat init", body);
 
+      setFeedyouParam("directLineBotId", body && body.directLineBotId)
       setFeedyouParam("openUrlTarget", props.openUrlTarget || (body.config && body.config.openUrlTarget))
 
       if(props.typingDelay) {
@@ -246,3 +242,22 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 	renderWebchatApp(props, container)
 };
 
+async function fetchConfig(host: string, props: AppProps): Promise<Response>{
+  const template = props.theme && props.theme.template && props.theme.template.type ? {type: props.theme.template.type} : null
+  return fetch(
+    `https://${host}.azurewebsites.net/webchat/config`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json;charset=UTF-8",
+      },
+      body: JSON.stringify({
+        user: props.user,
+        channel: props.channel,
+        referrer: window.location.href,
+        template
+      }),
+    }
+  )
+}
