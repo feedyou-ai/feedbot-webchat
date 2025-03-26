@@ -71,6 +71,7 @@ export interface ChatProps {
     onEvent?: {[event: string]: (activity: Activity) => void},
     onMessage?: (activity: Activity) => void,
     typingDelay?: number
+    initialMessage?: string
 }
 
 
@@ -330,23 +331,36 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         botConnection.postActivityOriginal = botConnection.postActivity
         
-        botConnection.postActivity = (activity: any) => {
+        //botConnection.postActivity = (activity: any) => {
             // send userData only once during initial event
-            if (activity.name === 'beginIntroDialog') {
-                const newActivity = {
-                    ...activity,
-                    channelData: {
-                        ...activity.channelData,
-                        userData: {
-                            ...(this.props.userData || {}),
-                            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
-                            ...getLocaleUserData(this.props.locale),
-                            ...getReferrerUserData(), 
-	                          "user-agent":  navigator.userAgent
-												}
-                    }
-                };
-                return botConnection.postActivityOriginal(newActivity);
+            //if (activity.name === 'beginIntroDialog') {
+                // const newActivity = {
+                //     ...activity,
+                //     channelData: {
+                //         ...activity.channelData,
+                //         userData: {
+                //             ...(this.props.userData || {}),
+                //             ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
+                //             ...getLocaleUserData(this.props.locale),
+                //             ...getReferrerUserData(), 
+	            //               "user-agent":  navigator.userAgent
+				// 								}
+                //     }
+                // };
+                if (this.props.initialMessage) {
+                    botConnection
+                        .postActivity({
+                            from: this.props.user,
+                            type: 'message',
+                            text: this.props.initialMessage,
+                        })
+                        .subscribe(
+                            (id: any) => konsole.log('Initial message sent successfully:', id),
+                            (error: any) => konsole.log('Failed to send initial message:', error)
+                        );
+                }
+
+                //return botConnection.postActivityOriginal(newActivity);
             /*} else if (this.smartsupp && activity.type === "message") {
                 console.log('Smartsupp send', activity.text, activity)
                 this.smartsupp.chatMessage({
@@ -356,10 +370,10 @@ export class Chat extends React.Component<ChatProps, {}> {
                     },
                 })
                 return new Observable()*/
-            } else {
-                return botConnection.postActivityOriginal(activity);
-            }
-        }
+            // } else {
+            //     return botConnection.postActivityOriginal(activity);
+            // }
+        //}
 
         if (this.props.onEvent) {
             Object.keys(this.props.onEvent).forEach((eventName) => {
@@ -443,18 +457,18 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
-        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
-            const introDialogId = getIntroDialogId(this.props)
-            botConnection.postActivity({
-                from: this.props.user,
-                name: 'beginIntroDialog',
-                type: 'event',
-                value: '',
-                channelData: introDialogId ? {id: introDialogId} : undefined
-            }).subscribe(function (id: any) {
-                konsole.log('"beginIntroDialog" event sent');
-            });
-        }
+        // if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
+        //     const introDialogId = getIntroDialogId(this.props)
+        //     botConnection.postActivity({
+        //         from: this.props.user,
+        //         name: 'beginIntroDialog',
+        //         type: 'event',
+        //         value: '',
+        //         channelData: introDialogId ? {id: introDialogId} : undefined
+        //     }).subscribe(function (id: any) {
+        //         konsole.log('"beginIntroDialog" event sent');
+        //     });
+        // }
 
         // FEEDYOU - way to trigger dialog from anywhere using window event
         // polyfill needed for IEs https://gomakethings.com/custom-events-in-internet-explorer-with-vanilla-js/
