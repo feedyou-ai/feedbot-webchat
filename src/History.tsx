@@ -182,6 +182,7 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                                 this.props.onClickRetry(activity)
                             } }
                             onClickInfo={() => this.props.onCardInfo(activity)}
+                            onClickCopy={() => (navigator as any).clipboard.writeText(activity.text)}
                             onClickRatingUp={callback => this.props.onCardRating(activity, 1, callback)}
                             onClickRatingDown={callback => this.props.onCardRating(activity, -1, callback)}
                         >
@@ -289,6 +290,7 @@ export interface WrappedActivityProps {
     onClickRatingUp: (callback: (rated: boolean) => void) => boolean,
     onClickRatingDown: (callback: (rated: boolean) => void) => boolean,
     onClickInfo: () => void,
+    onClickCopy?: () => void,
 }
 
 export class WrappedActivity extends React.Component<WrappedActivityProps, {ratingInProgress: boolean, rated: boolean}> {
@@ -349,6 +351,8 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {rati
                         { this.props.children }
                     </div>
                     {this.props.activity.channelData && this.props.activity.channelData.queryId && !this.props.fromMe && this.props.activity.type === 'message' && <div className={'wc-message-buttons' + (this.state.ratingInProgress ? ' wc-rating-in-progress' : '') }>
+                        {<div onClick={() => bootbox.alert(this.props.format.strings.aiMessageTitle)} title={this.props.format.strings.aiMessageTitle} className='wc-message-button-ai'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288l111.5 0L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7l-111.5 0L349.4 44.6z"/></svg></div>}
+                        {<div onClick={() => this.props.onClickCopy()} className='wc-message-button-copy'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/></svg></div>}
                         {location.href.endsWith('?developer') && this.props.activity.channelData.info && <div onClick={this.props.onClickInfo} className='wc-message-button-info'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></div>}
                         {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => !this.state.ratingInProgress && this.props.onClickRatingUp(rated => this.setState({rated}))} className='wc-message-button-vote-up'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg></div>}
                         {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => !this.state.ratingInProgress && this.props.onClickRatingDown(rated => this.setState({rated}))} className='wc-message-button-vote-down'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 479.1c26-5.2 42.9-30.5 37.7-56.5l-2.3-11.4c-5.3-26.7-15.1-52.1-28.8-75.2l144 0c26.5 0 48-21.5 48-48c0-18.5-10.5-34.6-25.9-42.6C497 236.6 504 223.1 504 208c0-23.4-16.8-42.9-38.9-47.1c4.4-7.3 6.9-15.8 6.9-24.9c0-21.3-13.9-39.4-33.1-45.6c.7-3.3 1.1-6.8 1.1-10.4c0-26.5-21.5-48-48-48l-97.5 0c-19 0-37.5 5.6-53.3 16.1L202.7 73.8C176 91.6 160 121.6 160 153.7l0 38.3 0 48 0 24.9c0 29.2 13.3 56.7 36 75l7.4 5.9c26.5 21.2 44.6 51 51.2 84.2l2.3 11.4c5.2 26 30.5 42.9 56.5 37.7zM32 384l64 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32L32 96C14.3 96 0 110.3 0 128L0 352c0 17.7 14.3 32 32 32z"/></svg></div>}

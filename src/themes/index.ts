@@ -24,6 +24,7 @@ export type Theme = {
 	customCss?: string;
 	showSignature?: boolean,
 	enableScreenshotUpload?: boolean
+	showAiMessageIndicator?: boolean
 	signature?: {
 		partnerLogoUrl: string,
 		partnerLogoStyle: string,

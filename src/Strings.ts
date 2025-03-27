@@ -15,6 +15,7 @@ export interface Strings {
     uploadFile: string;
     speak: string;
     uploadFileFailedSize: string;
+    aiMessageTitle: string;
   }
   
   interface LocalizedStrings {
@@ -40,6 +41,7 @@ export interface Strings {
       speak: 'Speak',
       uploadFileFailedSize:
         'The file is too large to upload. The maximum allowed size is 4 MB. Please choose a smaller file.',
+      aiMessageTitle: 'This response was generated with the help of artificial intelligence. The information may not always be accurate, up-to-date, or binding. Please verify important conclusions using reliable sources.',
     },
     'ja-jp': {
       title: 'チャット',
@@ -57,7 +59,8 @@ export interface Strings {
       listeningIndicator: '聴いてます...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'この回答は人工知能によって生成されたものです。情報が常に正確、最新、または信頼できるとは限りません。重要な判断を下す前に、信頼できる情報源で確認してください。',
     },
     'nb-no': {
       title: 'Chat',
@@ -75,7 +78,8 @@ export interface Strings {
       listeningIndicator: 'Lytter...',
       uploadFile: 'Last opp fil',
       speak: 'Snakk',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Dette svaret er generert av kunstig intelligens. Informasjonen er kanskje ikke alltid nøyaktig, oppdatert eller bindende. Vennligst bekreft viktige konklusjoner med pålitelige kilder.',
     },
     'da-dk': {
       title: 'Chat',
@@ -93,7 +97,8 @@ export interface Strings {
       listeningIndicator: 'Lytter...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Dette svar er genereret ved hjælp af kunstig intelligens. Oplysningerne er ikke nødvendigvis altid præcise, opdaterede eller bindende. Bekræft venligst vigtige konklusioner med pålidelige kilder.',
     },
     'de-de': {
       title: 'Chat',
@@ -113,6 +118,7 @@ export interface Strings {
       speak: '',
       uploadFileFailedSize:
         'Die Datei ist zu groß zum Hochladen. Bitte wählen Sie eine kleinere Datei.',
+        aiMessageTitle: 'Diese Antwort wurde mit Hilfe künstlicher Intelligenz generiert. Die Informationen sind möglicherweise nicht immer genau, aktuell oder verbindlich. Bitte überprüfen Sie wichtige Schlussfolgerungen anhand verlässlicher Quellen.',
     },
     'pl-pl': {
       title: 'Chat',
@@ -130,7 +136,8 @@ export interface Strings {
       listeningIndicator: 'Słuchanie...',
       uploadFile: 'Wyślij plik',
       speak: 'Mów',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Этот ответ сгенерирован с использованием искусственного интеллекта. Информация может быть неточной, устаревшей или не иметь юридической силы. Пожалуйста, перепроверьте важные выводы в надёжных источниках.',
     },
     'ru-ru': {
       title: 'Чат',
@@ -148,7 +155,8 @@ export interface Strings {
       listeningIndicator: 'прослушивание...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Этот ответ сгенерирован с использованием искусственного интеллекта. Информация может быть неточной, устаревшей или не иметь юридической силы. Пожалуйста, перепроверьте важные выводы в надёжных источниках.',
     },
     'nl-nl': {
       title: 'Chat',
@@ -166,7 +174,8 @@ export interface Strings {
       listeningIndicator: 'Aan het luisteren...',
       uploadFile: 'Bestand uploaden',
       speak: 'Spreek',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: '',
     },
     'lv-lv': {
       title: 'Tērzēšana',
@@ -184,7 +193,8 @@ export interface Strings {
       listeningIndicator: 'Klausoties...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Šī atbilde ir ģenerēta, izmantojot mākslīgo intelektu. Informācija ne vienmēr var būt precīza, aktuāla vai saistoša. Lūdzu, pārbaudiet svarīgus secinājumus no uzticamiem avotiem.',
     },
     'pt-br': {
       title: 'Bate-papo',
@@ -204,6 +214,7 @@ export interface Strings {
       speak: '',
       uploadFileFailedSize:
         'O arquivo é muito grande para ser carregado. Escolha um arquivo menor.',
+        aiMessageTitle: 'Esta resposta foi gerada com o auxílio de inteligência artificial. As informações podem não ser sempre precisas, atualizadas ou vinculativas. Por favor, verifique conclusões importantes com fontes confiáveis.',
     },
     'fr-fr': {
       title: 'Chat',
@@ -223,6 +234,7 @@ export interface Strings {
       speak: '',
       uploadFileFailedSize:
         'Le fichier est trop volumineux pour être téléchargé. Veuillez choisir un fichier plus petit.',
+        aiMessageTitle: 'Cette réponse a été générée à l’aide de l’intelligence artificielle. Les informations peuvent ne pas être toujours exactes, à jour ou juridiquement contraignantes. Veuillez vérifier les conclusions importantes auprès de sources fiables.',
     },
     'es-es': {
       title: 'Chat',
@@ -242,6 +254,7 @@ export interface Strings {
       speak: '',
       uploadFileFailedSize:
         'El archivo es demasiado grande para cargar. Por favor, elige un archivo más pequeño.',
+        aiMessageTitle: 'Esta respuesta ha sido generada mediante inteligencia artificial. La información puede no ser siempre precisa, actualizada o vinculante. Por favor, verifica las conclusiones importantes con fuentes fiables.',
     },
     'el-gr': {
       title: 'Συνομιλία',
@@ -259,7 +272,8 @@ export interface Strings {
       listeningIndicator: 'Ακούγοντας...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Αυτή η απάντηση δημιουργήθηκε με τη βοήθεια τεχνητής νοημοσύνης. Οι πληροφορίες ενδέχεται να μην είναι πάντα ακριβείς, επίκαιρες ή δεσμευτικές. Παρακαλώ επαληθεύστε τα σημαντικά συμπεράσματα με αξιόπιστες πηγές.',
     },
     'it-it': {
       title: 'Chat',
@@ -279,6 +293,7 @@ export interface Strings {
       speak: '',
       uploadFileFailedSize:
         'Il file è troppo grande per il caricamento. Scegli un file più piccolo.',
+        aiMessageTitle: 'Questa risposta è stata generata con l’ausilio dell’intelligenza artificiale. Le informazioni potrebbero non essere sempre accurate, aggiornate o vincolanti. Si prega di verificare le conclusioni importanti con fonti affidabili.',
     },
     'zh-hans': {
       title: '聊天',
@@ -296,7 +311,8 @@ export interface Strings {
       listeningIndicator: '正在倾听...',
       uploadFile: '上传文件',
       speak: '发言',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: '此回答由人工智能生成。信息可能并非始终准确、最新或具约束力。请通过可靠来源核实重要结论。',
     },
     'zh-hant': {
       title: '聊天',
@@ -314,7 +330,8 @@ export interface Strings {
       listeningIndicator: '正在聆聽...',
       uploadFile: '上載檔案',
       speak: '發言',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: '此回覆由人工智慧生成。資訊可能並非總是準確、最新或具約束力。請透過可靠來源查證重要結論。',
     },
     'zh-yue': {
       title: '傾偈',
@@ -332,7 +349,8 @@ export interface Strings {
       listeningIndicator: '聽緊你講嘢...',
       uploadFile: '上載檔案',
       speak: '講嘢',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: '呢個答案係由人工智能生成。資料未必一定準確、最新或者具約束力。請喺可靠來源中確認重要結論。',
     },
     'cs-cz': {
       title: 'Chat',
@@ -350,7 +368,8 @@ export interface Strings {
       listeningIndicator: 'Poslouchám...',
       uploadFile: 'Nahrát soubor',
       speak: 'Použít hlas',
-      uploadFileFailedSize: 'Soubor je pro nahrání příliš velký. Vyberte prosím menší soubor.'
+      uploadFileFailedSize: 'Soubor je pro nahrání příliš velký. Vyberte prosím menší soubor.',
+      aiMessageTitle: 'Tato odpověď byla vygenerována pomocí umělé inteligence. Informace nemusí být vždy přesné, aktuální nebo závazné. Důležité závěry si prosím ověřte z důvěryhodných zdrojů.',
     },
     'sk-sk': {
       title: 'Chat',
@@ -368,7 +387,8 @@ export interface Strings {
       listeningIndicator: 'Poslouchám...',
       uploadFile: 'Nahrať súbor',
       speak: 'Použít hlas',
-      uploadFileFailedSize: 'Súbor je príliš veľký na odovzdanie. Vyberte menší súbor.'
+      uploadFileFailedSize: 'Súbor je príliš veľký na odovzdanie. Vyberte menší súbor.',
+      aiMessageTitle: 'Táto odpoveď bola vygenerovaná pomocou umelej inteligencie. Informácie nemusia byť vždy presné, aktuálne alebo záväzné. Dôležité závery si, prosím, overte z dôveryhodných zdrojov.',
     },
     'ko-kr': {
       title: '채팅',
@@ -386,7 +406,8 @@ export interface Strings {
       listeningIndicator: '수신중...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: '이 답변은 인공지능에 의해 생성되었습니다. 정보가 항상 정확하거나 최신이거나 법적 구속력이 있을 수는 없습니다. 중요한 결론은 신뢰할 수 있는 출처를 통해 확인해 주세요.',
     },
     'hu-hu': {
       title: 'Csevegés',
@@ -404,7 +425,8 @@ export interface Strings {
       listeningIndicator: 'Figyelés...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Ez a válasz mesterséges intelligencia segítségével készült. Az információk nem feltétlenül pontosak, naprakészek vagy kötelező érvényűek. Kérjük, a fontos következtetéseket megbízható forrásból ellenőrizze.',
     },
     'sv-se': {
       title: 'Chatt',
@@ -422,7 +444,8 @@ export interface Strings {
       listeningIndicator: 'Lyssnar...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Detta svar har genererats med hjälp av artificiell intelligens. Informationen är inte alltid korrekt, uppdaterad eller bindande. Vänligen bekräfta viktiga slutsatser med tillförlitliga källor.',
     },
     'tr-tr': {
       title: 'Sohbet',
@@ -440,7 +463,8 @@ export interface Strings {
       listeningIndicator: 'Dinliyor...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Bu yanıt yapay zeka tarafından oluşturulmuştur. Bilgiler her zaman doğru, güncel veya bağlayıcı olmayabilir. Önemli sonuçları lütfen güvenilir kaynaklardan doğrulayın.',
     },
     'pt-pt': {
       title: 'Chat',
@@ -458,7 +482,8 @@ export interface Strings {
       listeningIndicator: 'A Escutar...',
       uploadFile: '',
       speak: '',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Esta resposta foi gerada com recurso a inteligência artificial. As informações podem não ser sempre precisas, atualizadas ou vinculativas. Por favor, confirme conclusões importantes com fontes fidedignas.',
     },
     'fi-fi': {
       title: 'Chat',
@@ -476,7 +501,8 @@ export interface Strings {
       listeningIndicator: 'Kuuntelee...',
       uploadFile: 'Lataa tiedosto',
       speak: 'Puhu',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Tämä vastaus on luotu tekoälyn avulla. Tiedot eivät välttämättä ole aina tarkkoja, ajantasaisia tai sitovia. Varmistathan tärkeät johtopäätökset luotettavista lähteistä.',
     },
     'ro-ro': {
       title: 'Conversație',
@@ -494,7 +520,8 @@ export interface Strings {
       listeningIndicator: 'Listening...',
       uploadFile: 'Incarca un fisier',
       speak: 'Speak',
-      uploadFileFailedSize: 'Fișierul este prea mare pentru a fi încărcat. Vă rugăm să alegeți un fișier mai mic.'
+      uploadFileFailedSize: 'Fișierul este prea mare pentru a fi încărcat. Vă rugăm să alegeți un fișier mai mic.',
+      aiMessageTitle: 'Acest răspuns a fost generat cu ajutorul inteligenței artificiale. Informațiile pot să nu fie întotdeauna exacte, actualizate sau obligatorii. Vă rugăm să verificați concluziile importante din surse de încredere.',
     },
     'uk-ua': {
       title: 'Чат',
@@ -512,7 +539,8 @@ export interface Strings {
       listeningIndicator: 'Завантажте файл',
       uploadFile: 'Завантажте файл',
       speak: 'Використовуйте голос',
-      uploadFileFailedSize: 'Файл завеликий для завантаження. Виберіть файл меншого розміру.'
+      uploadFileFailedSize: 'Файл завеликий для завантаження. Виберіть файл меншого розміру.',
+      aiMessageTitle: 'Цю відповідь згенеровано за допомогою штучного інтелекту. Інформація може бути неточною, неактуальною або необов’язковою. Будь ласка, перевіряйте важливі висновки з надійних джерел.',
     },
     'sr-rs': {
       title: 'Chat',
@@ -530,7 +558,8 @@ export interface Strings {
       listeningIndicator: 'Otpremite datoteku',
       uploadFile: 'Otpremite datoteku',
       speak: 'Govorite',
-      uploadFileFailedSize: ''
+      uploadFileFailedSize: '',
+      aiMessageTitle: 'Ovaj odgovor je generisan pomoću veštačke inteligencije. Informacije možda nisu uvek tačne, ažurne ili obavezujuće. Molimo vas da važne zaključke proverite iz pouzdanih izvora.',
     },
   };
   

@@ -5,6 +5,14 @@ function isSafari() {
 }
 
 export const BaseTheme = (theme: Theme) => `
+    .bootbox.modal {
+      z-index: 100002 !important;
+    }
+
+    .modal-backdrop {
+      z-index: 100001 !important;
+    }
+
     body.feedbot-disabled div.feedbot {
         display: none;
     }
@@ -335,7 +343,7 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-from-bot .wc-message-content-type-message {
       float: left;
-      max-width: calc(100% - 140px);
+      max-width: calc(100% - 183px);
     }
 
     .wc-message-type-message.wc-message-from-bot {
@@ -344,7 +352,7 @@ export const BaseTheme = (theme: Theme) => `
     
     .wc-message-buttons {
       float: left;
-      padding-left: 16px;
+      padding-left: 8px;
     }
 
     .wc-message-buttons>div {
@@ -365,6 +373,27 @@ export const BaseTheme = (theme: Theme) => `
       fill: #e5e5e5 !important;
       visibility: visible;
       cursor: wait;
+    }
+
+    .wc-message-buttons>.wc-message-button-copy {
+      width: 17px;
+      height: 17px;
+      padding-top: 12px;
+    }
+
+    .wc-message-buttons>.wc-message-button-ai {
+      width: 17px;
+      height: 17px;
+      padding-top: 12px;
+      visibility: visible;
+      fill: ${theme.mainColor};
+      cursor: auto;
+      opacity: 0.7;
+      ${!theme.showAiMessageIndicator ? `display: none;` : ''}
+    }
+
+    .wc-message-buttons>.wc-message-button-ai:hover {
+      fill: ${theme.mainColor};
     }
 
     .wc-message-buttons.wc-rating-in-progress>.wc-message-button-info {

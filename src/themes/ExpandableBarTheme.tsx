@@ -92,4 +92,17 @@ export const ExpandableBarTheme = (theme: Theme) => `
   .wc-carousel .wc-hscroll > ul > li > .wc-card > div > .ac-container > .ac-container .ac-image{
     border-radius: 5px 5px 0 0;
   }
+
+  .wc-message-button-copy {
+    display: none !important;
+  }
+
+  .wc-message-buttons>div {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .wc-message-from-bot .wc-message-content-type-message {
+    max-width:calc(100% - 112px);
+  }
 `

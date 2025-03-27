@@ -125,7 +125,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 
         props.theme.showSignature = !config.hideSignature
         props.theme.signature = config.signature || {}
-
+        props.theme.showAiMessageIndicator = !!config.showAiMessageIndicator
         props.theme.enableScreenshotUpload = !!config.enableScreenshotUpload
 
         if (config.showInput && !props.hasOwnProperty("disableInputWhenNotNeeded")) {
