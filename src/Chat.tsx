@@ -347,18 +347,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 				// 								}
                 //     }
                 // };
-                if (this.props.initialMessage) {
-                    botConnection
-                        .postActivity({
-                            from: this.props.user,
-                            type: 'message',
-                            text: this.props.initialMessage,
-                        })
-                        .subscribe(
-                            (id: any) => konsole.log('Initial message sent successfully:', id),
-                            (error: any) => konsole.log('Failed to send initial message:', error)
-                        );
-                }
+                
 
                 //return botConnection.postActivityOriginal(newActivity);
             /*} else if (this.smartsupp && activity.type === "message") {
@@ -523,6 +512,20 @@ export class Chat extends React.Component<ChatProps, {}> {
             (activity: any) => this.handleIncomingActivity(activity),
             (error: any) => konsole.log("activity$ error", error)
         );
+
+        if (this.props.initialMessage) {
+            this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs'));
+            /*botConnection
+                .postActivity({
+                    from: this.props.user,
+                    type: 'message',
+                    text: this.props.initialMessage,
+                })
+                .subscribe(
+                    (id: any) => konsole.log('Initial message sent successfully:', id),
+                    (error: any) => konsole.log('Failed to send initial message:', error)
+                );*/
+        }
 
         if (this.props.selectedActivity) {
             this.selectedActivitySubscription = this.props.selectedActivity.subscribe(activityOrID => {
