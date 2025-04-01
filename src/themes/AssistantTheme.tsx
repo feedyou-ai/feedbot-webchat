@@ -2,20 +2,25 @@ import { BaseTheme } from './BaseTheme'
 import { Theme } from './index'
 
 export const AssistantTheme = (theme: Theme) => {
-  const calculateSecondaryColor = (primaryColor: string): string => {
-    // Simple logic to calculate a lighter shade of the primary color
-    const lightenColor = (color: string, amount: number): string => {
-      const num = parseInt(color.replace("#", ""), 16)
-      const r = Math.min(255, (num >> 16) + amount)
-      const g = Math.min(255, ((num >> 8) & 0x00ff) + amount)
-      const b = Math.min(255, (num & 0x0000ff) + amount)
-      return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, "0")}`
-    }
 
-    return lightenColor(primaryColor, 30)
+  const lightenColor = (color: string, amount: number): string => {
+    const num = parseInt(color.replace("#", ""), 16)
+    const r = Math.min(255, (num >> 16) + amount)
+    const g = Math.min(255, ((num >> 8) & 0x00ff) + amount)
+    const b = Math.min(255, (num & 0x0000ff) + amount)
+    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, "0")}`
   }
 
-  const secondaryColor = calculateSecondaryColor(theme.mainColor || '#000000')
+
+
+  const generateConicGradient = (mainColor: string): string => {
+    const lighter1 = lightenColor(mainColor, 50);
+    const lighter2 = lightenColor(mainColor, 100);
+
+    return `conic-gradient(from var(--angle), ${mainColor},${lighter1}, ${lighter2}, ${lighter2}, ${lighter1}, ${mainColor})`;
+  };
+
+  const secondaryColor = lightenColor(theme.mainColor, 30)
   
   return `
 @keyframes spin{
@@ -120,7 +125,7 @@ export const AssistantTheme = (theme: Theme) => {
   position: absolute;
   height: 100%;
   width: 100%;
-  background-image: conic-gradient(from var(--angle), #ff4545,rgb(255, 46, 46),rgb(255, 163, 163),rgb(255, 240, 240), rgb(255, 240, 240), rgb(255, 163, 163), rgb(255, 46, 46), #ff4545);
+  background-image: ${generateConicGradient(theme.mainColor || '#ff4545')};
   top: 50%;
   left: 50%;
   translate: -50% -50%;
