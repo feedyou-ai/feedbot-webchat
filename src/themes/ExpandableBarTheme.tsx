@@ -102,6 +102,11 @@ export const ExpandableBarTheme = (theme: Theme) => `
     height: 15px !important;
   }
 
+  .wc-message-buttons>div.wc-message-button-ai {
+      width: 18px;
+      height: 18px;
+    }
+
   .wc-message-from-bot .wc-message-content-type-message {
     max-width:calc(100% - 112px);
   }

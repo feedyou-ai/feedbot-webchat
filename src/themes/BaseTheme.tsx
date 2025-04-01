@@ -382,9 +382,7 @@ export const BaseTheme = (theme: Theme) => `
     }
 
     .wc-message-buttons>.wc-message-button-ai {
-      width: 17px;
-      height: 17px;
-      padding-top: 12px;
+      padding-top: 11px;
       visibility: visible;
       fill: ${theme.mainColor};
       cursor: auto;
