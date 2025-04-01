@@ -18,39 +18,6 @@ export const AssistantTheme = (theme: Theme) => {
   const secondaryColor = calculateSecondaryColor(theme.mainColor || '#000000')
   
   return `
-.card{
-  margin: 0 auto;
-  text-align: center;
-  border-radius: 20px;
-  position: relative;
-  width: 80%;
-  max-width: 500px;
-}
-
-@property --angle{
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.card::after, .card::before{
-  content: '';
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  background-image: conic-gradient(from var(--angle), #ff4545, #d3d3d3, #a9a9a9, #d3d3d3, #ff4545);
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
-  z-index: -1;
-  padding: 1px;
-  border-radius: 20px;
-  animation: 10s spin linear infinite;
-}
-.card::before{
-  filter: blur(0.8rem);
-  opacity: 0.8;
-}
 @keyframes spin{
   from{
     --angle: 0deg;
@@ -118,18 +85,54 @@ export const AssistantTheme = (theme: Theme) => {
   }
 
   .chat-input {
-    border: 1px solid ${theme.mainColor};
-    border-radius: 20px;
-    padding: 10px 15px;
-    width: 468px;
+    border: none;
+    padding: 15px;
+    border-radius: 15px;
+    width: calc(100% - 30px);
+    height: calc(100% - 30px);
     font-size: 16px;
     outline: none;
+    resize: none;
     transition: border-color 0.3s ease;
+    font-family: inherit;
   }
 
   .chat-input:focus {
     border-color: ${secondaryColor};
   }
+
+  .card{
+  width: 500px;
+    height: 100px;
+  margin: 30px auto;
+  border-radius: 15px;
+  position: relative;
+}
+
+@property --angle{
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.card::after, .card::before{
+  content: '';
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-image: conic-gradient(from var(--angle), #ff4545,rgb(255, 46, 46),rgb(255, 163, 163),rgb(255, 240, 240), rgb(255, 240, 240), rgb(255, 163, 163), rgb(255, 46, 46), #ff4545);
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+  padding: 1px;
+  border-radius: 15px;
+  animation: 10s spin linear infinite;
+}
+.card::before{
+  filter: blur(0.8rem);
+  opacity: 0.8;
+}
 
   .feedbot-logo {
     height: 10%;

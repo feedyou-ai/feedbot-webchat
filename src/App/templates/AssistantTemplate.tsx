@@ -29,7 +29,7 @@ export class AssistantTemplate extends React.Component<Props, { introMode: boole
 
     handleExampleQueryClick = (query: string) => {
         this.setState({ inputValue: query }, () => {
-            const inputElement = document.getElementById('chat-input') as HTMLInputElement
+            const inputElement = document.getElementById('chat-input') as HTMLTextAreaElement
             if (inputElement) {
                 inputElement.focus()
                 inputElement.setSelectionRange(query.length, query.length)
@@ -37,11 +37,11 @@ export class AssistantTemplate extends React.Component<Props, { introMode: boole
         })
     }
 
-    handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         this.setState({ inputValue: event.target.value })
     }
 
-    handleInputKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    handleInputKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && this.state.inputValue.trim() !== '') {
             const message = this.state.inputValue.trim()
 
@@ -58,14 +58,14 @@ export class AssistantTemplate extends React.Component<Props, { introMode: boole
             <div className="intro-section">
                 <h1 className="intro-title">{welcomeTitle}</h1>
 				<div className='card'>
-                <input
+                <textarea
                     id="chat-input"
                     className="chat-input"
-                    type="text"
                     placeholder="Type your message..."
                     value={this.state.inputValue}
                     onChange={this.handleInputChange}
                     onKeyPress={this.handleInputKeyPress}
+                    rows={5}
                 />
 				</div>
                 <div className="example-queries">

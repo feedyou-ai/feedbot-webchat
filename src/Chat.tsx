@@ -331,25 +331,25 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         botConnection.postActivityOriginal = botConnection.postActivity
         
-        //botConnection.postActivity = (activity: any) => {
-            // send userData only once during initial event
-            //if (activity.name === 'beginIntroDialog') {
-                // const newActivity = {
-                //     ...activity,
-                //     channelData: {
-                //         ...activity.channelData,
-                //         userData: {
-                //             ...(this.props.userData || {}),
-                //             ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
-                //             ...getLocaleUserData(this.props.locale),
-                //             ...getReferrerUserData(), 
-	            //               "user-agent":  navigator.userAgent
-				// 								}
-                //     }
-                // };
+        botConnection.postActivity = (activity: any) => {
+            //send userData only once during initial event
+            if (activity.name === 'beginIntroDialog') {
+                const newActivity = {
+                    ...activity,
+                    channelData: {
+                        ...activity.channelData,
+                        userData: {
+                            ...(this.props.userData || {}),
+                            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
+                            ...getLocaleUserData(this.props.locale),
+                            ...getReferrerUserData(), 
+	                          "user-agent":  navigator.userAgent
+												}
+                    }
+                };
                 
 
-                //return botConnection.postActivityOriginal(newActivity);
+                return botConnection.postActivityOriginal(newActivity);
             /*} else if (this.smartsupp && activity.type === "message") {
                 console.log('Smartsupp send', activity.text, activity)
                 this.smartsupp.chatMessage({
@@ -359,10 +359,10 @@ export class Chat extends React.Component<ChatProps, {}> {
                     },
                 })
                 return new Observable()*/
-            // } else {
-            //     return botConnection.postActivityOriginal(activity);
-            // }
-        //}
+            } else {
+                return botConnection.postActivityOriginal(activity);
+            }
+        }
 
         if (this.props.onEvent) {
             Object.keys(this.props.onEvent).forEach((eventName) => {
@@ -515,16 +515,6 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         if (this.props.initialMessage) {
             this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs'));
-            /*botConnection
-                .postActivity({
-                    from: this.props.user,
-                    type: 'message',
-                    text: this.props.initialMessage,
-                })
-                .subscribe(
-                    (id: any) => konsole.log('Initial message sent successfully:', id),
-                    (error: any) => konsole.log('Failed to send initial message:', error)
-                );*/
         }
 
         if (this.props.selectedActivity) {
