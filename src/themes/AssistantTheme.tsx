@@ -51,6 +51,7 @@ export const AssistantTheme = (theme: Theme) => {
     align-items: center;
     justify-content: center;
     height: 100vh;
+    margin-top: 50px;
     text-align: center;
     translate: 0px -10%;
   }
@@ -110,6 +111,7 @@ export const AssistantTheme = (theme: Theme) => {
 
   .card{
     width: 600px;
+    max-width: 80%;
     height: 50px;
     margin: 50px auto 65px auto;
     border-radius: 15px;
