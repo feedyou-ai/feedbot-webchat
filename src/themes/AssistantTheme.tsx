@@ -109,7 +109,7 @@ export const AssistantTheme = (theme: Theme) => {
   }
 
   .card{
-    width: 500px;
+    width: 600px;
     height: 50px;
     margin: 50px auto 65px auto;
     border-radius: 15px;
@@ -145,7 +145,7 @@ export const AssistantTheme = (theme: Theme) => {
     height: 40px;
     cursor: pointer;
     z-index: 1000;
-    
+
     background-color: transparent;
     text-align: left;
     padding-top: 0px;
