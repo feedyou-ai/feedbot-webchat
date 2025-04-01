@@ -102,7 +102,7 @@ export class AssistantTemplate extends React.Component<
                 className={`feedbot-wrapper ${this.state.darkMode ? 'dark-mode' : ''}`}
                 data-html2canvas-ignore=""
             >
-                <div className="feedbot-logo">
+                <div className="feedbot-logo" onClick={() => location.reload()}>
                     <img alt="Logo" src={logoSrc} />
                 </div>
 

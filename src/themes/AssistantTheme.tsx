@@ -52,12 +52,18 @@ export const AssistantTheme = (theme: Theme) => {
     justify-content: center;
     height: 100vh;
     text-align: center;
+    translate: 0px -10%;
   }
 
   .intro-title {
-    font-size: 24px;
+    font-size: 30px;
     font-weight: bold;
     margin-bottom: 20px;
+    color: rgb(22, 54, 77);
+  }
+
+  .dark-mode .intro-title {
+    color: rgb(211, 211, 211);
   }
 
   .example-queries {
@@ -69,22 +75,26 @@ export const AssistantTheme = (theme: Theme) => {
   }
 
   .example-query {
+    display: flex;
+    align-items: center;
+    max-width: 250px;
     background-color: ${theme.mainColor};
     color: white;
     border-radius: 20px;
     padding: 10px 15px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: opacity 0.3s ease;
+    opacity: 0.75;
   }
 
   .example-query:hover {
-    background-color: ${secondaryColor};
+    opacity: 1;
   }
 
   .chat-input {
     border: none;
-    padding: 15px;
-    border-radius: 15px;
+    padding: 20px;
+    border-radius: 32px;
     width: calc(100% - 30px);
     height: calc(100% - 30px);
     font-size: 16px;
@@ -99,12 +109,12 @@ export const AssistantTheme = (theme: Theme) => {
   }
 
   .card{
-  width: 500px;
-    height: 100px;
-  margin: 30px auto;
-  border-radius: 15px;
-  position: relative;
-}
+    width: 500px;
+    height: 50px;
+    margin: 50px auto 65px auto;
+    border-radius: 15px;
+    position: relative;
+  }
 
 @property --angle{
   syntax: "<angle>";
@@ -115,15 +125,15 @@ export const AssistantTheme = (theme: Theme) => {
 .card::after, .card::before{
   content: '';
   position: absolute;
-  height: 100%;
-  width: 100%;
+  height: calc(100% + 10px);
+  width: calc(100% + 10px);
   background-image: ${generateConicGradient(theme.mainColor || '#ff4545')};
-  top: 50%;
-  left: 50%;
+  top: calc(50% + 5px);
+  left: calc(50% + 5px);
   translate: -50% -50%;
   z-index: -1;
   padding: 1px;
-  border-radius: 15px;
+  border-radius: 33px;
   animation: 10s spin linear infinite;
 }
 .card::before{
@@ -132,12 +142,15 @@ export const AssistantTheme = (theme: Theme) => {
 }
 
   .feedbot-logo {
-    height: 10%;
-
+    height: 40px;
+    cursor: pointer;
+    z-index: 1000;
+    
     background-color: transparent;
-    text-align: center;
+    text-align: left;
     padding-top: 0px;
     padding-bottom: 5px;
+    padding-left: 20px;
   }
 
   .feedbot-logo img {
@@ -207,7 +220,7 @@ export const AssistantTheme = (theme: Theme) => {
   }
 
   .dark-mode-toggle {
-    border: 2px solid ${theme.mainColor};
+    border-width: 0px;
     border-radius: 30px;
     position: fixed;
     top: 10px;
