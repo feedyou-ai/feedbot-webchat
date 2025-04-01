@@ -34,23 +34,15 @@ export const AssistantTheme = (theme: Theme) => {
 
   body {
     font-family: Helvetica, Arial;
-    padding: 30px;
-
-    display: -ms-flexbox;
-    display: -webkit-flex;
+    margin: 0; 
+    padding: 0; 
+    width: 100%; 
+    height: 100%;
+    overflow: hidden;
     display: flex;
-    -webkit-flex-direction: row;
-    -ms-flex-direction: row;
-    flex-direction: row;
-    -webkit-flex-wrap: wrap;
-    -ms-flex-wrap: wrap;
-    flex-wrap: wrap;
-    -webkit-justify-content: center;
-    -ms-flex-pack: center;
     justify-content: center;
-    -webkit-align-items: flex-end;
-    -ms-flex-align: end;
-    align-items: flex-end;
+    align-items: center;
+    background-color: '#ffffff';
   }
 
   .intro-section {
@@ -163,34 +155,81 @@ export const AssistantTheme = (theme: Theme) => {
 
   .feedbot-wrapper {
     background-color: transparent;
-    max-width: 900px;
-    min-width: 300px;
-    max-height: 98.5%;
-    min-height: 500px;
-
-    display: -ms-flexbox;
-    display: -webkit-flex;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    max-width: 100%; /* Prevent any max-width restrictions */
+    max-height: 100%; /* Prevent any max-height restrictions */
     display: flex;
-    -webkit-flex-direction: column;
-    -ms-flex-direction: column;
     flex-direction: column;
-
-    position: fixed;
-    top: 2%;
-    left: 2%;
-    right: 2%;
+    position: fixed; /* Ensure it stays fixed to the viewport */
+    top: 0;
+    left: 0;
+    right: 0;
     bottom: 0;
   }
-
-  @media screen and (min-width: 950px) {
-    .feedbot-wrapper {
-      left: calc(50% - 450px);
-    }
+  .feedbot-wrapper .wc-app {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: transparent;
   }
+
+  .wc-app .wc-message-groups {
+    background-color: transparent !important;
+  }
+
+  .wc-app .wc-console {
+    background-color: transparent !important;}
 
   .feedbot-wrapper .feedbot {
     position: relative;
     height: 90%;
+  }
+
+  .feedbot-wrapper.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+  }
+
+  .feedbot-wrapper.dark-mode .chat-input {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border-color: #ffffff;
+  }
+
+  .feedbot-wrapper.dark-mode .example-query {
+    background-color: #333333;
+    color: #ffffff;
+  }
+
+  .feedbot-wrapper.dark-mode .example-query:hover {
+    background-color: #444444;
+  }
+
+  .dark-mode-toggle {
+    border: 2px solid ${theme.mainColor};
+    border-radius: 30px;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #333333;
+    color: #ffffff;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 1000;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .dark-mode-icon {
+    margin-left: 10px;
+  }
+
+  .dark-mode-toggle:hover {
+    background-color: #000;
+    color: #ffffff;
   }
 
   .wc-message-from.wc-message-from-bot {
