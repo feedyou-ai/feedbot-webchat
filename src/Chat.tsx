@@ -218,10 +218,13 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         console.log('Rating ' + value + ' for query ' + activity.channelData.queryId);
 
-        fetch('https://'+this.props.bot.id+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = getRole(urlParams)
+
+        fetch(`https://${this.props.bot.id}.azurewebsites.net/api/messages/kb/${(activity.channelData.modelId || 'KB')}/queries/${activity.channelData.queryPartition}/${activity.channelData.queryId}/rating`,{
             method: 'POST',
             headers: { accept: 'application/json', 'content-type': 'application/json' },
-            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
+            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation, role, channel: "webchat" }),
         }).then(() => {
             callback(true)
         }).catch((err) => {
@@ -884,3 +887,14 @@ function getExplanation(callback: (explanation: string) => void) {
         }
     });
 }
+
+function getRole(urlParams: URLSearchParams) {
+    const roles = ['admin', 'customer', 'user']
+
+    // this goes through all roles and returns the first one that is set in URL
+    const role = roles.find(role => {
+        return urlParams.get(role) !== null
+    })
+
+    return role || "user"
+ }
