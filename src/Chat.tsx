@@ -21,6 +21,9 @@ import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
 import { getFeedyouParam } from './FeedyouParams';
 
+const Swal = require('sweetalert2')
+
+declare var $: any;
 declare const fbq: Function;
 
 interface GaEvent {
@@ -97,6 +100,8 @@ export class Chat extends React.Component<ChatProps, {}> {
 
     private resizeListener = () => this.setSize();
 
+    private _handleCardRating = this.handleCardRating.bind(this);
+    private _handleCardInfo = this.handleCardInfo.bind(this);
     private _handleCardAction = this.handleCardAction.bind(this);
     private _handleKeyDownCapture = this.handleKeyDownCapture.bind(this);
     private _saveChatviewPanelRef = this.saveChatviewPanelRef.bind(this);
@@ -170,7 +175,16 @@ export class Chat extends React.Component<ChatProps, {}> {
     private handleIncomingActivity(activity: Activity) {
         let state = this.store.getState();
         switch (activity.type) {
+            case "event":
+                if (['message-stream','message-stream-chunk'].includes(activity.name) && activity.from.id !== state.connection.user.id) {
+                    this.store.dispatch<ChatActions>({ type: 'Receive_Message', activity: Object.assign({},activity, {type: 'message', text: activity.value})});
+                }
+                break;
             case "message":
+                if (activity.channelData && activity.channelData.alreadyStreamed) {
+                    break
+                }
+
                 this.store.dispatch<ChatActions>({ type: activity.from.id === state.connection.user.id ? 'Receive_Sent_Message' : 'Receive_Message', activity });
                 break;
 
@@ -186,6 +200,52 @@ export class Chat extends React.Component<ChatProps, {}> {
             type: 'Set_Size',
             width: this.chatviewPanelRef.offsetWidth,
             height: this.chatviewPanelRef.offsetHeight
+        });
+    }
+
+    private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
+        if (rating === -1) {
+            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback))
+        } else {
+            this.rate(activity, rating, '', callback)
+        }
+    }
+
+    private rate(activity: Activity, value: number, explanation = '', callback: (rated: boolean) => void) {
+        if (value === -1 && !explanation) {
+            callback(false)
+            return
+        }
+
+        console.log('Rating ' + value + ' for query ' + activity.channelData.queryId);
+
+        fetch('https://'+this.props.bot.id+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
+            method: 'POST',
+            headers: { accept: 'application/json', 'content-type': 'application/json' },
+            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
+        }).then(() => {
+            Swal.fire({
+                icon: "success",
+                title: "Děkujeme za zpětnou vazbu!"
+            });
+            callback(true)
+        }).catch((err) => {
+            console.error('Failed to rate query', err);
+            Swal.fire({
+                icon: "error",
+                title: "Něco se pokazilo",
+                text: "Bohužel se nepodařilo odeslat vaši zpětnou vazbu. Budeme moc rádi, pokud ji zkusíte předat jiným způsobem."
+            });
+            callback(false)
+        })
+
+    }
+
+    private handleCardInfo(activity: Activity) {
+        Swal.fire({
+            width: 1000,
+            title: "Query details",
+            html: activity.channelData.info
         });
     }
 
@@ -588,6 +648,8 @@ export class Chat extends React.Component<ChatProps, {}> {
                           <MessagePane>
                               <History
                                   onCardAction={ this._handleCardAction }
+                                  onCardRating={ this._handleCardRating }
+                                  onCardInfo={ this._handleCardInfo }
                                   ref={ this._saveHistoryRef }
                               />
                           </MessagePane>
@@ -788,4 +850,39 @@ function getIntroDialogId(props: ChatProps): string | undefined {
     }
 
     return props.introDialog && props.introDialog.id ? props.introDialog.id : undefined
+}
+
+function getExplanation(callback: (explanation: string) => void) {
+    Swal.fire({
+        title: 'Zpětná vazba',
+        showCancelButton: true,
+        cancelButtonText: 'Zrušit',
+        html: `
+          <p style="margin-top:32px;text-align:left;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný.</p>
+          <form style="text-align:left;">
+            <div class="form-group">
+                <label for="swal-problem"><b>Stručně prosím popište, v čem je u vygenerované odpovědi problém a ideálně i to, jak by správná odpověď měla vypadat: <span style="color: red;">*</span></b></label>
+                <textarea class="form-control" id="swal-problem" rows="3"></textarea>
+            </div>
+          </form>
+        `,
+        /*
+            <div class="form-group">
+                <label for="swal-sources"><b>Prosíme také o uvedení dokumentu (ideálně konkrétní kapitoly) popřípadě URL adresy, kde se nachází informace, ze kterých bychom měli při sestavování správné odpovědi čerpat:</b></label>
+                <textarea class="form-control" style="width: calc(100% - 1.5rem);" id="swal-sources" rows="3"></textarea>
+            </div>
+        */
+        focusConfirm: false,
+        preConfirm: () => {
+            const problem = (document.getElementById("swal-problem") as any).value
+            const sources = '' //(document.getElementById("swal-sources") as any).value
+            document.getElementById("swal-problem").style.border = "2px red solid"
+            return problem ? [problem, sources].join('\n\n') : false
+        },
+        confirmButtonText: 'Odeslat'
+    }).then((result: any) => {
+        if (result.value) {
+            callback(result.value);
+        }
+    })
 }
