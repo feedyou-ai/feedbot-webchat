@@ -5,7 +5,6 @@
     <title>Chatbot</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css">
     <style>
       *, ::after, ::before {
         box-sizing: initial;
@@ -13,24 +12,13 @@
     </style>
   </head>
   <body>
-    <!-- JS dependencies -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Bootstrap 4 dependency -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.min.js"></script>
-
-    <!-- bootbox code -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/6.0.0/bootbox.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/6.0.0/bootbox.locales.min.js"></script>
-
     <!-- PUT THIS CODE RIGHT BEFORE THE </BODY> TAG (you can also use some tag manager like GTM) AND REPLACE ... WITH BOT ID -->
     <!--  • design and behavior of webchat could be configured remotely from Feedyou Designer -->
     <!--  • it is needed to append #feedbot-test-mode to the URL to show chatbot window during development -->
-    <link href="https://cdn.feedyou.ai/webchat/feature/knowledge-base/botchat.css" rel="stylesheet" />
+    <link href="https://cdn.feedyou.ai/webchat/master/botchat.css" rel="stylesheet" />
     <script type="text/javascript">
-      (function (f,y,b,o,t,s){(t = y.createElement(b)), (s = y.getElementsByTagName(b)[0]);t.async = 1;t.src = "https://cdn.feedyou.ai/webchat/feature/knowledge-base/botchat.js";t.onload=function(){BotChat.App({
-        bot: { id: "feedbot-pardubickykraj" }, // try "feedbot-demo-webchat" during testing
-        channel: {id:"gkh3ks"}
+      (function (f,y,b,o,t,s){(t = y.createElement(b)), (s = y.getElementsByTagName(b)[0]);t.async = 1;t.src = "https://cdn.feedyou.ai/webchat/master/botchat.js";t.onload=function(){BotChat.App({
+        bot: { id: "feedbot-..." } // try "feedbot-demo-webchat" during testing
       })};s.parentNode.insertBefore(t, s);})(window, document, "script");
     </script>
     <!-- --------------------------------------------------------------------------------------- -->

@@ -21,7 +21,8 @@ import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
 import { getFeedyouParam } from './FeedyouParams';
 
-declare var bootbox: any;
+const Swal = require('sweetalert2')
+
 declare var $: any;
 declare const fbq: Function;
 
@@ -221,26 +222,33 @@ export class Chat extends React.Component<ChatProps, {}> {
         const urlParams = new URLSearchParams(window.location.search);
         const role = getRole(urlParams)
 
-        fetch(`https://${this.props.bot.id}.azurewebsites.net/api/messages/kb/${(activity.channelData.modelId || 'KB')}/queries/${activity.channelData.queryPartition}/${activity.channelData.queryId}/rating`,{
+        fetch('https://'+this.props.bot.id+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
             method: 'POST',
             headers: { accept: 'application/json', 'content-type': 'application/json' },
             body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation, role, channel: "webchat" }),
         }).then(() => {
+            Swal.fire({
+                icon: "success",
+                title: "Děkujeme za zpětnou vazbu!"
+            });
             callback(true)
         }).catch((err) => {
             console.error('Failed to rate query', err);
-            bootbox.alert('Bohužel se nepodařilo odeslat vaši zpětnou vazbu. Budeme moc rádi, pokud ji zkusíte předat jiným způsobem.');
+            Swal.fire({
+                icon: "error",
+                title: "Něco se pokazilo",
+                text: "Bohužel se nepodařilo odeslat vaši zpětnou vazbu. Budeme moc rádi, pokud ji zkusíte předat jiným způsobem."
+            });
             callback(false)
         })
 
     }
 
     private handleCardInfo(activity: Activity) {
-        bootbox.dialog({
+        Swal.fire({
+            width: 1000,
             title: "Query details",
-            size: 'lg',
-            buttons: {cancel: {label: "Close",callback: function(){}}},
-            message: activity.channelData.info
+            html: activity.channelData.info
         });
     }
 
@@ -436,7 +444,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             .filter((activity: any) => activity.type === "event" && activity.name === "log")
             .subscribe((activity: any) => {
                 if (Array.isArray(activity.value)) {
-                    const logs: any[] = activity.value
+                    const logs: any[] = [].concat(activity.value) // unfreeeze so unshift will not fail
                     logs.unshift('Feedyou WebChat log')
                     console.log.apply(this, logs)
                 } else {
@@ -847,47 +855,6 @@ function getIntroDialogId(props: ChatProps): string | undefined {
     return props.introDialog && props.introDialog.id ? props.introDialog.id : undefined
 }
 
-function getExplanation(callback: (explanation: string) => void) {
-    bootbox.dialog({
-        title: "Zpětná vazba",
-        message: `
-            <p style="margin-top:32px;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný.</p>
-            <form id="multiInputForm">
-                <div class="form-group">
-                    <label for="problem"><b>Stručně prosím popište, v čem je u vygenerované odpovědi problém a ideálně i to, jak by správná odpověď měla vypadat.</b></label>
-                    <textarea class="form-control" id="problem" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="sources"><b>Prosíme také o uvedení dokumentu (ideálně konkrétní kapitoly) popřípadě URL adresy, kde se nachází informace, ze kterých bychom měli při sestavování správné odpovědi čerpat.</b></label>
-                    <textarea class="form-control" id="sources" rows="3"></textarea>
-                </div>
-            </form>
-        `,
-        buttons: {
-            cancel: {
-                label: "Zrušit",
-                className: "btn-secondary"
-            },
-            save: {
-                label: "Odeslat",
-                className: "btn-primary",
-                callback: function() {
-                    const problem = String($('#problem').val()).trim();
-                    const sources = String($('#sources').val()).trim();
-
-                    if (!problem) {
-                        bootbox.alert('Prosím vyplňte alespoň první pole.');
-                        return false
-                    }
-
-                    callback(problem + '\n\n' + sources);
-                    return true; // close the dialog
-                }
-            }
-        }
-    });
-}
-
 function getRole(urlParams: URLSearchParams) {
     const roles = ['admin', 'customer', 'user']
 
@@ -898,3 +865,38 @@ function getRole(urlParams: URLSearchParams) {
 
     return role || "user"
  }
+
+function getExplanation(callback: (explanation: string) => void) {
+    Swal.fire({
+        title: 'Zpětná vazba',
+        showCancelButton: true,
+        cancelButtonText: 'Zrušit',
+        html: `
+          <p style="margin-top:32px;text-align:left;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný.</p>
+          <form style="text-align:left;">
+            <div class="form-group">
+                <label for="swal-problem"><b>Stručně prosím popište, v čem je u vygenerované odpovědi problém a ideálně i to, jak by správná odpověď měla vypadat: <span style="color: red;">*</span></b></label>
+                <textarea class="form-control" id="swal-problem" rows="3"></textarea>
+            </div>
+          </form>
+        `,
+        /*
+            <div class="form-group">
+                <label for="swal-sources"><b>Prosíme také o uvedení dokumentu (ideálně konkrétní kapitoly) popřípadě URL adresy, kde se nachází informace, ze kterých bychom měli při sestavování správné odpovědi čerpat:</b></label>
+                <textarea class="form-control" style="width: calc(100% - 1.5rem);" id="swal-sources" rows="3"></textarea>
+            </div>
+        */
+        focusConfirm: false,
+        preConfirm: () => {
+            const problem = (document.getElementById("swal-problem") as any).value
+            const sources = '' //(document.getElementById("swal-sources") as any).value
+            document.getElementById("swal-problem").style.border = "2px red solid"
+            return problem ? [problem, sources].join('\n\n') : false
+        },
+        confirmButtonText: 'Odeslat'
+    }).then((result: any) => {
+        if (result.value) {
+            callback(result.value);
+        }
+    })
+}

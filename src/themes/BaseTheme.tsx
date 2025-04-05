@@ -233,7 +233,6 @@ export const BaseTheme = (theme: Theme) => `
     @media (max-width: 450px) {
       .feedbot-wrapper .wc-card {
         border: 1px solid #d2dde5;
-        width: 198px;
       }
       .feedbot-wrapper .wc-list.tiles .wc-card {
         border: none;
@@ -408,28 +407,6 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-button-info {
       padding: 12px 6px 12px 6px !important;
-    }
-
-    .bootbox .modal-xl {
-      max-width: 80% !important;
-    }
-
-    .bootbox .modal-dialog .bootbox-body {
-      margin-top: -2rem;
-    }
-
-    .bootbox .modal-dialog h2 {
-      font-size: 1.5rem;
-      margin-top: 2rem;
-    } 
-
-    .bootbox .modal-dialog h3 {
-      font-size: 1.3rem;
-      margin-top: 1.5rem;
-    } 
-
-    .bootbox .form-control {
-      width: calc(100% - 25px);
     }
 
     ${theme.enableScreenshotUpload && !isSafari() ? `

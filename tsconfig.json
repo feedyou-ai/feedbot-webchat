@@ -20,5 +20,8 @@
         "src/BotChat.ts",
         "src/jspeech.d.ts",
         "src/simple-update-in.d.ts"
+    ],
+    "exclude": [
+        "node_modules/sweetalert2/sweetalert2.d.ts"
     ]
 }
