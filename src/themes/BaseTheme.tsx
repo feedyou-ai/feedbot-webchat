@@ -5,14 +5,6 @@ function isSafari() {
 }
 
 export const BaseTheme = (theme: Theme) => `
-    .bootbox.modal {
-      z-index: 100002 !important;
-    }
-
-    .modal-backdrop {
-      z-index: 100001 !important;
-    }
-
     body.feedbot-disabled div.feedbot {
         display: none;
     }
@@ -408,28 +400,6 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-button-info {
       padding: 12px 6px 12px 6px !important;
-    }
-
-    .bootbox .modal-xl {
-      max-width: 80% !important;
-    }
-
-    .bootbox .modal-dialog .bootbox-body {
-      margin-top: -2rem;
-    }
-
-    .bootbox .modal-dialog h2 {
-      font-size: 1.5rem;
-      margin-top: 2rem;
-    } 
-
-    .bootbox .modal-dialog h3 {
-      font-size: 1.3rem;
-      margin-top: 1.5rem;
-    } 
-
-    .bootbox .form-control {
-      width: calc(100% - 25px);
     }
 
     ${theme.enableScreenshotUpload && !isSafari() ? `
