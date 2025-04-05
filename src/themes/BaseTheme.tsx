@@ -5,14 +5,6 @@ function isSafari() {
 }
 
 export const BaseTheme = (theme: Theme) => `
-    .bootbox.modal {
-      z-index: 100002 !important;
-    }
-
-    .modal-backdrop {
-      z-index: 100001 !important;
-    }
-
     body.feedbot-disabled div.feedbot {
         display: none;
     }
