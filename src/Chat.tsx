@@ -858,10 +858,10 @@ function getExplanation(callback: (explanation: string) => void) {
         showCancelButton: true,
         cancelButtonText: 'Zrušit',
         html: `
-          <p style="margin-top:32px;text-align:left;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný.</p>
+          <p style="margin-top:32px;text-align:left;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Vaše zpětná vazba je velmi vítaná.</p>
           <form style="text-align:left;">
             <div class="form-group">
-                <label for="swal-problem"><b>Stručně prosím popište, v čem je u vygenerované odpovědi problém a ideálně i to, jak by správná odpověď měla vypadat: <span style="color: red;">*</span></b></label>
+                <label for="swal-problem"><b>Stručně prosím popište, co by na odpovědi mohlo být lépe: <span style="color: red;">*</span></b></label>
                 <textarea class="form-control" id="swal-problem" rows="3"></textarea>
             </div>
           </form>
