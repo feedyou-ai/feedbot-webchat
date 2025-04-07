@@ -352,9 +352,13 @@ export const BaseTheme = (theme: Theme) => `
       padding: 10px 6px 12px 6px;
       float: left;
       fill: #d5d7d8;
-      visibility: hidden;
+      display: none;
       cursor: pointer;
     }
+
+    .wc-message-wrapper:last-child .wc-message-buttons>div {
+      display: block;
+    }   
 
     .wc-message-buttons>div:hover {
       fill: #b0b1b1;
@@ -362,7 +366,7 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-buttons.wc-rating-in-progress>.wc-message-button-vote-up, .wc-message-buttons.wc-rating-in-progress>.wc-message-button-vote-down {
       fill: #e5e5e5 !important;
-      visibility: visible;
+      display: block;
       cursor: wait;
     }
 
@@ -374,7 +378,7 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-buttons>.wc-message-button-ai {
       padding-top: 11px;
-      visibility: visible;
+      display: block;
       fill: ${theme.mainColor};
       cursor: auto;
       opacity: 0.7;
@@ -386,11 +390,11 @@ export const BaseTheme = (theme: Theme) => `
     }
 
     .wc-message-buttons.wc-rating-in-progress>.wc-message-button-info {
-      visibility: visible;
+      display: block;
     }
 
     .wc-message-wrapper:hover .wc-message-buttons>div {
-      visibility: visible;
+      display: block;
     }
 
     .wc-message-button-vote-down {
