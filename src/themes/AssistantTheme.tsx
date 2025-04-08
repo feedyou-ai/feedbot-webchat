@@ -14,10 +14,18 @@ export const AssistantTheme = (theme: Theme) => {
 
 
   const generateConicGradient = (mainColor: string): string => {
-    const lighter1 = lightenColor(mainColor, 50);
-    const lighter2 = lightenColor(mainColor, 100);
+    const adjustColor = (color: string, amount: number): string => {
+      const num = parseInt(color.replace("#", ""), 16);
+      const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+      const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + amount));
+      const b = Math.max(0, Math.min(255, (num & 0x0000ff) + amount));
+      return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, "0")}`;
+    };
 
-    return `conic-gradient(from var(--angle), ${mainColor},${lighter1}, ${lighter2}, ${lighter2}, ${lighter1}, ${mainColor})`;
+    const shade1 = adjustColor(mainColor, 10);
+    const shade2 = adjustColor(mainColor, 30);
+
+    return `conic-gradient(from var(--angle), ${mainColor}, ${shade1}, ${shade2}, ${shade2}, ${shade1}, ${mainColor})`;
   };
 
   const secondaryColor = lightenColor(theme.mainColor, 30)
@@ -94,15 +102,17 @@ export const AssistantTheme = (theme: Theme) => {
 
   .chat-input {
     border: none;
-    padding: 20px;
+    padding: 16px 20px;
+    padding-right: 100px;
     border-radius: 32px;
-    width: calc(100% - 30px);
-    height: calc(100% - 30px);
+    width: 100%;
+    height: 100%;
     font-size: 16px;
     outline: none;
     resize: none;
     transition: border-color 0.3s ease;
     font-family: inherit;
+    box-sizing: border-box;
   }
 
   .chat-input:focus {
@@ -110,8 +120,8 @@ export const AssistantTheme = (theme: Theme) => {
   }
 
   .card{
-    width: 600px;
-    max-width: 80%;
+    width: 100%;
+    max-width: 600px;
     height: 50px;
     margin: 50px auto 65px auto;
     border-radius: 15px;
@@ -127,11 +137,11 @@ export const AssistantTheme = (theme: Theme) => {
 .card::after, .card::before{
   content: '';
   position: absolute;
-  height: calc(100% + 10px);
-  width: calc(100% + 10px);
+  height: 100%;
+  width: 100%;
   background-image: ${generateConicGradient(theme.mainColor || '#ff4545')};
-  top: calc(50% + 5px);
-  left: calc(50% + 5px);
+  top: 50%;
+  left: 50%;
   translate: -50% -50%;
   z-index: -1;
   padding: 1px;
@@ -142,6 +152,32 @@ export const AssistantTheme = (theme: Theme) => {
   filter: blur(0.8rem);
   opacity: 0.8;
 }
+
+  .send-button {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background-color: #ccc;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .send-button.active {
+    background-color: ${theme.mainColor};
+    color: white;
+  }
+
+  .send-button.disabled {
+    background-color: #ccc;
+    color: #999;
+    cursor: default;
+  }
 
   .feedbot-logo {
     height: 40px;
@@ -196,13 +232,18 @@ export const AssistantTheme = (theme: Theme) => {
   .wc-app .wc-console {
     background-color: transparent !important;}
 
+  .wc-app .wc-chatview-panel {
+    width: 1000px;
+    left: calc(50% - 500px);
+  }
+
   .feedbot-wrapper .feedbot {
     position: relative;
-    height: 90%;
+    height: 95%;
   }
 
   .feedbot-wrapper.dark-mode {
-    background-color: #121212;
+    background-color: #191919;
     color: #ffffff;
   }
 
@@ -374,6 +415,45 @@ export const AssistantTheme = (theme: Theme) => {
     background-color: white !important;
     border-color: ${theme.mainColor} !important;
   }
+    @media (max-width: 1200px) {
+    .wc-app .wc-chatview-panel {
+    width: 100%;
+    left: 0;}
+    }
+
+  @media (max-width: 768px) {
+  
+  .intro-title {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+  .example-query {
+    max-width: 200px;
+  }
+
+  .card {
+    max-width: 90%;
+    margin: 20px auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .intro-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .example-query {
+    max-width: 150px;
+  }
+
+
+  .card {
+    max-width: 90%;
+    margin: 15px auto;
+  }
+}
 
   ${BaseTheme(theme)}
 `}

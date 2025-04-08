@@ -61,6 +61,7 @@ export class AssistantTemplate extends React.Component<
         const { theme } = this.props
         const welcomeTitle = (theme && theme.template && theme.template.welcomeTitle) || 'Welcome to the chatbot!'
         const exampleQueries = (theme && theme.template && theme.template.exampleQueries) || []
+        const isSendDisabled = this.state.inputValue.trim() === ''
 
         return (
             <div className="intro-section">
@@ -74,7 +75,19 @@ export class AssistantTemplate extends React.Component<
                         onChange={this.handleInputChange}
                         onKeyPress={this.handleInputKeyPress}
                         rows={5}
+                        autoFocus
                     />
+                    <button
+                        className={`send-button ${isSendDisabled ? 'disabled' : 'active'}`}
+                        onClick={() => {
+                            if (!isSendDisabled) {
+                                this.setState({ introMode: false })
+                            }
+                        }}
+                        disabled={isSendDisabled}
+                    >
+                        Send
+                    </button>
                 </div>
                 <div className="example-queries">
                     {exampleQueries.map((query, index) => (
