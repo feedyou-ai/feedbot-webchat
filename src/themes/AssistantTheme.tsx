@@ -11,26 +11,33 @@ export const AssistantTheme = (theme: Theme) => {
     return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, "0")}`
   }
 
-
-
   const generateConicGradient = (mainColor: string): string => {
-    const adjustColor = (color: string, amount: number): string => {
-      const num = parseInt(color.replace("#", ""), 16);
-      const r = Math.max(0, Math.min(255, (num >> 16) + amount));
-      const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + amount));
-      const b = Math.max(0, Math.min(255, (num & 0x0000ff) + amount));
-      return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, "0")}`;
+    const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+      const num = parseInt(hex.replace("#", ""), 16);
+      return {
+        r: (num >> 16) & 0xff,
+        g: (num >> 8) & 0xff,
+        b: num & 0xff
+      };
     };
 
-    const shade1 = adjustColor(mainColor, 10);
-    const shade2 = adjustColor(mainColor, 30);
+    const toRgba = (color: string, alpha: number): string => {
+      const { r, g, b } = hexToRgb(color);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
 
-    return `conic-gradient(from var(--angle), ${mainColor}, ${shade1}, ${shade2}, ${shade2}, ${shade1}, ${mainColor})`;
+    const color1 = toRgba(mainColor, 1);    
+    const color2 = toRgba(mainColor, 0.7);  
+    const color3 = toRgba(mainColor, 0.4);  
+
+    return `conic-gradient(from var(--angle), ${color1}, ${color2}, ${color3}, ${color3}, ${color2}, ${color1})`;
   };
 
   const secondaryColor = lightenColor(theme.mainColor, 30)
   
   return `
+  ${BaseTheme(theme)}
+
 @keyframes spin{
   from{
     --angle: 0deg;
@@ -50,7 +57,6 @@ export const AssistantTheme = (theme: Theme) => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: '#ffffff';
   }
 
   .intro-section {
@@ -155,17 +161,23 @@ export const AssistantTheme = (theme: Theme) => {
 
   .send-button {
     position: absolute;
-    top: 50%;
+    top: 7px;
     right: 10px;
-    transform: translateY(-50%);
+    height: 36px;
+    width: 36px;
     background-color: #ccc;
     color: white;
     border: none;
-    border-radius: 20px;
-    padding: 10px 20px;
+    padding: 5px;
+    border-radius: 30px;
     font-size: 14px;
     cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: 0.3s ease, color 0.3s ease;
+    opacity: 0.75;
+  }
+
+  .send-button.active:hover {
+    opacity: 1;
   }
 
   .send-button.active {
@@ -173,10 +185,28 @@ export const AssistantTheme = (theme: Theme) => {
     color: white;
   }
 
+  .send-button.active svg {
+    fill: white;
+    transition: fill 0.3s ease;
+}
+
   .send-button.disabled {
     background-color: #ccc;
     color: #999;
     cursor: default;
+  }
+
+  .send-button.disabled svg {
+    fill: #999;
+  }
+
+  .feedbot-wrapper.dark-mode .send-button {
+    background-color: #333;
+  }
+
+
+  .feedbot-wrapper.dark-mode .send-button.disabled {
+    background-color: transparent;
   }
 
   .feedbot-logo {
@@ -454,6 +484,4 @@ export const AssistantTheme = (theme: Theme) => {
     margin: 15px auto;
   }
 }
-
-  ${BaseTheme(theme)}
 `}
