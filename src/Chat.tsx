@@ -219,10 +219,13 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         console.log('Rating ' + value + ' for query ' + activity.channelData.queryId);
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = getRole(urlParams)
+
         fetch('https://'+this.props.bot.id+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
             method: 'POST',
             headers: { accept: 'application/json', 'content-type': 'application/json' },
-            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
+            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation, role, channel: "webchat" }),
         }).then(() => {
             Swal.fire({
                 icon: "success",
@@ -851,6 +854,17 @@ function getIntroDialogId(props: ChatProps): string | undefined {
 
     return props.introDialog && props.introDialog.id ? props.introDialog.id : undefined
 }
+
+function getRole(urlParams: URLSearchParams) {
+    const roles = ['admin', 'customer', 'user']
+
+    // this goes through all roles and returns the first one that is set in URL
+    const role = roles.find(role => {
+        return urlParams.get(role) !== null
+    })
+
+    return role || "user"
+ }
 
 function getExplanation(callback: (explanation: string) => void) {
     Swal.fire({
