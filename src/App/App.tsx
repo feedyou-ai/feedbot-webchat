@@ -6,6 +6,8 @@ import { getFeedyouParam, setFeedyouParam } from '../FeedyouParams'
 import { getStyleForTheme, Theme } from '../themes'
 import { generateUserId } from '../utils/generateUserId'
 
+const Swal = require('sweetalert2')
+
 export type AppProps = ChatProps & {
   theme?: Theme; // option to override theme settings from remote config
   defaultTheme?: Theme; // option to set default template when no remote config found (on default microsite for example)
@@ -125,7 +127,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 
         props.theme.showSignature = !config.hideSignature
         props.theme.signature = config.signature || {}
-
+        props.theme.showAiMessageIndicator = !!config.showAiMessageIndicator
         props.theme.enableScreenshotUpload = !!config.enableScreenshotUpload
 
         if (config.showInput && !props.hasOwnProperty("disableInputWhenNotNeeded")) {

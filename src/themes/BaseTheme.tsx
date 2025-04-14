@@ -225,7 +225,6 @@ export const BaseTheme = (theme: Theme) => `
     @media (max-width: 450px) {
       .feedbot-wrapper .wc-card {
         border: 1px solid #d2dde5;
-        width: 198px;
       }
       .feedbot-wrapper .wc-list.tiles .wc-card {
         border: none;
@@ -335,7 +334,7 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-from-bot .wc-message-content-type-message {
       float: left;
-      max-width: calc(100% - 140px);
+      max-width: calc(100% - 183px);
     }
 
     .wc-message-type-message.wc-message-from-bot {
@@ -344,7 +343,7 @@ export const BaseTheme = (theme: Theme) => `
     
     .wc-message-buttons {
       float: left;
-      padding-left: 16px;
+      padding-left: 8px;
     }
 
     .wc-message-buttons>div {
@@ -353,9 +352,13 @@ export const BaseTheme = (theme: Theme) => `
       padding: 10px 6px 12px 6px;
       float: left;
       fill: #d5d7d8;
-      visibility: hidden;
+      display: none;
       cursor: pointer;
     }
+
+    .wc-message-wrapper:last-child .wc-message-buttons>div {
+      display: block;
+    }   
 
     .wc-message-buttons>div:hover {
       fill: #b0b1b1;
@@ -363,16 +366,35 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-buttons.wc-rating-in-progress>.wc-message-button-vote-up, .wc-message-buttons.wc-rating-in-progress>.wc-message-button-vote-down {
       fill: #e5e5e5 !important;
-      visibility: visible;
+      display: block;
       cursor: wait;
     }
 
+    .wc-message-buttons>.wc-message-button-copy {
+      width: 17px;
+      height: 17px;
+      padding-top: 12px;
+    }
+
+    .wc-message-buttons>.wc-message-button-ai {
+      padding-top: 11px;
+      display: block;
+      fill: ${theme.mainColor};
+      cursor: auto;
+      opacity: 0.7;
+      ${!theme.showAiMessageIndicator ? `display: none;` : ''}
+    }
+
+    .wc-message-buttons>.wc-message-button-ai:hover {
+      fill: ${theme.mainColor};
+    }
+
     .wc-message-buttons.wc-rating-in-progress>.wc-message-button-info {
-      visibility: visible;
+      display: block;
     }
 
     .wc-message-wrapper:hover .wc-message-buttons>div {
-      visibility: visible;
+      display: block;
     }
 
     .wc-message-button-vote-down {
@@ -381,28 +403,6 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-button-info {
       padding: 12px 6px 12px 6px !important;
-    }
-
-    .bootbox .modal-xl {
-      max-width: 80% !important;
-    }
-
-    .bootbox .modal-dialog .bootbox-body {
-      margin-top: -2rem;
-    }
-
-    .bootbox .modal-dialog h2 {
-      font-size: 1.5rem;
-      margin-top: 2rem;
-    } 
-
-    .bootbox .modal-dialog h3 {
-      font-size: 1.3rem;
-      margin-top: 1.5rem;
-    } 
-
-    .bootbox .form-control {
-      width: calc(100% - 25px);
     }
 
     ${theme.enableScreenshotUpload && !isSafari() ? `
