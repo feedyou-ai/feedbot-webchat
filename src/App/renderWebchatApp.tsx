@@ -2,8 +2,9 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { AppProps } from './App'
 import { ExpandableTemplate } from './templates/ExpandableTemplate'
-import { Chat } from '../Chat'
 import { FullscreenTemplate } from './templates/FullscreenTemplate'
+import { AssistantTemplate } from './templates/AssistantTemplate'
+import { Chat } from '../Chat'
 
 export const renderWebchatApp = (props: AppProps, container: HTMLElement) => {
 	if (container) {
@@ -18,6 +19,9 @@ export const renderWebchatApp = (props: AppProps, container: HTMLElement) => {
 	switch (props.theme && props.theme.template && props.theme.template.type) {
 		case 'full-screen':
 			ReactDOM.render(<FullscreenTemplate {...props} />, reactEntryPoint)
+			break
+		case 'assistant':
+			ReactDOM.render(<AssistantTemplate {...props} />, reactEntryPoint)
 			break
 		default:
 			ReactDOM.render(
