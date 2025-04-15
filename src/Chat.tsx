@@ -454,18 +454,18 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
-        // if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
-        //     const introDialogId = getIntroDialogId(this.props)
-        //     botConnection.postActivity({
-        //         from: this.props.user,
-        //         name: 'beginIntroDialog',
-        //         type: 'event',
-        //         value: '',
-        //         channelData: introDialogId ? {id: introDialogId} : undefined
-        //     }).subscribe(function (id: any) {
-        //         konsole.log('"beginIntroDialog" event sent');
-        //     });
-        // }
+        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId)) && !this.props.initialMessage) {
+            const introDialogId = getIntroDialogId(this.props)
+            botConnection.postActivity({
+                from: this.props.user,
+                name: 'beginIntroDialog',
+                type: 'event',
+                value: '',
+                channelData: introDialogId ? {id: introDialogId} : undefined
+            }).subscribe(function (id: any) {
+                konsole.log('"beginIntroDialog" event sent');
+            });
+        }
 
         // FEEDYOU - way to trigger dialog from anywhere using window event
         // polyfill needed for IEs https://gomakethings.com/custom-events-in-internet-explorer-with-vanilla-js/
