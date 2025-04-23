@@ -152,7 +152,7 @@ export const AssistantTheme = (theme: Theme) => {
   z-index: -1;
   padding: 1px;
   border-radius: 33px;
-  animation: 10s spin linear infinite;
+  animation: 7s spin linear infinite;
 }
 .card::before {
   filter: blur(0.6rem);
