@@ -164,6 +164,19 @@ export const AssistantTheme = (theme: Theme) => {
   opacity: 0.8;
 }
 
+.card::after {
+  opacity: 0.6;
+}
+
+.feedbot-wrapper.dark-mode .card::before {
+  filter: blur(0.8rem);
+  opacity: 0.8;
+}
+
+.feedbot-wrapper.dark-mode .card::after {
+  opacity: 1;
+}
+
   .send-button {
     position: absolute;
     top: 12px;
