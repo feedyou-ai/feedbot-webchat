@@ -337,6 +337,14 @@ export class Chat extends React.Component<ChatProps, {}> {
             botConnection = this.props.botConnection
         }
 
+        const userData = {
+            ...(this.props.userData || {}),
+            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
+            ...getLocaleUserData(this.props.locale),
+            ...getReferrerUserData(), 
+              "user-agent":  navigator.userAgent
+        }
+
         botConnection.postActivityOriginal = botConnection.postActivity
         
         botConnection.postActivity = (activity: any) => {
@@ -346,13 +354,7 @@ export class Chat extends React.Component<ChatProps, {}> {
                     ...activity,
                     channelData: {
                         ...activity.channelData,
-                        userData: {
-                            ...(this.props.userData || {}),
-                            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
-                            ...getLocaleUserData(this.props.locale),
-                            ...getReferrerUserData(), 
-	                          "user-agent":  navigator.userAgent
-												}
+                        userData
                     }
                 };
                 
@@ -522,7 +524,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         );
 
         if (this.props.initialMessage) {
-            this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs'));
+            this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs', {userData}));
         }
 
         if (this.props.selectedActivity) {
