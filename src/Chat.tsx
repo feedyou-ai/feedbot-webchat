@@ -72,6 +72,7 @@ export interface ChatProps {
     onEvent?: {[event: string]: (activity: Activity) => void},
     onMessage?: (activity: Activity) => void,
     typingDelay?: number
+    initialMessage?: string
 }
 
 
@@ -339,7 +340,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         botConnection.postActivityOriginal = botConnection.postActivity
         
         botConnection.postActivity = (activity: any) => {
-            // send userData only once during initial event
+            //send userData only once during initial event
             if (activity.name === 'beginIntroDialog') {
                 const newActivity = {
                     ...activity,
@@ -354,6 +355,8 @@ export class Chat extends React.Component<ChatProps, {}> {
 												}
                     }
                 };
+                
+
                 return botConnection.postActivityOriginal(newActivity);
             /*} else if (this.smartsupp && activity.type === "message") {
                 console.log('Smartsupp send', activity.text, activity)
@@ -451,7 +454,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
-        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
+        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId)) && !this.props.initialMessage) {
             const introDialogId = getIntroDialogId(this.props)
             botConnection.postActivity({
                 from: this.props.user,
@@ -517,6 +520,10 @@ export class Chat extends React.Component<ChatProps, {}> {
             (activity: any) => this.handleIncomingActivity(activity),
             (error: any) => konsole.log("activity$ error", error)
         );
+
+        if (this.props.initialMessage) {
+            this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs'));
+        }
 
         if (this.props.selectedActivity) {
             this.selectedActivitySubscription = this.props.selectedActivity.subscribe(activityOrID => {

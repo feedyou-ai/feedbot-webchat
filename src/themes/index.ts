@@ -2,6 +2,7 @@ import { ExpandableBarTheme } from './ExpandableBarTheme'
 import { FullScreenTheme } from './FullScreenTheme'
 import { ExpandableKnobTheme } from './ExpandableKnobTheme'
 import { SidebarTheme } from './SidebarTheme'
+import { AssistantTheme } from './AssistantTheme'
 
 export type Theme = {
 	mainColor: string;
@@ -20,6 +21,8 @@ export type Theme = {
 		iconUrl?: string,
 		customScript?: string,
 		logoUrl?: string,
+		welcomeTitle?: string,
+		exampleQueries?: string[],
 	};
 	customCss?: string;
 	showSignature?: boolean,
@@ -39,6 +42,8 @@ export function getStyleForTheme(theme: Theme, remoteConfig: boolean): string {
 			return ExpandableBarTheme(theme)
 		case 'full-screen':
 			return FullScreenTheme(theme)
+		case "assistant":
+			return AssistantTheme(theme)
 		case 'expandable-knob':
 			return ExpandableKnobTheme(theme)
 		case 'sidebar':
