@@ -85,7 +85,7 @@ export const AssistantTheme = (theme: Theme) => {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: 18px;
     margin-top: 20px;
   }
 
@@ -96,7 +96,7 @@ export const AssistantTheme = (theme: Theme) => {
     background-color: ${theme.mainColor};
     color: white;
     border-radius: 20px;
-    padding: 10px 15px;
+    padding: 12px 17px;
     cursor: pointer;
     transition: opacity 0.3s ease;
     opacity: 0.75;
@@ -108,8 +108,8 @@ export const AssistantTheme = (theme: Theme) => {
 
   .chat-input {
     border: none;
-    padding: 16px 20px;
-    padding-right: 100px;
+    padding: 20px 25px;
+    padding-right: 65px;
     border-radius: 32px;
     width: 100%;
     height: 100%;
@@ -125,10 +125,10 @@ export const AssistantTheme = (theme: Theme) => {
     border-color: ${secondaryColor};
   }
 
-  .card{
+  .card {
     width: 100%;
     max-width: 600px;
-    height: 50px;
+    height: 60px;
     margin: 50px auto 65px auto;
     border-radius: 15px;
     position: relative;
@@ -140,7 +140,7 @@ export const AssistantTheme = (theme: Theme) => {
   inherits: false;
 }
 
-.card::after, .card::before{
+.card::after, .card::before {
   content: '';
   position: absolute;
   height: 100%;
@@ -154,15 +154,20 @@ export const AssistantTheme = (theme: Theme) => {
   border-radius: 33px;
   animation: 10s spin linear infinite;
 }
-.card::before{
+.card::before {
+  filter: blur(0.6rem);
+  opacity: 0.5;
+}
+
+.feedbot-wrapper.dark-mode .card::before {
   filter: blur(0.8rem);
   opacity: 0.8;
 }
 
   .send-button {
     position: absolute;
-    top: 7px;
-    right: 10px;
+    top: 12px;
+    right: 12px;
     height: 36px;
     width: 36px;
     background-color: #ccc;
@@ -309,8 +314,8 @@ export const AssistantTheme = (theme: Theme) => {
     align-items: center;
   }
 
-  .dark-mode-icon {
-    margin-left: 10px;
+  .dark-mode-title {
+    display: none;
   }
 
   .dark-mode-toggle:hover {

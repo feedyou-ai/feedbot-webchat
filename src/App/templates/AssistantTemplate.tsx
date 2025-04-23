@@ -14,7 +14,7 @@ export class AssistantTemplate extends React.Component<
         this.state = {
             introMode: true,
             inputValue: '',
-            darkMode: false,
+            darkMode: window.matchMedia('(prefers-color-scheme: dark)').matches,
         }
     }
 
@@ -122,7 +122,7 @@ export class AssistantTemplate extends React.Component<
                 </div>
 
                 <button className="dark-mode-toggle" onClick={this.toggleDarkMode}>
-                    <span>{this.state.darkMode ? 'Light mode' : 'Dark mode'}</span> <span className='dark-mode-icon'> {this.state.darkMode ?"☀️" : "🌙"}</span>
+                    <span className='dark-mode-title'>{this.state.darkMode ? 'Light mode' : 'Dark mode'}</span> <span className='dark-mode-icon'> {this.state.darkMode ?"☀️" : "🌙"}</span>
                 </button>
 
                 {this.state.introMode ? (
