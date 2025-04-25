@@ -115,6 +115,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
       if (config && config.template) {
         props.theme = {
           ...props.theme,
+          genAi: {...config.genAi},
           template: {
             ...config.template,
             ...(props.theme ? props.theme.template : {}),

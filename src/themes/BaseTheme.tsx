@@ -378,7 +378,7 @@ export const BaseTheme = (theme: Theme) => `
       fill: ${theme.mainColor};
       cursor: auto;
       opacity: 0.7;
-      ${!theme.showAiMessageIndicator ? `display: none;` : ''}
+      ${!theme.genAi.disclaimerEnabled ? `display: none;` : ''}
     }
 
     .wc-message-buttons>.wc-message-button-ai:hover {
