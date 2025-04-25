@@ -74,6 +74,7 @@ export interface ChatProps {
     onMessage?: (activity: Activity) => void,
     typingDelay?: number
     theme?: Theme
+    initialMessage?: string
 }
 
 
@@ -219,7 +220,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         const role = getRole()
 
-        fetch('https://'+this.props.bot.id+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
+        fetch('https://'+this.props.bot.id.replace(/\-app$/,'')+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
             method: 'POST',
             headers: { accept: 'application/json', 'content-type': 'application/json' },
             body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation, role}),
@@ -336,24 +337,28 @@ export class Chat extends React.Component<ChatProps, {}> {
             botConnection = this.props.botConnection
         }
 
+        const userData = {
+            ...(this.props.userData || {}),
+            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
+            ...getLocaleUserData(this.props.locale),
+            ...getReferrerUserData(), 
+              "user-agent":  navigator.userAgent
+        }
+
         botConnection.postActivityOriginal = botConnection.postActivity
         
         botConnection.postActivity = (activity: any) => {
-            // send userData only once during initial event
+            //send userData only once during initial event
             if (activity.name === 'beginIntroDialog') {
                 const newActivity = {
                     ...activity,
                     channelData: {
                         ...activity.channelData,
-                        userData: {
-                            ...(this.props.userData || {}),
-                            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
-                            ...getLocaleUserData(this.props.locale),
-                            ...getReferrerUserData(), 
-	                          "user-agent":  navigator.userAgent
-												}
+                        userData
                     }
                 };
+                
+
                 return botConnection.postActivityOriginal(newActivity);
             /*} else if (this.smartsupp && activity.type === "message") {
                 console.log('Smartsupp send', activity.text, activity)
@@ -451,7 +456,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
-        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
+        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId)) && !this.props.initialMessage) {
             const introDialogId = getIntroDialogId(this.props)
             botConnection.postActivity({
                 from: this.props.user,
@@ -517,6 +522,10 @@ export class Chat extends React.Component<ChatProps, {}> {
             (activity: any) => this.handleIncomingActivity(activity),
             (error: any) => konsole.log("activity$ error", error)
         );
+
+        if (this.props.initialMessage) {
+            this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs', {userData}));
+        }
 
         if (this.props.selectedActivity) {
             this.selectedActivitySubscription = this.props.selectedActivity.subscribe(activityOrID => {
@@ -878,7 +887,7 @@ function getRole(): Role {
 function getExplanation(callback: (explanation: string) => void, customExplanationForCurrentRole: CustomExplanation | undefined) {
     const title = (customExplanationForCurrentRole && customExplanationForCurrentRole.title) || 'Zpětná vazba'
     const intro = (customExplanationForCurrentRole && customExplanationForCurrentRole.intro) || "Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný."
-    const explanationFields = (customExplanationForCurrentRole && customExplanationForCurrentRole.explanationFields.length > 0) ? customExplanationForCurrentRole.explanationFields : [{"name": "swal-problem", "label": "Stručně prosím popište, v čem je u vygenerované odpovědi problém a ideálně i to, jak by správná odpověď měla vypadat:", "required": true}]
+    const explanationFields = (customExplanationForCurrentRole && customExplanationForCurrentRole.explanationFields.length > 0) ? customExplanationForCurrentRole.explanationFields : [{"name": "swal-problem", "label": "<b>Stručně prosím popište, co by na odpovědi mohlo být lépe: <span style='color: red;'>*</span></b>", "required": true}]
 
     const fieldsHtml = explanationFields.map((field) => {
         return `

@@ -108,6 +108,6 @@ export const ExpandableBarTheme = (theme: Theme) => `
     }
 
   .wc-message-from-bot .wc-message-content-type-message {
-    max-width:calc(100% - 112px);
+      max-width:calc(100% - 30px) !important;
   }
 `
