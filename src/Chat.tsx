@@ -220,7 +220,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         console.log('Rating ' + value + ' for query ' + activity.channelData.queryId);
 
-        fetch('https://'+this.props.bot.id+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
+        fetch('https://'+this.props.bot.id.replace(/\-app$/,'')+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
             method: 'POST',
             headers: { accept: 'application/json', 'content-type': 'application/json' },
             body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
