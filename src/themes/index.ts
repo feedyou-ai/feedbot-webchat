@@ -4,6 +4,22 @@ import { ExpandableKnobTheme } from './ExpandableKnobTheme'
 import { SidebarTheme } from './SidebarTheme'
 import { AssistantTheme } from './AssistantTheme'
 
+export type Role = "admin" | "user" | "customer"
+
+export type CustomExplanation = {
+	roles: Role[],
+	required: boolean,
+	intro: string,
+	title: string
+	explanationFields: ExplanationFields[]
+}
+
+export type ExplanationFields = {
+		name: string,
+		label: string,
+		required: boolean,
+	}
+
 export type Theme = {
 	mainColor: string;
 	template?: {
@@ -24,6 +40,13 @@ export type Theme = {
 		welcomeTitle?: string,
 		exampleQueries?: string[],
 	};
+	genAi?: {
+		ratingRoles: Role[],
+		explanationRoles: Role[],
+		customExplanations: CustomExplanation[],
+		disclaimerEnabled: boolean,
+		customDisclaimerText: string,
+	},
 	customCss?: string;
 	showSignature?: boolean,
 	enableScreenshotUpload?: boolean
