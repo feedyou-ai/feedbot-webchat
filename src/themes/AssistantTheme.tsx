@@ -113,6 +113,7 @@ export const AssistantTheme = (theme: Theme) => {
     border-radius: 32px;
     width: 100%;
     height: 100%;
+    max-height: 130px;
     font-size: 16px;
     outline: none;
     resize: none;
@@ -128,7 +129,8 @@ export const AssistantTheme = (theme: Theme) => {
   .card {
     width: 100%;
     max-width: 600px;
-    height: 60px;
+    height: 58px;
+    max-height: 130px;
     margin: 50px auto 65px auto;
     border-radius: 15px;
     position: relative;
@@ -201,6 +203,10 @@ export const AssistantTheme = (theme: Theme) => {
   .send-button.active {
     background-color: ${theme.mainColor};
     color: white;
+  }
+
+  .send-button svg {
+    margin-top: 2px;
   }
 
   .send-button.active svg {
