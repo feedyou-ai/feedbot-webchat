@@ -334,7 +334,13 @@ export const BaseTheme = (theme: Theme) => `
 
     .wc-message-from-bot .wc-message-content-type-message {
       float: left;
-      max-width: calc(100% - 183px);
+      
+    }
+
+    @media (min-width: 600px) {
+      .wc-message-from-bot .wc-message-content-type-message {
+        max-width: calc(100% - 183px);
+      }
     }
 
     .wc-message-type-message.wc-message-from-bot {
