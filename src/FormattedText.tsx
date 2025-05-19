@@ -71,7 +71,12 @@ const renderMarkdown = (
         const arr = src.split(/\n *\n|\r\n *\r\n|\r *\r/);
         const ma = arr.map(a => markdownIt.render(a));
 
-        __html = ma.join('<br/>');
+        __html = ma.join('<br/>')
+        //transform markdown links whose text is wrapped in [ ] into "chip" elements
+        .replace(/>\[([^\]]+)\]<\/a>/gi, (_match, label) => {
+           return `><span class="source-link-chip">${label}</span></a>`
+        }
+        );
     } else {
         // Replace spaces with non-breaking space Unicode characters
         __html = text.replace(/ */, '\u00A0');

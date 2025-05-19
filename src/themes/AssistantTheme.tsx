@@ -502,4 +502,13 @@ export const AssistantTheme = (theme: Theme) => {
     margin: 15px auto;
   }
 }
+
+.source-link-chip {
+  display: inline-block;
+  background-color: ${theme.mainColor};
+  color: white;
+  border-radius: 20px;
+  padding: 5px 10px;
+  margin: 5px;
+  }
 `}
