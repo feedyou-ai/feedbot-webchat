@@ -503,12 +503,24 @@ export const AssistantTheme = (theme: Theme) => {
   }
 }
 
-.source-link-chip {
-  display: inline-block;
-  background-color: ${theme.mainColor};
-  color: white;
-  border-radius: 20px;
-  padding: 5px 10px;
-  margin: 5px;
-  }
+  .source-link-chip {
+    display: inline-block;
+    background-color: #ddd !important;
+    color: #424242 !important;
+    border-radius: 5px !important;
+    padding: 4px 5px !important;
+    margin: 2px;
+    border: 0 !important;
+}
+
+.swal2-title {
+  text-align: left;
+  padding: 16px 32px;
+  font-size: 25px;
+}
+
+.swal2-html-container {
+    border: 1px solid #DDD;
+    padding: 0px 12px;
+}
 `}
