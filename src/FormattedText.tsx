@@ -2,7 +2,7 @@ import * as MarkdownIt from 'markdown-it';
 import * as React from 'react';
 import { getFeedyouParam } from './FeedyouParams';
 import { twemoji } from './lib.js'
-import Swal from 'sweetalert2'
+const Swal = require('sweetalert2')
 
 export interface IFormattedTextProps {
     text: string,
