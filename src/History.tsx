@@ -152,7 +152,7 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                 this.largeWidth = this.props.size.width * 2;
                 content = <this.measurableCarousel/>;
             } else {
-                content = this.props.activities.reduce((out, activity) => {
+                const activities = this.props.activities.reduce((out, activity) => {
                     if (activity.channelData && activity.channelData.streamId && activity.type === 'message') {
                         const firstStreamIndex = out.findIndex(a => a.channelData && a.channelData.streamId === activity.channelData.streamId)
                         const firstStreamActivity = out[firstStreamIndex]
@@ -163,13 +163,15 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                     }
                     out.push(Object.assign({}, activity))
                     return out
-                }, []).map((activity, index) =>
+                }, [])
+
+                content = activities.map((activity, index) =>
                     (activity.type !== 'message' || activity.text || (activity.attachments && activity.attachments.length)) &&
                         <WrappedActivity
                             format={ this.props.format }
                             key={ 'message' + index }
                             activity={ activity }
-                            showTimestamp={ index === this.props.activities.length - 1 || (index + 1 < this.props.activities.length && suitableInterval(activity, this.props.activities[index + 1])) }
+                            showTimestamp={ index === activities.length - 1 || (index + 1 < activities.length && suitableInterval(activity, activities[index + 1])) }
                             selected={ this.props.isSelected(activity) }
                             fromMe={ this.props.isFromMe(activity) }
                             onClickActivity={ this.props.onClickActivity(activity) }
@@ -191,7 +193,7 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                                 activity={ activity }
                                 onCardAction={ (type: CardActionTypes, value: string | object) => this.doCardAction(type, value) }
                                 onImageLoad={ () => this.autoscroll() }
-                                isLast={ index === this.props.activities.length - 1  }
+                                isLast={ index === activities.length - 1  }
                             />
                         </WrappedActivity>
                 );
