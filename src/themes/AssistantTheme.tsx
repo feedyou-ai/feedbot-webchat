@@ -102,6 +102,34 @@ export const AssistantTheme = (theme: Theme) => {
     opacity: 0.75;
   }
 
+  .feedbot-wrapper .wc-message-content {
+    border-radius: 20px !important;
+    padding: 10px 15px !important;
+  }
+
+  .feedbot-wrapper .wc-message-content p {
+    margin: 0;
+    padding: 0;
+  }
+
+  .feedbot-wrapper .wc-message-from-bot .wc-message-content {
+    background-color: #eee !important;
+  }
+
+  .feedbot-wrapper.dark-mode .wc-message-from-bot .wc-message-content {
+    background-color: #333 !important;
+    color: white !important;
+  }
+
+  .feedbot-wrapper .wc-message-from-me .wc-message-content {
+    background-color: ${theme.mainColor};
+    color: white;
+  }
+
+  svg.wc-message-callout {
+    display: none !important;
+  }
+
   .example-query:hover {
     opacity: 1;
   }
@@ -113,6 +141,7 @@ export const AssistantTheme = (theme: Theme) => {
     border-radius: 32px;
     width: 100%;
     height: 100%;
+    max-height: 130px;
     font-size: 16px;
     outline: none;
     resize: none;
@@ -125,10 +154,11 @@ export const AssistantTheme = (theme: Theme) => {
     border-color: ${secondaryColor};
   }
 
-  .card {
+  .card{
     width: 100%;
     max-width: 600px;
-    height: 60px;
+    height: 58px;
+    max-height: 130px;
     margin: 50px auto 65px auto;
     border-radius: 15px;
     position: relative;
@@ -140,7 +170,7 @@ export const AssistantTheme = (theme: Theme) => {
   inherits: false;
 }
 
-.card::after, .card::before {
+.card::after, .card::before{
   content: '';
   position: absolute;
   height: 100%;
@@ -201,6 +231,10 @@ export const AssistantTheme = (theme: Theme) => {
   .send-button.active {
     background-color: ${theme.mainColor};
     color: white;
+  }
+
+  .send-button svg {
+    margin-top: 2px;
   }
 
   .send-button.active svg {
@@ -406,14 +440,6 @@ export const AssistantTheme = (theme: Theme) => {
     margin: 0px 15px;
   }
 
-  .wc-textbox {
-    border-radius: 13px;
-    background-color: #eceff1;
-    height: 70%;
-    margin-bottom: 0px;
-    top: 6px !important;
-  }
-
   .wc-suggested-actions .wc-hscroll > ul {
     text-align: center;
     margin-top: 10px;
@@ -502,4 +528,44 @@ export const AssistantTheme = (theme: Theme) => {
     margin: 15px auto;
   }
 }
-`}
+
+.wc-message-groups {
+  bottom: 120px;
+}
+
+.feedbot-wrapper .wc-console {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  height: 100px;
+  background-color: transparent !important;
+}
+
+
+
+.wc-console .wc-textbox {
+  margin: 0px;
+  height: 100%;
+  width: 70%;
+  position: relative;
+  left: unset;
+  right: unset;
+  top: unset;
+  bottom: unset;
+  border-radius: 28px;
+}
+
+.wc-console .wc-textbox textarea {
+  padding: 15px;
+  border-radius: 12px;
+  margin: 0px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.feedbot-wrapper.dark-mode .wc-console .wc-textbox textarea {
+  border : 1px solid #555;
+}
+`
+}
