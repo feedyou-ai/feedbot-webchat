@@ -557,10 +557,15 @@ export const AssistantTheme = (theme: Theme) => {
 }
 
 .wc-console .wc-textbox textarea {
-  padding: 20px 25px;
-  border-radius: 28px;
+  padding: 15px;
+  border-radius: 12px;
+  margin: 0px;
   border: 1px solid #ccc;
   box-sizing: border-box;
 }
-`}
 
+.feedbot-wrapper.dark-mode .wc-console .wc-textbox textarea {
+  border : 1px solid #555;
+}
+`
+}
