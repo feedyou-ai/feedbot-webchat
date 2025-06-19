@@ -18,7 +18,12 @@ import { ConnectionStatus } from 'botframework-directlinejs';
 import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
+import { getFeedyouParam } from './FeedyouParams';
+import { CustomExplanation, Role, Theme } from './themes';
 
+const Swal = require('sweetalert2')
+
+declare var $: any;
 declare const fbq: Function;
 
 interface GaEvent {
@@ -60,6 +65,8 @@ export interface ChatProps {
     onEvent?: {[event: string]: (activity: Activity) => void},
     onMessage?: (activity: Activity) => void,
     typingDelay?: number
+    theme?: Theme
+    initialMessage?: string
 }
 
 
@@ -89,6 +96,8 @@ export class Chat extends React.Component<ChatProps, {}> {
 
     private resizeListener = () => this.setSize();
 
+    private _handleCardRating = this.handleCardRating.bind(this);
+    private _handleCardInfo = this.handleCardInfo.bind(this);
     private _handleCardAction = this.handleCardAction.bind(this);
     private _handleKeyDownCapture = this.handleKeyDownCapture.bind(this);
     private _saveChatviewPanelRef = this.saveChatviewPanelRef.bind(this);
@@ -162,7 +171,16 @@ export class Chat extends React.Component<ChatProps, {}> {
     private handleIncomingActivity(activity: Activity) {
         let state = this.store.getState();
         switch (activity.type) {
+            case "event":
+                if (['message-stream','message-stream-chunk'].includes(activity.name) && activity.from.id !== state.connection.user.id) {
+                    this.store.dispatch<ChatActions>({ type: 'Receive_Message', activity: Object.assign({},activity, {type: 'message', text: activity.value})});
+                }
+                break;
             case "message":
+                if (activity.channelData && activity.channelData.alreadyStreamed) {
+                    break
+                }
+
                 this.store.dispatch<ChatActions>({ type: activity.from.id === state.connection.user.id ? 'Receive_Sent_Message' : 'Receive_Message', activity });
                 break;
 
@@ -178,6 +196,50 @@ export class Chat extends React.Component<ChatProps, {}> {
             type: 'Set_Size',
             width: this.chatviewPanelRef.offsetWidth,
             height: this.chatviewPanelRef.offsetHeight
+        });
+    }
+
+    private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
+        if (rating === -1 && isUserRoleInArray(this.props.theme.genAi.explanationRoles)) {
+            const customExplanationForCurrentRole = this.props.theme.genAi.customExplanations.find((customExplanation) => customExplanation.roles.includes(getRole()))
+            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), customExplanationForCurrentRole)
+        } else {
+            this.rate(activity, rating, '', callback)
+        }
+    }
+
+    private rate(activity: Activity, value: number, explanation = '', callback: (rated: boolean) => void) {
+        console.log('Rating ' + value + ' for query ' + activity.channelData.queryId);
+
+        const role = getRole()
+
+        fetch('https://'+this.props.bot.id.replace(/\-app$/,'')+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
+            method: 'POST',
+            headers: { accept: 'application/json', 'content-type': 'application/json' },
+            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation, role}),
+        }).then(() => {
+            Swal.fire({
+                icon: "success",
+                title: "Děkujeme za zpětnou vazbu!"
+            });
+            callback(true)
+        }).catch((err) => {
+            console.error('Failed to rate query', err);
+            Swal.fire({
+                icon: "error",
+                title: "Něco se pokazilo",
+                text: "Bohužel se nepodařilo odeslat vaši zpětnou vazbu. Budeme moc rádi, pokud ji zkusíte předat jiným způsobem."
+            });
+            callback(false)
+        })
+
+    }
+
+    private handleCardInfo(activity: Activity) {
+        Swal.fire({
+            width: 1000,
+            title: "Query details",
+            html: activity.channelData.info
         });
     }
 
@@ -268,24 +330,28 @@ export class Chat extends React.Component<ChatProps, {}> {
             botConnection = this.props.botConnection
         }
 
+        const userData = {
+            ...(this.props.userData || {}),
+            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
+            ...getLocaleUserData(this.props.locale),
+            ...getReferrerUserData(), 
+              "user-agent":  navigator.userAgent
+        }
+
         botConnection.postActivityOriginal = botConnection.postActivity
         
         botConnection.postActivity = (activity: any) => {
-            // send userData only once during initial event
+            //send userData only once during initial event
             if (activity.name === 'beginIntroDialog') {
                 const newActivity = {
                     ...activity,
                     channelData: {
                         ...activity.channelData,
-                        userData: {
-                            ...(this.props.userData || {}),
-                            ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
-                            ...getLocaleUserData(this.props.locale),
-                            ...getReferrerUserData(), 
-	                          "user-agent":  navigator.userAgent
-												}
+                        userData
                     }
                 };
+                
+
                 return botConnection.postActivityOriginal(newActivity);
             /*} else if (this.smartsupp && activity.type === "message") {
                 console.log('Smartsupp send', activity.text, activity)
@@ -326,8 +392,9 @@ export class Chat extends React.Component<ChatProps, {}> {
         // this.handleIncomingActivity({ id: 'maintenance', type: 'message', from: { name: "Chatbot", ...this.props.bot }, text: "Dobrý den, aktuálně mám technické problémy, které kolegové intenzivně řeší. Je možné, že nebudu reagovat úplně správně, moc se za to omlouvám. Prosím zkuste si se mnou popovídat později.", timestamp: new Date().toISOString()});
 
         // FEEDYOU - show typing on startup - if bot.id is set to the same value as value on server, it will be cleared by first message
-        if (this.props.bot && this.props.bot.id) {
-            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot }, timestamp: new Date().toISOString()}});
+        const directLineBotId = getFeedyouParam("directLineBotId") || this.props.bot.id
+        if (this.props.bot && directLineBotId) {
+            this.store.dispatch<ChatActions>({ type: 'Show_Typing', activity: { id: 'typingUntilIntroDialog', type: 'typing', from: { name: "Chatbot", ...this.props.bot, id: directLineBotId }, timestamp: new Date().toISOString()}});
         }
 
         // FEEDYOU - support "start over" button
@@ -372,7 +439,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             .filter((activity: any) => activity.type === "event" && activity.name === "log")
             .subscribe((activity: any) => {
                 if (Array.isArray(activity.value)) {
-                    const logs: any[] = activity.value
+                    const logs: any[] = [].concat(activity.value) // unfreeeze so unshift will not fail
                     logs.unshift('Feedyou WebChat log')
                     console.log.apply(this, logs)
                 } else {
@@ -382,7 +449,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         // FEEDYOU - send event to bot to tell him webchat was opened - more reliable solution instead of conversationUpdate event
         // https://github.com/Microsoft/BotBuilder/issues/4245#issuecomment-369311452
-        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId))) {
+        if ((!this.props.directLine || !this.props.directLine.conversationId) && (!this.props.botConnection || !((this.props.botConnection as any).conversationId)) && !this.props.initialMessage) {
             const introDialogId = getIntroDialogId(this.props)
             botConnection.postActivity({
                 from: this.props.user,
@@ -448,6 +515,10 @@ export class Chat extends React.Component<ChatProps, {}> {
             (activity: any) => this.handleIncomingActivity(activity),
             (error: any) => konsole.log("activity$ error", error)
         );
+
+        if (this.props.initialMessage) {
+            //this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs', {userData}));
+        }
 
         if (this.props.selectedActivity) {
             this.selectedActivitySubscription = this.props.selectedActivity.subscribe(activityOrID => {
@@ -579,7 +650,13 @@ export class Chat extends React.Component<ChatProps, {}> {
                           }
                           <MessagePane>
                               <History
+                                customDisclaimerText={ this.props.theme.genAi.customDisclaimerText }
+                                canRate={isUserRoleInArray(this.props.theme.genAi.ratingRoles)}
+                                canWriteExplanation={ isUserRoleInArray(this.props.theme.genAi.explanationRoles) }
+                                canSeeInfo={ getRole() === "admin" }
                                   onCardAction={ this._handleCardAction }
+                                  onCardRating={ this._handleCardRating }
+                                  onCardInfo={ this._handleCardInfo }
                                   ref={ this._saveHistoryRef }
                               />
                           </MessagePane>
@@ -780,4 +857,77 @@ function getIntroDialogId(props: ChatProps): string | undefined {
     }
 
     return props.introDialog && props.introDialog.id ? props.introDialog.id : undefined
+}
+
+function getRole(): Role {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roles = ['admin', 'customer', 'user'] as Role[]
+
+    // this goes through all roles and returns the first one that is set in URL
+    const role = roles.find((role): boolean => {
+        return urlParams.get(role) !== null
+    })
+
+    return role || "user"
+ }
+
+ function isUserRoleInArray(roles: Role[] = []): boolean {
+    const userRole = getRole()
+    const isInArray = roles.indexOf(userRole) >= 0
+
+    return isInArray          
+ }
+
+function getExplanation(callback: (explanation: string) => void, customExplanationForCurrentRole: CustomExplanation | undefined) {
+    const title = (customExplanationForCurrentRole && customExplanationForCurrentRole.title) || 'Zpětná vazba'
+    const intro = (customExplanationForCurrentRole && customExplanationForCurrentRole.intro) || "Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný."
+    const explanationFields = (customExplanationForCurrentRole && customExplanationForCurrentRole.explanationFields.length > 0) ? customExplanationForCurrentRole.explanationFields : [{"name": "swal-problem", "label": "<b>Stručně prosím popište, co by na odpovědi mohlo být lépe: <span style='color: red;'>*</span></b>", "required": true}]
+
+    const fieldsHtml = explanationFields.map((field) => {
+        return `
+        <label for="${field.name}">${field.label}</label>
+        <textarea class="form-control" id="${field.name}" rows="3"></textarea>
+        `})
+
+    Swal.fire({
+        title,
+        showCancelButton: true,
+        cancelButtonText: 'Zrušit',
+        html: `
+          <p style="margin-top:32px;text-align:left;">${intro}</p>
+          <form style="text-align:left;">
+            <div class="form-group">
+                ${fieldsHtml}
+            </div>
+          </form>
+        `,
+        focusConfirm: false,
+        preConfirm: () => {
+            const fields = explanationFields.map((field) => {
+                return { ...field, value: (document.getElementById(field.name) as any).value}
+            })
+            const invalidFields = fields.filter((field) => field.required && !field.value)  
+
+            fields.forEach((field) => {
+                if(invalidFields.includes(field)) {
+                    document.getElementById(field.name).style.border = "2px solid red"
+                    return
+                }
+
+                document.getElementById(field.name).style.border = "2px solid #ced4da"
+            })
+
+            if (invalidFields.length > 0) {
+                Swal.showValidationMessage(`Prosím vyplňte všechna povinná pole.`)
+                return false
+            }
+
+            return fields.map(field => field.value).join('\n\n')
+        },
+        confirmButtonText: 'Odeslat'
+    }).then((result: any) => {
+        if (result.value) {
+            callback(result.value);
+        }
+    })
 }

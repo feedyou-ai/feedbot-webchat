@@ -847,3 +847,14 @@
   .DropZone--over {
     border: 3px solid #259925;
   }
+  
+.swal2-container {
+    z-index: 100000;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.swal2-html-container textarea {
+    border: 2px #ddd solid;
+    width: calc(100% - 1.5rem);
+    margin-top: 1rem;
+}

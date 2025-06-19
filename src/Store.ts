@@ -17,7 +17,7 @@ export enum ListeningState {
     STOPPING
 }
 
-export const sendMessage = (text: string, from: User, locale: string) => ({
+export const sendMessage = (text: string, from: User, locale: string, channelData: any = {}) => ({
     type: 'Send_Message',
     activity: {
         type: "message",
@@ -25,7 +25,8 @@ export const sendMessage = (text: string, from: User, locale: string) => ({
         from,
         locale,
         textFormat: 'plain',
-        timestamp: (new Date()).toISOString()
+        timestamp: (new Date()).toISOString(),
+        channelData
     }} as ChatActions);
 
 export const sendFiles = (files: File[], from: User, locale: string, isDirectUpload: boolean) => ({
@@ -469,7 +470,7 @@ export const history: Reducer<HistoryState> = (
                     {
                         ... action.activity,
                         timestamp: (new Date()).toISOString(),
-                        channelData: { clientActivityId: state.clientActivityBase + state.clientActivityCounter }
+                        channelData: { ...(action.activity.channelData || {}), clientActivityId: state.clientActivityBase + state.clientActivityCounter }
                     },
                     ... state.activities.filter(activity => activity.type === "typing"),
                 ],
@@ -499,6 +500,12 @@ export const history: Reducer<HistoryState> = (
             if (i === -1) return state;
 
             const activity = state.activities[i];
+
+            if(action.type === "Send_Message_Fail" && activity && activity.type === "message" && activity.attachments) {
+                alert(defaultStrings.uploadFileFailedSize)
+                return state
+            }
+            
             if (activity.id && activity.id != "retry") return state;
 
             const newActivity = {
