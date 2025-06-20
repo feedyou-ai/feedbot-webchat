@@ -22,6 +22,7 @@
         "src/simple-update-in.d.ts"
     ],
     "exclude": [
-        "node_modules/sweetalert2/sweetalert2.d.ts"
+        "node_modules/sweetalert2/sweetalert2.d.ts",
+        "node_modules/@types/qrcode/index.d.ts"
     ]
 }

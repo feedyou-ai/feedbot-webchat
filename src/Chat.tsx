@@ -2,11 +2,10 @@ import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
 import { Activity, IBotConnection, User, DirectLine, DirectLineOptions, CardActionTypes } from 'botframework-directlinejs';
-import { createStore, ChatActions, sendMessage, typingDelay, HistoryAction, ChatStore } from './Store';
+import { createStore, ChatActions, HistoryAction, ChatStore } from './Store';
 import { Provider } from 'react-redux';
 import { SpeechOptions } from './SpeechOptions';
 import { Speech } from './SpeechModule';
@@ -40,15 +39,6 @@ interface GtmEvent {
     variables?: Array<{name: string, value: string}>
 }
 
-interface SmartsuppHandoffOptions {
-    key: string
-    name?: string
-    email?: string
-    phone?: string
-    notification?: string
-    variables?: {[key: string]: string}
-}
-
 export interface ChatProps {
     adaptiveCardsHostConfig: any,
     chatTitle?: boolean | string,
@@ -62,6 +52,8 @@ export interface ChatProps {
     selectedActivity?: BehaviorSubject<ActivityOrID>,
     sendTyping?: boolean,
     showUploadButton?: boolean,
+    uploadUsingQrCodeOnly?: boolean,
+    uploadUsingDndAndQrCode?: boolean,
     uploadCapture?: 'image/*' | 'video/*' | 'audio/*',
     disableInputWhenNotNeeded?: boolean,
     formatOptions?: FormatOptions,
@@ -89,6 +81,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private fbPixelEventsSubscription: Subscription;
     private gaEventsSubscription: Subscription;
     private gtmEventsSubscription: Subscription;
+    private botEventsSubscribtion: Subscription;
     private handoffSubscription: Subscription;
     private webchatCollapseSubscribtion: Subscription;
     private redirectSubscribtion: Subscription;
@@ -157,7 +150,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             this.store.dispatch<ChatActions>({ type: 'Set_Chat_Title', chatTitle });
         }
 
-        this.store.dispatch<ChatActions>({ type: 'Toggle_Upload_Button', showUploadButton: props.showUploadButton !== false });
+        this.store.dispatch<ChatActions>({ type: 'Toggle_Upload_Button', showUploadButton: props.showUploadButton !== false, uploadUsingQrCodeOnly: !!props.uploadUsingQrCodeOnly, uploadUsingDndAndQrCode: !!props.uploadUsingDndAndQrCode });
 
         this.store.dispatch<ChatActions>({ type: 'Set_Upload_Capture', uploadCapture: props.uploadCapture });
 
@@ -524,7 +517,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         );
 
         if (this.props.initialMessage) {
-            this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs', {userData}));
+            //this.store.dispatch<ChatActions>(sendMessage(this.props.initialMessage, this.props.user, 'cs', {userData}));
         }
 
         if (this.props.selectedActivity) {
@@ -587,6 +580,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         this.fbPixelEventsSubscription.unsubscribe();
         this.gaEventsSubscription.unsubscribe();
         this.gtmEventsSubscription.unsubscribe();
+        this.botEventsSubscribtion.unsubscribe();
         // this.handoffSubscription.unsubscribe();
         this.webchatCollapseSubscribtion.unsubscribe();
         this.redirectSubscribtion.unsubscribe();
