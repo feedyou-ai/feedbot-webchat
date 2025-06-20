@@ -112,13 +112,15 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
           .normalize("NFKD")
           .replace(/[^\w]/g, "");
           
-        const action = type === "repository" ? "autosuggest-repository" : "autosuggest";
+          //FOR SOME REASON GOOGLE PLACES API RETURNS NEEDS CZ INSTEAD OF CS NOW???
+          const paramOrReplaceCSforCZ = param === "cs" ? "cz" : param;
+        const action = type === "repository" ? "autosuggest-repository" : "google-places-city";
         // use replaced query string with old autosuggest
-        const useReplacedQueryString = action === "autosuggest"
+        const useReplacedQueryString = action === "google-places-city"
         const query = useReplacedQueryString ? replacedQueryString : encodeURIComponent(queryString)
 
         const res = await fetch(
-          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${query}/${param}`
+          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${query}/${paramOrReplaceCSforCZ}`
         );
         const data = await res.json();
   
@@ -132,7 +134,8 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
   
       private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (this.props.autoSuggestType === "google-city") {
-          this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestCountry);
+          console.log(this.props.autoSuggestType)
+          this.debounceCall(e.currentTarget.value, "google-places-city", this.props.autoSuggestCountry);
         }
         if(this.props.autoSuggestType === "repository") {
           this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestSource)
@@ -296,6 +299,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                     this.props.onChangeText(inputValue)
                     return
                 }}
+                inputValue={this.props.inputText}
                 itemToString={(item) => {
                   return item ? item : "";
                 }}
@@ -319,7 +323,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                       className="wc-shellinput"
                       ref={(input) => (this.textInput = input)}
                       autoFocus
-                      value={this.props.inputText}
+                      value={inputValue}
                       onBlur={async () => {
                         if(this.props.autoSuggestType === "static") {
                           return this.props.onChangeText("");
@@ -441,6 +445,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
 
 export const Shell = connect(
     (state: ChatState) => {
+      console.log("Shell state", state)
       return {
         // passed down to ShellContainer
         botId: state.connection.bot ? state.connection.bot.id : "",
