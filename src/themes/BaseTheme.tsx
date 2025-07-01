@@ -4,7 +4,10 @@ function isSafari() {
 	return !(navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') !== -1)
 }
 
-export const BaseTheme = (theme: Theme) => `
+export const BaseTheme = (theme: Theme) => {
+  const disclaimerEnabled = theme.genAi ? theme.genAi.disclaimerEnabled : false
+
+  return `
     body.feedbot-disabled div.feedbot {
         display: none;
     }
@@ -388,7 +391,7 @@ export const BaseTheme = (theme: Theme) => `
       fill: ${theme.mainColor};
       cursor: auto;
       opacity: 0.7;
-      ${!theme.genAi.disclaimerEnabled ? `display: none;` : ''}
+      ${!disclaimerEnabled ? `display: none;` : ''}
     }
 
     .wc-message-buttons>.wc-message-button-ai:hover {
@@ -434,3 +437,4 @@ export const BaseTheme = (theme: Theme) => `
 
     ${theme.customCss || ''}
   `
+    }

@@ -39,7 +39,7 @@ export type Theme = {
 		logoUrl?: string,
 		welcomeTitle?: string,
 		exampleQueries?: string[],
-	};
+	},
 	genAi?: {
 		ratingRoles: Role[],
 		explanationRoles: Role[],
