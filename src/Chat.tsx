@@ -207,8 +207,8 @@ export class Chat extends React.Component<ChatProps, {}> {
     }
 
     private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
-        if (rating === -1 && isUserRoleInArray(this.props.theme.genAi.explanationRoles)) {
-            const customExplanationForCurrentRole = this.props.theme.genAi.customExplanations.find((customExplanation) => customExplanation.roles.includes(getRole()))
+        if (rating === -1 && isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : [])) {
+            const customExplanationForCurrentRole = (this.props.theme.genAi ? this.props.theme.genAi : {customExplanations: []}).customExplanations.find((customExplanation) => customExplanation.roles.includes(getRole()))
             getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), customExplanationForCurrentRole)
         } else {
             this.rate(activity, rating, '', callback)
@@ -656,9 +656,9 @@ export class Chat extends React.Component<ChatProps, {}> {
                           }
                           <MessagePane>
                               <History
-                                customDisclaimerText={ this.props.theme.genAi.customDisclaimerText }
-                                canRate={isUserRoleInArray(this.props.theme.genAi.ratingRoles)}
-                                canWriteExplanation={ isUserRoleInArray(this.props.theme.genAi.explanationRoles) }
+                                customDisclaimerText={ this.props.theme.genAi ? this.props.theme.genAi.customDisclaimerText : '' }
+                                canRate={isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.ratingRoles : [])}
+                                canWriteExplanation={ isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : []) }
                                 canSeeInfo={ getRole() === "admin" }
                                   onCardAction={ this._handleCardAction }
                                   onCardRating={ this._handleCardRating }
