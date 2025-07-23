@@ -208,7 +208,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
     private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
         if (rating === -1 && isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : [])) {
-            const customExplanationForCurrentRole = (this.props.theme.genAi ? this.props.theme.genAi : {customExplanations: []}).customExplanations.find((customExplanation) => customExplanation.roles.includes(getRole()))
+            const customExplanationForCurrentRole = (this.props.theme.genAi ? this.props.theme.genAi : ({customExplanations: []} as any)).customExplanations.find((customExplanation: any) => customExplanation.roles.includes(getRole()))
             getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), customExplanationForCurrentRole)
         } else {
             this.rate(activity, rating, '', callback)
