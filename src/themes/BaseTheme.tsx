@@ -337,14 +337,18 @@ export const BaseTheme = (theme: Theme) => {
 
     .wc-message-from-bot .wc-message-content-type-message {
       float: left;
-      
+      max-width: calc(100% - 183px);
     }
 
-    @media (min-width: 600px) {
-      .wc-message-from-bot .wc-message-content-type-message {
-        max-width: calc(100% - 183px);
+    @media (max-width: 600px) {
+      .wc-message-wrapper.list .wc-message-from-bot .wc-message-content-type-message {
+        max-width: 100%;
+      }
+      .wc-message-wrapper.carousel .wc-message-from-bot .wc-message-content-type-message {
+        max-width: calc(100% - 60px) !important;
       }
     }
+       
 
     .wc-message-type-message.wc-message-from-bot {
       width: 100%;
