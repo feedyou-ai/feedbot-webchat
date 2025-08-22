@@ -1,15 +1,22 @@
+import { debounce } from "debounce";
+import { connect } from 'react-redux';
+import { StyledDropZone } from 'react-drop-zone'
+
 import * as React from 'react';
+import * as QRCode from 'qrcode'
+import * as html2canvas from 'html2canvas'
+
+
+import Downshift from "downshift";
+
+import fuzzysort =  require('fuzzysort');
+
 import { ChatState} from './Store';
 import { classList } from './Chat';
-import { connect } from 'react-redux';
 import { Strings } from './Strings';
 import { Speech } from './SpeechModule'
 import { ChatActions, ListeningState, sendMessage, sendFiles, sendScreenshot } from './Store';
 
-import * as html2canvas from 'html2canvas'
-import {debounce} from "debounce";
-import Downshift from "downshift";
-import fuzzysort =  require('fuzzysort');
 
 interface Props {
     botId: string
@@ -23,13 +30,13 @@ interface Props {
     autoSuggestCountry: string;
     autoSuggestSource: string;
     attachmentUrl: string,
+    uploadUsingQrCodeOnly: boolean,
+    uploadUsingDndAndQrCode: boolean,
     uploadCapture: 'image/*' | 'video/*' | 'audio/*' | string,
     disableInput: boolean
-
     onChangeText: (inputText: string) => void
-
     sendMessage: (inputText: string) => void,
-    sendFiles: (files: FileList) => void,
+    sendFiles: (files: File[], isDirectUpload: boolean) => void,
     sendScreenshot: (screen: string) => void,
     stopListening: () => void,
     startListening: () => void
@@ -48,6 +55,7 @@ export interface ShellFunctions {
 class ShellContainer extends React.Component<Props, State> implements ShellFunctions {
     private textInput: HTMLTextAreaElement | HTMLInputElement;
     private fileInput: HTMLInputElement;
+    private addFileTimeout: any
 
     constructor(props: Props) {
         super(props);
@@ -59,6 +67,15 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
           if ((forceText || "").trim().length > 0 || this.props.inputText.trim().length > 0) {
               this.props.sendMessage((forceText || "").trim() || this.props.inputText);
           }
+          if (this.props.attachmentUrl && (!this.state.attachmentQrCode)) {
+            QRCode.toDataURL(this.props.attachmentUrl, {
+                color: {
+                    dark: '#000',
+                    light: '#0000' // transparent
+                }
+            }).then((attachmentQrCode: string) => this.setState({ attachmentQrCode }))
+        }
+        (window as any).props = this.props
       }
 
     componentDidUpdate(prevProps: Props) {
@@ -95,13 +112,15 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
           .normalize("NFKD")
           .replace(/[^\w]/g, "");
           
-        const action = type === "repository" ? "autosuggest-repository" : "autosuggest";
+          //FOR SOME REASON GOOGLE PLACES API RETURNS NEEDS CZ INSTEAD OF CS NOW???
+          const paramOrReplaceCSforCZ = param === "cs" ? "cz" : param;
+        const action = type === "repository" ? "autosuggest-repository" : "google-places-city";
         // use replaced query string with old autosuggest
-        const useReplacedQueryString = action === "autosuggest"
+        const useReplacedQueryString = action === "google-places-city"
         const query = useReplacedQueryString ? replacedQueryString : encodeURIComponent(queryString)
 
         const res = await fetch(
-          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${query}/${param}`
+          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${query}/${paramOrReplaceCSforCZ}`
         );
         const data = await res.json();
   
@@ -115,7 +134,8 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
   
       private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (this.props.autoSuggestType === "google-city") {
-          this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestCountry);
+          console.log(this.props.autoSuggestType)
+          this.debounceCall(e.currentTarget.value, "google-places-city", this.props.autoSuggestCountry);
         }
         if(this.props.autoSuggestType === "repository") {
           this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestSource)
@@ -127,10 +147,19 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     }
 
     private onChangeFile() {
-        this.props.sendFiles(this.fileInput.files);
-        this.fileInput.value = null;
-        this.textInput.focus();
-    }
+      const fileList = this.fileInput.files;
+      let files: File[] = [];
+  
+      for (let i = 0; i < fileList.length; i++) {
+          const file = fileList[i];
+          files.push(file);
+      }
+  
+      this.props.sendFiles(files, location.hash.includes('#feedbot-direct-upload'));
+      this.fileInput.value = null;
+      this.textInput.focus();    
+  }
+  
 
     private onTextInputFocus() {
         if (this.props.listeningState === ListeningState.STARTED) {
@@ -154,6 +183,44 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
         }
     }
 
+    addFile(file: File) {
+      // onDrop called multiple times, need to debounce
+      clearTimeout(this.addFileTimeout)
+
+      this.addFileTimeout = setTimeout(() => {
+          console.log('addFile timeout')
+
+          if (file.size > 3 * 1024 * 1024 || location.hash.includes('#feedbot-direct-upload')) {
+              const attachmentUrl = this.props.attachmentUrl
+              const f = file
+              const reader = new FileReader()
+
+              reader.onload = (function (file) {
+                  return async function (e: any) {
+                      console.log(e)
+                      var binaryData = e.target.result
+                      //Converting Binary Data to base 64
+                      var base64String = 'data:' + file.type + ';base64,' + window.btoa(binaryData)
+                      const body = JSON.stringify([{ data: base64String, fileName: file.name }])
+                      try {
+                          const response = await fetch(attachmentUrl, {
+                              method: 'POST',
+                              body
+                          })
+
+                          console.log("File successfully uploaded", response.status, response.statusText)
+                      } catch (error) {
+                          console.log("File upload failed", error)
+                      }
+                  }
+              })(f)
+
+              reader.readAsBinaryString(f)
+          }
+          this.props.sendFiles([file], file.size > 3 * 1024 * 1024 || location.hash.includes('#feedbot-direct-upload'))
+      }, 75)
+  }
+
     private async takeScreenshot() {
         const screen = await html2canvas(document.body, { allowTaint: true, useCORS: true }).then((canvas) => {
             const dataURI = canvas.toDataURL("image/png");
@@ -168,14 +235,14 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
             'wc-console',
             this.props.inputText.length > 0 && 'has-text',
             this.props.showUploadButton && 'has-upload-button',
-            this.props.disableInput && 'disable-input'
+            this.props.disableInput && (this.props.uploadUsingDndAndQrCode || this.props.uploadUsingQrCodeOnly) && 'disable-input'
         );
 
         const showMicButton = this.props.listeningState !== ListeningState.STOPPED || (Speech.SpeechRecognizer.speechIsAvailable() && !this.props.inputText.length);
 
         const sendButtonClassName = classList(
             'wc-send',
-            showMicButton && 'hidden'
+            showMicButton || (this.props.showUploadButton && this.props.disableInput) && (this.props.uploadUsingDndAndQrCode || this.props.uploadUsingQrCodeOnly) && 'hidden'
         );
 
         const micButtonClassName = classList(
@@ -187,23 +254,24 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
 
         const placeholder = this.props.listeningState === ListeningState.STARTED ? this.props.strings.listeningIndicator : this.props.strings.consolePlaceholder;
 
-        return (
-            <div className={className}>
-                {
-                    this.props.showUploadButton &&
-                    <label
-                        className="wc-upload"
-                        htmlFor="wc-upload-input"
-                        onKeyPress={evt => this.handleUploadButtonKeyPress(evt)}
-                        tabIndex={0}
-                    >
-                        <svg>
-                            <path d="M19.96 4.79m-2 0a2 2 0 0 1 4 0 2 2 0 0 1-4 0zM8.32 4.19L2.5 15.53 22.45 15.53 17.46 8.56 14.42 11.18 8.32 4.19ZM1.04 1L1.04 17 24.96 17 24.96 1 1.04 1ZM1.03 0L24.96 0C25.54 0 26 0.45 26 0.99L26 17.01C26 17.55 25.53 18 24.96 18L1.03 18C0.46 18 0 17.55 0 17.01L0 0.99C0 0.45 0.47 0 1.03 0Z" />
-                        </svg>
-                    </label>
-                }
-                {
-                    this.props.showUploadButton &&
+        const localAndQrAttachment = [
+            <StyledDropZone key="a" label={this.props.strings.attachmentDropArea} onDrop={(file: any) => this.addFile(file)} />,
+            <div key="b" className="attachment-wrapper">
+                <span className="attachment-url">{this.props.strings.attachmentInfo}</span>
+                <a href="#" onClick={() => alert(this.props.strings.attachmentAlert + '\n\n' + this.props.attachmentUrl)}><img src={this.state && this.state.attachmentQrCode} /></a>
+            </div>
+        ]
+
+          const qrOnlyAttachment = [
+            <div key="b" className="attachment-wrapper qr-only">
+                <span className="attachment-url">{this.props.strings.attachmentInfoQrOnly}<br /><span>{this.props.attachmentUrl}</span></span>
+                <a href="#" onClick={() => alert(this.props.strings.attachmentAlert + '\n\n' + this.props.attachmentUrl)}><img src={this.state && this.state.attachmentQrCode} /></a>
+            </div>
+        ]
+
+        const buttonAttachment = 
+                [
+                    <label onKeyPress={evt => this.handleUploadButtonKeyPress(evt)}  className="wc-upload" htmlFor="wc-upload-input" tabIndex={0}><svg><path d="M19.96 4.79m-2 0a2 2 0 0 1 4 0 2 2 0 0 1-4 0zM8.32 4.19L2.5 15.53 22.45 15.53 17.46 8.56 14.42 11.18 8.32 4.19ZM1.04 1L1.04 17 24.96 17 24.96 1 1.04 1ZM1.03 0L24.96 0C25.54 0 26 0.45 26 0.99L26 17.01C26 17.55 25.53 18 24.96 18L1.03 18C0.46 18 0 17.55 0 17.01L0 0.99C0 0.45 0.47 0 1.03 0Z"></path></svg></label>,
                     <input
                         id="wc-upload-input"
                         tabIndex={-1}
@@ -215,127 +283,131 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
                         role="button"
                         capture={!!this.props.uploadCapture}
                         accept={this.props.uploadCapture}
-                    />
-                }
-                {
-                    this.props.showUploadButton &&
+                    />,
                     <button className="wc-upload-screenshot" onClick={() => { this.takeScreenshot() }}><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="camera" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#8a8a8a" d="M512 144v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V144c0-26.5 21.5-48 48-48h88l12.3-32.9c7-18.7 24.9-31.1 44.9-31.1h125.5c20 0 37.9 12.4 44.9 31.1L376 96h88c26.5 0 48 21.5 48 48zM376 288c0-66.2-53.8-120-120-120s-120 53.8-120 120 53.8 120 120 120 120-53.8 120-120zm-32 0c0 48.5-39.5 88-88 88s-88-39.5-88-88 39.5-88 88-88 88 39.5 88 88z"></path></svg></button>
-                }
+                ]
 
-{this.props.showAutoSuggest ? (
-          <Downshift
-            onChange={async (selection) => {
-              this.sendMessage(selection)
-              return 
-            }}
-            onInputValueChange={(inputValue) => {
-                if(this.props.autoSuggestType === "static") {
-                    return
-                }
-                this.props.onChangeText(inputValue)
-                return
-            }}
-            inputValue={this.props.inputText}
-            itemToString={(item) => {
-              return item ? item : "";
-            }}
-          >
-            {({
-              getInputProps,
-              getItemProps,
-              getMenuProps,
-              isOpen,
-              inputValue,
-              highlightedIndex,
-              selectedItem,
-              getRootProps,
-            }) => (
-              <div
-                className="wc-textbox"
-                {...getRootProps({ refKey: "" }, { suppressRefError: true })}
-              >
-                <input
-                  type="text"
-                  className="wc-shellinput"
-                  ref={(input) => (this.textInput = input)}
-                  autoFocus
-                  value={inputValue}
-                  onBlur={async () => {
+           const autosuggestInput = <Downshift
+                onChange={async (selection) => {
+                  this.sendMessage(selection)
+                  return 
+                }}
+                onInputValueChange={(inputValue) => {
                     if(this.props.autoSuggestType === "static") {
-                      return this.props.onChangeText("");
+                        return
                     }
-                  }}
-                  onKeyPress={(e) => {
-                    this.onKeyPress(e);
-                  }}
-                  onKeyUp={this.autoSuggestOnKeyUp}
-                  onFocus={() => this.onTextInputFocus()}
-                  placeholder={placeholder}
-                  disabled={this.props.disableInput}
-                  aria-label={this.props.inputText ? null : placeholder}
-                  aria-live="polite"
-                  {...getInputProps()}
-                />
-                <ul
-                  style={{
-                    position: "absolute",
-                    bottom: "100%",
-                    left: 13,
-                    minWidth: 200,
-                    borderTopLeftRadius: "13px",
-                    borderTopRightRadius: "13px",
-                    padding: 0,
-                    overflow: "hidden",
-                    backgroundColor: "#eceff1",
-                  }}
-                  {...getMenuProps()}
-                >
-                  {isOpen
-                    ? Array.from(fuzzysort.go(inputValue, (this.props.autoSuggestItems.length > 0
-                        ? this.props.autoSuggestItems 
-                        : this.state.items), {keys: ["answer"], limit: 10}))
-                      .reverse()
-                      .map((item: any, index: number) => {
-                          return <li
-                            {...getItemProps({
-                              key: item.obj.answer,
-                              index,
-                              item: item.obj.answer,
-                              style: {
-                                backgroundColor:
-                                  highlightedIndex === index
-                                    ? "lightgray"
-                                    : "transparent",
-                                fontWeight:
-                                  selectedItem === item ? "bold" : "normal",
-                                padding: "10px",
-                              },
-                            })}
-                          >
-                            {item.obj.answer}
-                          </li>
-                        })
-                    : null}
-                </ul>
-              </div>
-            )}
-          </Downshift>
+                    this.props.onChangeText(inputValue)
+                    return
+                }}
+                inputValue={this.props.inputText}
+                itemToString={(item) => {
+                  return item ? item : "";
+                }}
+              >
+                {({
+                  getInputProps,
+                  getItemProps,
+                  getMenuProps,
+                  isOpen,
+                  inputValue,
+                  highlightedIndex,
+                  selectedItem,
+                  getRootProps,
+                }) => (
+                  <div
+                    className="wc-textbox"
+                    {...getRootProps({ refKey: "" }, { suppressRefError: true })}
+                  >
+                    <input
+                      type="text"
+                      className="wc-shellinput"
+                      ref={(input) => (this.textInput = input)}
+                      autoFocus
+                      value={inputValue}
+                      onBlur={async () => {
+                        if(this.props.autoSuggestType === "static") {
+                          return this.props.onChangeText("");
+                        }
+                      }}
+                      onKeyPress={(e) => {
+                        this.onKeyPress(e);
+                      }}
+                      onKeyUp={this.autoSuggestOnKeyUp}
+                      onFocus={() => this.onTextInputFocus()}
+                      placeholder={placeholder}
+                      disabled={this.props.disableInput}
+                      aria-label={this.props.inputText ? null : placeholder}
+                      aria-live="polite"
+                      {...getInputProps()}
+                    />
+                    <ul
+                      style={{
+                        position: "absolute",
+                        bottom: "100%",
+                        left: 13,
+                        minWidth: 200,
+                        borderTopLeftRadius: "13px",
+                        borderTopRightRadius: "13px",
+                        padding: 0,
+                        overflow: "hidden",
+                        backgroundColor: "#eceff1",
+                      }}
+                      {...getMenuProps()}
+                    >
+                      {isOpen
+                        ? Array.from(fuzzysort.go(inputValue, (this.props.autoSuggestItems.length > 0
+                            ? this.props.autoSuggestItems 
+                            : this.state.items), {keys: ["answer"], limit: 10}))
+                          .reverse()
+                          .map((item: any, index: number) => {
+                              return <li
+                                {...getItemProps({
+                                  key: item.obj.answer,
+                                  index,
+                                  item: item.obj.answer,
+                                  style: {
+                                    backgroundColor:
+                                      highlightedIndex === index
+                                        ? "lightgray"
+                                        : "transparent",
+                                    fontWeight:
+                                      selectedItem === item ? "bold" : "normal",
+                                    padding: "10px",
+                                  },
+                                })}
+                              >
+                                {item.obj.answer}
+                              </li>
+                            })
+                        : null}
+                    </ul>
+                  </div>
+                )}
+              </Downshift>
 
-        ) : ( <div className="wc-textbox">
-        <textarea
-            className="wc-shellinput"
-            ref={input => this.textInput = input}
-            autoFocus
-            value={this.props.inputText}
-            onChange={_ => this.props.onChangeText(this.textInput.value)}
-            onKeyPress={e => this.onKeyPress(e)}
-            onFocus={() => this.onTextInputFocus()}
-            placeholder={placeholder}
-            disabled={this.props.disableInput}
-            aria-label={this.props.inputText ? null : placeholder}
-            aria-live="polite"
-        ></textarea>
-    </div> )}
+                const defaultInput = <div className="wc-textbox">
+                <textarea
+                    className="wc-shellinput"
+                    ref={input => this.textInput = input}
+                    autoFocus
+                    value={this.props.inputText}
+                    onChange={_ => this.props.onChangeText(this.textInput.value)}
+                    onKeyPress={e => this.onKeyPress(e)}
+                    onFocus={() => this.onTextInputFocus()}
+                    placeholder={placeholder}
+                    disabled={this.props.disableInput}
+                    aria-label={this.props.inputText ? null : placeholder}
+                    aria-live="polite"
+                ></textarea>
+            </div>
+
+        return (
+            <div className={className}>
+              {
+                    this.props.showUploadButton && (this.props.uploadUsingQrCodeOnly ? qrOnlyAttachment : this.props.uploadUsingDndAndQrCode ? localAndQrAttachment : buttonAttachment)
+              }
+
+              {this.props.showAutoSuggest ? autosuggestInput : defaultInput}
                 
                 <button
                     className={sendButtonClassName}
@@ -373,11 +445,14 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
 
 export const Shell = connect(
     (state: ChatState) => {
+      console.log("Shell state", state)
       return {
         // passed down to ShellContainer
         botId: state.connection.bot ? state.connection.bot.id : "",
         inputText: state.shell.input,
         showUploadButton: state.format.showUploadButton,
+        uploadUsingQrCodeOnly: state.format.uploadUsingQrCodeOnly,
+        uploadUsingDndAndQrCode: state.format.uploadUsingDndAndQrCode,
         attachmentUrl: state.format.attachmentUrl,
         showAutoSuggest: state.format.showAutoSuggest,
         autoSuggestType: state.format.autoSuggestType,
@@ -405,6 +480,8 @@ export const Shell = connect(
     botId: stateProps.botId,
     inputText: stateProps.inputText,
     showUploadButton: stateProps.showUploadButton,
+    uploadUsingQrCodeOnly: stateProps.uploadUsingQrCodeOnly,
+    uploadUsingDndAndQrCode: stateProps.uploadUsingDndAndQrCode,
     attachmentUrl: stateProps.attachmentUrl,
     showAutoSuggest: stateProps.showAutoSuggest,
     autoSuggestType: stateProps.autoSuggestType,
@@ -419,7 +496,7 @@ export const Shell = connect(
     onChangeText: dispatchProps.onChangeText,
     // helper functions
     sendMessage: (text: string) => dispatchProps.sendMessage(text, stateProps.user, stateProps.locale),
-    sendFiles: (files: FileList) => dispatchProps.sendFiles(files, stateProps.user, stateProps.locale),
+    sendFiles: (files: File[], isDirectUpload: boolean) => dispatchProps.sendFiles(files, stateProps.user, stateProps.locale, isDirectUpload),
     sendScreenshot: (screen: string) => dispatchProps.sendScreenshot(screen, stateProps.user, stateProps.locale),
     startListening: () => dispatchProps.startListening(),
     stopListening: () => dispatchProps.stopListening()
