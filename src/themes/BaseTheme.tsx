@@ -357,6 +357,22 @@ export const BaseTheme = (theme: Theme) => {
     .wc-message-buttons {
       float: left;
       padding-left: 8px;
+      width: 100%;
+      height: 44px;
+    }
+
+    .wc-message-buttons .loader {
+      border: 2px solid #f3f3f3; 
+      border-top: 2px solid #3d3d3dff;
+      border-radius: 50%;
+      width: 15px;
+      height: 15px;
+      animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .wc-message-buttons>div {
@@ -400,10 +416,6 @@ export const BaseTheme = (theme: Theme) => {
 
     .wc-message-buttons>.wc-message-button-ai:hover {
       fill: ${theme.mainColor};
-    }
-
-    .wc-message-buttons.wc-rating-in-progress>.wc-message-button-info {
-      display: block;
     }
 
     .wc-message-wrapper:hover .wc-message-buttons>div {
