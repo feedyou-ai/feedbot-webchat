@@ -106,13 +106,6 @@ export class ActivityView extends React.Component<ActivityViewProps, {}> {
                 })
                     return (
                     <div>
-                        <div className="ticontainer">
-                            <div className="tiblock">
-                                <div className="tidot"></div>
-                                <div className="tidot"></div>
-                                <div className="tidot"></div>
-                            </div>
-                        </div>
                             <FormattedText
                                 text={ activity.text }
                                 format={ activity.textFormat }

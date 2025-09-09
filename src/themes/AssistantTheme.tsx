@@ -103,7 +103,7 @@ export const AssistantTheme = (theme: Theme) => {
   }
 
   .feedbot-wrapper .wc-message-content {
-    border-radius: 20px !important;
+    border-radius: 16px !important;
     padding: 10px 15px !important;
   }
 
@@ -412,6 +412,7 @@ export const AssistantTheme = (theme: Theme) => {
 
   .feedbot-wrapper .wc-console {
     border-width: 0px;
+    display: block;
     height: 70px;
   }
 
@@ -434,6 +435,7 @@ export const AssistantTheme = (theme: Theme) => {
 
   .wc-console .wc-mic, .wc-console .wc-send {
     top: 10px !important;
+    right: 25px;
   }
 
   .wc-console input[type=text], .wc-console textarea {
@@ -545,15 +547,12 @@ export const AssistantTheme = (theme: Theme) => {
 
 
 .wc-console .wc-textbox {
-  margin: 0px;
-  height: 100%;
-  width: 70%;
-  position: relative;
-  left: unset;
-  right: unset;
-  top: unset;
-  bottom: unset;
-  border-radius: 28px;
+  padding: 0 18px;
+    height: 100%;
+    border-radius: 28px;
+    position: static;
+    width: 100%;
+    display: block;
 }
 
 .wc-console .wc-textbox textarea {
@@ -562,10 +561,23 @@ export const AssistantTheme = (theme: Theme) => {
   margin: 0px;
   border: 1px solid #ccc;
   box-sizing: border-box;
+  margin: 0;
 }
 
 .feedbot-wrapper.dark-mode .wc-console .wc-textbox textarea {
   border : 1px solid #555;
+  background: #232323;
+  color: white;
+}
+@media (min-width: 1200px) {
+  .feedbot-wrapper .wc-console {
+    width: 1000px;
+    left: calc(50% - 500px);
+  }
+}
+
+.feedbot-wrapper.dark-mode a {
+  color: #67b0ffff !important;
 }
 `
 }
