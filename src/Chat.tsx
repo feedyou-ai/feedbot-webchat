@@ -20,6 +20,7 @@ import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
 import { getFeedyouParam } from './FeedyouParams';
+import { CustomExplanation, Role, Theme } from './themes';
 
 const Swal = require('sweetalert2')
 
@@ -72,6 +73,7 @@ export interface ChatProps {
     onEvent?: {[event: string]: (activity: Activity) => void},
     onMessage?: (activity: Activity) => void,
     typingDelay?: number
+    theme?: Theme
     initialMessage?: string
 }
 
@@ -205,25 +207,23 @@ export class Chat extends React.Component<ChatProps, {}> {
     }
 
     private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
-        if (rating === -1) {
-            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback))
+        if (rating === -1 && isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : [])) {
+            const customExplanationForCurrentRole = (this.props.theme.genAi ? this.props.theme.genAi : ({customExplanations: []} as any)).customExplanations.find((customExplanation: any) => customExplanation.roles.includes(getRole()))
+            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), customExplanationForCurrentRole)
         } else {
             this.rate(activity, rating, '', callback)
         }
     }
 
     private rate(activity: Activity, value: number, explanation = '', callback: (rated: boolean) => void) {
-        if (value === -1 && !explanation) {
-            callback(false)
-            return
-        }
-
         console.log('Rating ' + value + ' for query ' + activity.channelData.queryId);
+
+        const role = getRole()
 
         fetch('https://'+this.props.bot.id.replace(/\-app$/,'')+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
             method: 'POST',
             headers: { accept: 'application/json', 'content-type': 'application/json' },
-            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation }),
+            body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation, role}),
         }).then(() => {
             Swal.fire({
                 icon: "success",
@@ -656,6 +656,10 @@ export class Chat extends React.Component<ChatProps, {}> {
                           }
                           <MessagePane>
                               <History
+                                customDisclaimerText={ this.props.theme.genAi ? this.props.theme.genAi.customDisclaimerText : '' }
+                                canRate={isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.ratingRoles : [])}
+                                canWriteExplanation={ isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : []) }
+                                canSeeInfo={ getRole() === "admin" }
                                   onCardAction={ this._handleCardAction }
                                   onCardRating={ this._handleCardRating }
                                   onCardInfo={ this._handleCardInfo }
@@ -861,32 +865,70 @@ function getIntroDialogId(props: ChatProps): string | undefined {
     return props.introDialog && props.introDialog.id ? props.introDialog.id : undefined
 }
 
-function getExplanation(callback: (explanation: string) => void) {
+function getRole(): Role {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roles = ['admin', 'customer', 'user'] as Role[]
+
+    // this goes through all roles and returns the first one that is set in URL
+    const role = roles.find((role): boolean => {
+        return urlParams.get(role) !== null
+    })
+
+    return role || "user"
+ }
+
+ function isUserRoleInArray(roles: Role[] = []): boolean {
+    const userRole = getRole()
+    const isInArray = roles.indexOf(userRole) >= 0
+
+    return isInArray          
+ }
+
+function getExplanation(callback: (explanation: string) => void, customExplanationForCurrentRole: CustomExplanation | undefined) {
+    const title = (customExplanationForCurrentRole && customExplanationForCurrentRole.title) || 'Zpětná vazba'
+    const intro = (customExplanationForCurrentRole && customExplanationForCurrentRole.intro) || "Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný."
+    const explanationFields = (customExplanationForCurrentRole && customExplanationForCurrentRole.explanationFields.length > 0) ? customExplanationForCurrentRole.explanationFields : [{"name": "swal-problem", "label": "<b>Stručně prosím popište, co by na odpovědi mohlo být lépe: <span style='color: red;'>*</span></b>", "required": true}]
+
+    const fieldsHtml = explanationFields.map((field) => {
+        return `
+        <label for="${field.name}">${field.label}</label>
+        <textarea class="form-control" id="${field.name}" rows="3"></textarea>
+        `})
+
     Swal.fire({
-        title: 'Zpětná vazba',
+        title,
         showCancelButton: true,
         cancelButtonText: 'Zrušit',
         html: `
-          <p style="margin-top:32px;text-align:left;">Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Vaše zpětná vazba je velmi vítaná.</p>
+          <p style="margin-top:32px;text-align:left;">${intro}</p>
           <form style="text-align:left;">
             <div class="form-group">
-                <label for="swal-problem"><b>Stručně prosím popište, co by na odpovědi mohlo být lépe: <span style="color: red;">*</span></b></label>
-                <textarea class="form-control" id="swal-problem" rows="3"></textarea>
+                ${fieldsHtml}
             </div>
           </form>
         `,
-        /*
-            <div class="form-group">
-                <label for="swal-sources"><b>Prosíme také o uvedení dokumentu (ideálně konkrétní kapitoly) popřípadě URL adresy, kde se nachází informace, ze kterých bychom měli při sestavování správné odpovědi čerpat:</b></label>
-                <textarea class="form-control" style="width: calc(100% - 1.5rem);" id="swal-sources" rows="3"></textarea>
-            </div>
-        */
         focusConfirm: false,
         preConfirm: () => {
-            const problem = (document.getElementById("swal-problem") as any).value
-            const sources = '' //(document.getElementById("swal-sources") as any).value
-            document.getElementById("swal-problem").style.border = "2px red solid"
-            return problem ? [problem, sources].join('\n\n') : false
+            const fields = explanationFields.map((field) => {
+                return { ...field, value: (document.getElementById(field.name) as any).value}
+            })
+            const invalidFields = fields.filter((field) => field.required && !field.value)  
+
+            fields.forEach((field) => {
+                if(invalidFields.includes(field)) {
+                    document.getElementById(field.name).style.border = "2px solid red"
+                    return
+                }
+
+                document.getElementById(field.name).style.border = "2px solid #ced4da"
+            })
+
+            if (invalidFields.length > 0) {
+                Swal.showValidationMessage(`Prosím vyplňte všechna povinná pole.`)
+                return false
+            }
+
+            return fields.map(field => field.value).join('\n\n')
         },
         confirmButtonText: 'Odeslat'
     }).then((result: any) => {

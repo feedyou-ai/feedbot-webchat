@@ -15,6 +15,10 @@ export interface HistoryProps {
     size: SizeState,
     activities: Activity[],
     hasActivityWithSuggestedActions: Activity,
+    customDisclaimerText: string,
+    canRate: boolean,
+    canWriteExplanation: boolean,
+    canSeeInfo: boolean,
 
     setMeasurements: (carouselMargin: number) => void,
     onClickRetry: (activity: Activity) => void,
@@ -126,6 +130,9 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
             onClickInfo={ null }
             onClickRatingUp={ null }
             onClickRatingDown={ null }
+            customDisclaimerText={ null }
+            canRate={ null }
+            canSeeInfo={ null }
             selected={ false }
             showTimestamp={ false }
         >
@@ -152,7 +159,7 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                 this.largeWidth = this.props.size.width * 2;
                 content = <this.measurableCarousel/>;
             } else {
-                content = this.props.activities.reduce((out, activity) => {
+                const activities = this.props.activities.reduce((out, activity) => {
                     if (activity.channelData && activity.channelData.streamId && activity.type === 'message') {
                         const firstStreamIndex = out.findIndex(a => a.channelData && a.channelData.streamId === activity.channelData.streamId)
                         const firstStreamActivity = out[firstStreamIndex]
@@ -163,15 +170,20 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                     }
                     out.push(Object.assign({}, activity))
                     return out
-                }, []).map((activity, index) =>
+                }, [])
+
+                content = activities.map((activity, index) =>
                     (activity.type !== 'message' || activity.text || (activity.attachments && activity.attachments.length)) &&
                         <WrappedActivity
                             format={ this.props.format }
                             key={ 'message' + index }
                             activity={ activity }
-                            showTimestamp={ index === this.props.activities.length - 1 || (index + 1 < this.props.activities.length && suitableInterval(activity, this.props.activities[index + 1])) }
+                            showTimestamp={ index === activities.length - 1 || (index + 1 < activities.length && suitableInterval(activity, activities[index + 1])) }
                             selected={ this.props.isSelected(activity) }
                             fromMe={ this.props.isFromMe(activity) }
+                            customDisclaimerText={ this.props.customDisclaimerText }
+                            canRate={ this.props.canRate }
+                            canSeeInfo={ this.props.canSeeInfo }
                             onClickActivity={ this.props.onClickActivity(activity) }
                             onClickRetry={ e => {
                                 // Since this is a click on an anchor, we need to stop it
@@ -191,7 +203,7 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                                 activity={ activity }
                                 onCardAction={ (type: CardActionTypes, value: string | object) => this.doCardAction(type, value) }
                                 onImageLoad={ () => this.autoscroll() }
-                                isLast={ index === this.props.activities.length - 1  }
+                                isLast={ index === activities.length - 1  }
                             />
                         </WrappedActivity>
                 );
@@ -250,7 +262,11 @@ export const History = connect(
         onClickActivity: (activity: Activity) => stateProps.connectionSelectedActivity && (() => stateProps.connectionSelectedActivity.next({ activity })),
         onCardAction: ownProps.onCardAction,
         onCardRating: ownProps.onCardRating,
-        onCardInfo: ownProps.onCardInfo
+        onCardInfo: ownProps.onCardInfo,
+        customDisclaimerText: ownProps.customDisclaimerText,
+        canRate: ownProps.canRate,
+        canWriteExplanation: ownProps.canWriteExplanation,
+        canSeeInfo: ownProps.canSeeInfo,
     }), {
         withRef: true
     }
@@ -284,6 +300,10 @@ export interface WrappedActivityProps {
     selected: boolean,
     fromMe: boolean,
     format: FormatState,
+    customDisclaimerText: string,
+    canRate: boolean,
+    canSeeInfo: boolean,
+
     onClickActivity: React.MouseEventHandler<HTMLDivElement>,
     onClickRetry: React.MouseEventHandler<HTMLAnchorElement>,
     onClickRatingUp: (callback: (rated: boolean) => void) => boolean,
@@ -350,11 +370,11 @@ export class WrappedActivity extends React.Component<WrappedActivityProps, {rati
                         { this.props.children }
                     </div>
                     {this.props.activity.channelData && this.props.activity.channelData.queryId && !this.props.fromMe && this.props.activity.type === 'message' && <div className={'wc-message-buttons' + (this.state.ratingInProgress ? ' wc-rating-in-progress' : '') }>
-                        {<div onClick={() => Swal.fire({icon: "question", text: this.props.format.strings.aiMessageTitle})} title={this.props.format.strings.aiMessageTitle} className='wc-message-button-ai'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M320 0c17.7 0 32 14.3 32 32l0 64 120 0c39.8 0 72 32.2 72 72l0 272c0 39.8-32.2 72-72 72l-304 0c-39.8 0-72-32.2-72-72l0-272c0-39.8 32.2-72 72-72l120 0 0-64c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zM264 256a40 40 0 1 0 -80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224l16 0 0 192-16 0c-26.5 0-48-21.5-48-48l0-96c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48l0 96c0 26.5-21.5 48-48 48l-16 0 0-192 16 0z"/></svg></div>}
+                        {<div onClick={() => Swal.fire({icon: "question", text: this.props.customDisclaimerText || this.props.format.strings.aiMessageTitle})} title={this.props.format.strings.aiMessageTitle} className='wc-message-button-ai'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M320 0c17.7 0 32 14.3 32 32l0 64 120 0c39.8 0 72 32.2 72 72l0 272c0 39.8-32.2 72-72 72l-304 0c-39.8 0-72-32.2-72-72l0-272c0-39.8 32.2-72 72-72l120 0 0-64c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0zM264 256a40 40 0 1 0 -80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224l16 0 0 192-16 0c-26.5 0-48-21.5-48-48l0-96c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48l0 96c0 26.5-21.5 48-48 48l-16 0 0-192 16 0z"/></svg></div>}
                         {<div onClick={() => this.props.onClickCopy()} className='wc-message-button-copy'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/></svg></div>}
-                        {location.search.endsWith('?developer') && this.props.activity.channelData.info && <div onClick={this.props.onClickInfo} className='wc-message-button-info'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></div>}
-                        {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => !this.state.ratingInProgress && this.props.onClickRatingUp(rated => this.setState({rated}))} className='wc-message-button-vote-up'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg></div>}
-                        {this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => !this.state.ratingInProgress && this.props.onClickRatingDown(rated => this.setState({rated}))} className='wc-message-button-vote-down'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 479.1c26-5.2 42.9-30.5 37.7-56.5l-2.3-11.4c-5.3-26.7-15.1-52.1-28.8-75.2l144 0c26.5 0 48-21.5 48-48c0-18.5-10.5-34.6-25.9-42.6C497 236.6 504 223.1 504 208c0-23.4-16.8-42.9-38.9-47.1c4.4-7.3 6.9-15.8 6.9-24.9c0-21.3-13.9-39.4-33.1-45.6c.7-3.3 1.1-6.8 1.1-10.4c0-26.5-21.5-48-48-48l-97.5 0c-19 0-37.5 5.6-53.3 16.1L202.7 73.8C176 91.6 160 121.6 160 153.7l0 38.3 0 48 0 24.9c0 29.2 13.3 56.7 36 75l7.4 5.9c26.5 21.2 44.6 51 51.2 84.2l2.3 11.4c5.2 26 30.5 42.9 56.5 37.7zM32 384l64 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32L32 96C14.3 96 0 110.3 0 128L0 352c0 17.7 14.3 32 32 32z"/></svg></div>}
+                        {this.props.canSeeInfo && this.props.activity.channelData.info && <div onClick={this.props.onClickInfo} className='wc-message-button-info'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg></div>}
+                        {this.props.canRate && this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => !this.state.ratingInProgress && this.props.onClickRatingUp(rated => this.setState({rated}))} className='wc-message-button-vote-up'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 32.9c26 5.2 42.9 30.5 37.7 56.5l-2.3 11.4c-5.3 26.7-15.1 52.1-28.8 75.2l144 0c26.5 0 48 21.5 48 48c0 18.5-10.5 34.6-25.9 42.6C497 275.4 504 288.9 504 304c0 23.4-16.8 42.9-38.9 47.1c4.4 7.3 6.9 15.8 6.9 24.9c0 21.3-13.9 39.4-33.1 45.6c.7 3.3 1.1 6.8 1.1 10.4c0 26.5-21.5 48-48 48l-97.5 0c-19 0-37.5-5.6-53.3-16.1l-38.5-25.7C176 420.4 160 390.4 160 358.3l0-38.3 0-48 0-24.9c0-29.2 13.3-56.7 36-75l7.4-5.9c26.5-21.2 44.6-51 51.2-84.2l2.3-11.4c5.2-26 30.5-42.9 56.5-37.7zM32 192l64 0c17.7 0 32 14.3 32 32l0 224c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32L0 224c0-17.7 14.3-32 32-32z"/></svg></div>}
+                        {this.props.canRate && this.props.activity.channelData.queryId && !this.state.rated && <div onClick={() => !this.state.ratingInProgress && this.props.onClickRatingDown(rated => this.setState({rated}))} className='wc-message-button-vote-down'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M313.4 479.1c26-5.2 42.9-30.5 37.7-56.5l-2.3-11.4c-5.3-26.7-15.1-52.1-28.8-75.2l144 0c26.5 0 48-21.5 48-48c0-18.5-10.5-34.6-25.9-42.6C497 236.6 504 223.1 504 208c0-23.4-16.8-42.9-38.9-47.1c4.4-7.3 6.9-15.8 6.9-24.9c0-21.3-13.9-39.4-33.1-45.6c.7-3.3 1.1-6.8 1.1-10.4c0-26.5-21.5-48-48-48l-97.5 0c-19 0-37.5 5.6-53.3 16.1L202.7 73.8C176 91.6 160 121.6 160 153.7l0 38.3 0 48 0 24.9c0 29.2 13.3 56.7 36 75l7.4 5.9c26.5 21.2 44.6 51 51.2 84.2l2.3 11.4c5.2 26 30.5 42.9 56.5 37.7zM32 384l64 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32L32 96C14.3 96 0 110.3 0 128L0 352c0 17.7 14.3 32 32 32z"/></svg></div>}
                     </div>}
                 </div>
                 <div className={ 'wc-message-from wc-message-from-' + who }>{ timeLine }</div>
