@@ -2,6 +2,7 @@ import * as MarkdownIt from 'markdown-it';
 import * as React from 'react';
 import { getFeedyouParam } from './FeedyouParams';
 import { twemoji } from './lib.js'
+const Swal = require('sweetalert2')
 
 export interface IFormattedTextProps {
     text: string,
@@ -69,9 +70,20 @@ const renderMarkdown = (
           .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (match, text, url, title) => `[${text}](${markdownIt.normalizeLink(url)}${title === undefined ? '' : title})`);
 
         const arr = src.split(/\n *\n|\r\n *\r\n|\r *\r/);
-        const ma = arr.map(a => markdownIt.render(a));
+        const ma = arr.map(a => {
+            return markdownIt.render(a)
+        });
 
-        __html = ma.join('<br/>');
+        __html = ma.join('<br/>')
+        //transform markdown links whose text is wrapped in [ ] into "chip" elements
+        .replace(/<a href="(.+?)" target="_.+?">\[([^\]]+)\]<\/a>/gi, (_match, url ,label) => {
+            if(isUrlFeedyouPreview(url)){
+                // If the URL is a Feedyou preview link, show a custom iframe modal
+                return `<a href="${url}" class="source-link-chip" onclick="showIframeModal(event, '${url}')">${label}</a>`;
+            }
+
+            return `<a href="${url}" target="_blank"><span class="source-link-chip">${label}</span></a>`;
+        });
     } else {
         // Replace spaces with non-breaking space Unicode characters
         __html = text.replace(/ */, '\u00A0');
@@ -106,3 +118,28 @@ function escapeHtml(unsafe: string) {
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
  }
+
+ const isUrlFeedyouPreview = (url: string) => {
+    const parsedUrl = new URL(url)
+    const previewHtmlRegex = /\/preview\/html\/?$/
+    return previewHtmlRegex.test(parsedUrl.pathname)
+}
+
+ const showIframeModal = (e:MouseEvent ,url: string) => {
+    Swal.fire({
+        title: 'Source',
+        html: `<iframe width="100%" height="600px" frameborder="0" src="${url}"></iframe>`,
+        showCloseButton: true,
+        showConfirmButton: false,
+        width: 1000,
+      })
+    e.preventDefault();
+  }
+
+declare global {
+  interface Window {
+    showIframeModal: (e: MouseEvent, url: string) => void;
+  }
+}
+
+  window.showIframeModal = (e: MouseEvent, url: string) => showIframeModal(e, url);
