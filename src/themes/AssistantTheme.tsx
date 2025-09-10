@@ -511,6 +511,7 @@ export const AssistantTheme = (theme: Theme) => {
     padding: 4px 5px !important;
     margin: 2px;
     border: 0 !important;
+    text-decoration: none !important;
 }
 
 .swal2-title {

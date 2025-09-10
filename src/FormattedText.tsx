@@ -79,7 +79,7 @@ const renderMarkdown = (
         .replace(/<a href="(.+?)" target="_.+?">\[([^\]]+)\]<\/a>/gi, (_match, url ,label) => {
             if(isUrlFeedyouPreview(url)){
                 // If the URL is a Feedyou preview link, show a custom iframe modal
-                return `<button class="source-link-chip" onclick="showIframeModal('${url}')">${label}</button>`;
+                return `<a href="${url}" class="source-link-chip" onclick="showIframeModal(event, '${url}')">${label}</a>`;
             }
 
             return `<a href="${url}" target="_blank"><span class="source-link-chip">${label}</span></a>`;
@@ -125,7 +125,7 @@ function escapeHtml(unsafe: string) {
     return previewHtmlRegex.test(parsedUrl.pathname)
 }
 
- const showIframeModal = (url: string) => {
+ const showIframeModal = (e:MouseEvent ,url: string) => {
     Swal.fire({
         title: 'Source',
         html: `<iframe width="100%" height="600px" frameborder="0" src="${url}"></iframe>`,
@@ -133,12 +133,13 @@ function escapeHtml(unsafe: string) {
         showConfirmButton: false,
         width: 1000,
       })
+    e.preventDefault();
   }
 
 declare global {
   interface Window {
-    showIframeModal: (url: string) => void;
+    showIframeModal: (e: MouseEvent, url: string) => void;
   }
 }
 
-  window.showIframeModal = showIframeModal;
+  window.showIframeModal = (e: MouseEvent, url: string) => showIframeModal(e, url);
