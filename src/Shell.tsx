@@ -91,12 +91,8 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
     }
 
     debounceCall = debounce(async (queryString: string, action: string, param: string) => {
-        const replacedQueryString = queryString
-          .normalize("NFKD")
-          .replace(/[^\w]/g, "");
-
         const res = await fetch(
-          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${replacedQueryString}/${param}`
+          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${queryString}/${param}`
         );
         const data = await res.json();
   
