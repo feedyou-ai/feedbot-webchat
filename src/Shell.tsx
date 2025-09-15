@@ -106,7 +106,9 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
   
       private autoSuggestOnKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (this.props.autoSuggestType === "google-places-city") {
-          this.debounceCall(e.currentTarget.value, this.props.autoSuggestType, this.props.autoSuggestCountry);
+          const queryString = e.currentTarget.value.normalize("NFKD")
+          .replace(/[^\w]/g, "")
+          this.debounceCall(queryString, this.props.autoSuggestType, this.props.autoSuggestCountry);
         }
         if(this.props.autoSuggestType === "repository") {
           const queryString = encodeURIComponent(e.currentTarget.value)
