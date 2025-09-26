@@ -243,8 +243,12 @@ export const BaseTheme = (theme: Theme) => {
         margin-top: 0 !important;
       }
 
-      .feedbot-wrapper .wc-adaptive-card {
+      .feedbot-wrapper .wc-message-wrapper.carousel .wc-adaptive-card {
         width: 214px;
+      }
+        
+      .feedbot-wrapper .wc-message-wrapper.list .wc-adaptive-card {
+        width: 100% !important;
       }
     }
 
@@ -349,6 +353,7 @@ export const BaseTheme = (theme: Theme) => {
     @media (max-width: 600px) {
       .wc-message-wrapper.list .wc-message-from-bot .wc-message-content-type-message {
         max-width: 100%;
+        display: inline-block;
       }
       .wc-message-wrapper.carousel .wc-message-from-bot .wc-message-content-type-message {
         max-width: calc(100% - 60px) !important;
