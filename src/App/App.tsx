@@ -90,6 +90,12 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         }
       }
 
+      // FBOT-3192 temporary fix for Safari 26 on Mac, where websocket is not connected properly
+      const isSafariOnMac = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && /Macintosh/.test(navigator.userAgent);
+      if (isSafariOnMac) {
+        directLine.webSocket = false 
+      }
+
       props.botConnection = new DirectLine({
         ...directLine,
         token: body.token,
