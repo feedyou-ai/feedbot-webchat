@@ -9,6 +9,9 @@ export class AssistantTemplate extends React.Component<
     Props,
     { introMode: boolean; inputValue: string; darkMode: boolean }
 > {
+    private textareaRef: HTMLTextAreaElement | null = null;
+    private cardRef: HTMLDivElement | null = null;
+
     constructor(props: Props) {
         super(props)
         this.state = {
@@ -42,7 +45,9 @@ export class AssistantTemplate extends React.Component<
     }
 
     handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        this.setState({ inputValue: event.target.value })
+        this.setState({ inputValue: event.target.value }, () => {
+            this.adjustTextareaHeight();
+        })
     }
 
     handleInputKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -57,6 +62,17 @@ export class AssistantTemplate extends React.Component<
         this.setState((prevState) => ({ darkMode: !prevState.darkMode }))
     }
 
+    adjustTextareaHeight = () => {
+        const textarea = this.textareaRef;
+        const card = this.cardRef
+        if (textarea && card) {
+            textarea.style.height = 'auto';
+            card.style.height = "auto";
+            textarea.style.height = `${textarea.scrollHeight}px`;
+            card.style.height = `${textarea.scrollHeight}px`;
+        }
+    }
+
     renderIntroSection() {
         const { theme } = this.props
         const welcomeTitle = (theme && theme.template && theme.template.welcomeTitle) || 'Welcome to the chatbot!'
@@ -66,15 +82,16 @@ export class AssistantTemplate extends React.Component<
         return (
             <div className="intro-section">
                 <h1 className="intro-title">{welcomeTitle}</h1>
-                <div className="card">
+                <div className="card" ref={el => this.cardRef = el}>
                     <textarea
+                        ref={el => this.textareaRef = el}
                         id="chat-input"
                         className="chat-input"
-                        placeholder="Type your message..."
+                        placeholder={this.props.consolePlaceholder || "Type your message..."}
                         value={this.state.inputValue}
                         onChange={this.handleInputChange}
                         onKeyPress={this.handleInputKeyPress}
-                        rows={5}
+                        rows={1}
                         autoFocus
                     />
                     <button

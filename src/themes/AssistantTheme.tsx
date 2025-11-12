@@ -102,6 +102,34 @@ export const AssistantTheme = (theme: Theme) => {
     opacity: 0.75;
   }
 
+  .feedbot-wrapper .wc-message-content {
+    border-radius: 16px !important;
+    padding: 10px 15px !important;
+  }
+
+  .feedbot-wrapper .wc-message-content p {
+    margin: 0;
+    padding: 0;
+  }
+
+  .feedbot-wrapper .wc-message-from-bot .wc-message-content {
+    background-color: #eee !important;
+  }
+
+  .feedbot-wrapper.dark-mode .wc-message-from-bot .wc-message-content {
+    background-color: #333 !important;
+    color: white !important;
+  }
+
+  .feedbot-wrapper .wc-message-from-me .wc-message-content {
+    background-color: ${theme.mainColor};
+    color: white;
+  }
+
+  svg.wc-message-callout {
+    display: none !important;
+  }
+
   .example-query:hover {
     opacity: 1;
   }
@@ -113,6 +141,7 @@ export const AssistantTheme = (theme: Theme) => {
     border-radius: 32px;
     width: 100%;
     height: 100%;
+    max-height: 130px;
     font-size: 16px;
     outline: none;
     resize: none;
@@ -125,10 +154,11 @@ export const AssistantTheme = (theme: Theme) => {
     border-color: ${secondaryColor};
   }
 
-  .card {
+  .card{
     width: 100%;
     max-width: 600px;
-    height: 60px;
+    height: 58px;
+    max-height: 130px;
     margin: 50px auto 65px auto;
     border-radius: 15px;
     position: relative;
@@ -140,7 +170,7 @@ export const AssistantTheme = (theme: Theme) => {
   inherits: false;
 }
 
-.card::after, .card::before {
+.card::after, .card::before{
   content: '';
   position: absolute;
   height: 100%;
@@ -201,6 +231,10 @@ export const AssistantTheme = (theme: Theme) => {
   .send-button.active {
     background-color: ${theme.mainColor};
     color: white;
+  }
+
+  .send-button svg {
+    margin-top: 2px;
   }
 
   .send-button.active svg {
@@ -378,6 +412,7 @@ export const AssistantTheme = (theme: Theme) => {
 
   .feedbot-wrapper .wc-console {
     border-width: 0px;
+    display: block;
     height: 70px;
   }
 
@@ -400,18 +435,11 @@ export const AssistantTheme = (theme: Theme) => {
 
   .wc-console .wc-mic, .wc-console .wc-send {
     top: 10px !important;
+    right: 25px;
   }
 
   .wc-console input[type=text], .wc-console textarea {
     margin: 0px 15px;
-  }
-
-  .wc-textbox {
-    border-radius: 13px;
-    background-color: #eceff1;
-    height: 70%;
-    margin-bottom: 0px;
-    top: 6px !important;
   }
 
   .wc-suggested-actions .wc-hscroll > ul {
@@ -503,7 +531,55 @@ export const AssistantTheme = (theme: Theme) => {
   }
 }
 
+.wc-message-groups {
+  bottom: 120px;
+}
 
+.feedbot-wrapper .wc-console {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  height: 75px;
+  background-color: transparent !important;
+}
+
+
+
+.wc-console .wc-textbox {
+  padding: 0 18px;
+    height: 100%;
+    border-radius: 28px;
+    position: static;
+    width: 100%;
+    display: block;
+}
+
+.wc-console .wc-textbox textarea {
+  padding: 15px;
+  padding-top: 20px;
+  border-radius: 12px;
+  margin: 0px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.feedbot-wrapper.dark-mode .wc-console .wc-textbox textarea {
+  border : 1px solid #555;
+  background: #232323;
+  color: white;
+}
+@media (min-width: 1200px) {
+  .feedbot-wrapper .wc-console {
+    width: 1000px;
+    left: calc(50% - 500px);
+  }
+}
+
+.feedbot-wrapper.dark-mode a {
+  color: #67b0ffff !important;
+}
 
 .swal2-title {
   text-align: left;
@@ -512,7 +588,7 @@ export const AssistantTheme = (theme: Theme) => {
 }
 
 .swal2-html-container {
-    border: 1px solid #DDD;
-    padding: 0px 12px;
+  padding: 0px 12px;
 }
 `}
+  

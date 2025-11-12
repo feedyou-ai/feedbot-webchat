@@ -105,7 +105,7 @@ export class ActivityView extends React.Component<ActivityViewProps, {}> {
                     }
                 })
                     return (
-                        <div>
+                    <div>
                             <FormattedText
                                 text={ activity.text }
                                 format={ activity.textFormat }
@@ -120,11 +120,17 @@ export class ActivityView extends React.Component<ActivityViewProps, {}> {
                                 size={ props.size }
                                 tiles={tiles}
                             />
-                        </div>
+                    </div>
                     );
 
             case 'typing':
-                return <div className="wc-typing"/>;
+                return <div className="ticontainer">
+                <div className="tiblock">
+                  <div className="tidot"></div>
+                  <div className="tidot"></div>
+                  <div className="tidot"></div>
+                </div>
+              </div>;
         }
     }
 }
