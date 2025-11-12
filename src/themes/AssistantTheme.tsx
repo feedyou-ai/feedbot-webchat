@@ -580,5 +580,27 @@ export const AssistantTheme = (theme: Theme) => {
 .feedbot-wrapper.dark-mode a {
   color: #67b0ffff !important;
 }
-`
+
+.source-link-chip {
+  display: inline-block;
+  background-color: #ddd !important;
+  color: #424242 !important;
+  border-radius: 5px !important;
+  padding: 4px 5px !important;
+  margin: 2px;
+  border: 0 !important;
+  text-decoration: none !important;
 }
+
+.swal2-title {
+  text-align: left;
+  padding: 16px 32px;
+  font-size: 25px;
+}
+
+.swal2-html-container {
+  border: 1px solid #DDD;
+  padding: 0px 12px;
+}
+`}
+  

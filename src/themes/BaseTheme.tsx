@@ -4,7 +4,10 @@ function isSafari() {
 	return !(navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') !== -1)
 }
 
-export const BaseTheme = (theme: Theme) => `
+export const BaseTheme = (theme: Theme) => {
+  const disclaimerEnabled = theme.genAi ? theme.genAi.disclaimerEnabled : false
+
+  return `
     body.feedbot-disabled div.feedbot {
         display: none;
     }
@@ -240,8 +243,12 @@ export const BaseTheme = (theme: Theme) => `
         margin-top: 0 !important;
       }
 
-      .feedbot-wrapper .wc-adaptive-card {
+      .feedbot-wrapper .wc-message-wrapper.carousel .wc-adaptive-card {
         width: 214px;
+      }
+        
+      .feedbot-wrapper .wc-message-wrapper.list .wc-adaptive-card {
+        width: 100% !important;
       }
     }
 
@@ -333,9 +340,26 @@ export const BaseTheme = (theme: Theme) => `
     }
 
     .wc-message-from-bot .wc-message-content-type-message {
-      float: left;
-      max-width: calc(100% - 183px);
+      float: unset;      
     }
+
+    @media (min-width: 600px) {
+      .wc-message-from-bot .wc-message-content-type-message {
+        max-width: calc(100% - 183px);
+        float: left;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .wc-message-wrapper.list .wc-message-from-bot .wc-message-content-type-message {
+        max-width: 100%;
+        display: inline-block;
+      }
+      .wc-message-wrapper.carousel .wc-message-from-bot .wc-message-content-type-message {
+        max-width: calc(100% - 60px) !important;
+      }
+    }
+       
 
     .wc-message-type-message.wc-message-from-bot {
       width: 100%;
@@ -344,6 +368,22 @@ export const BaseTheme = (theme: Theme) => `
     .wc-message-buttons {
       float: left;
       padding-left: 8px;
+      width: 100%;
+      height: 44px;
+    }
+
+    .wc-message-buttons .loader {
+      border: 2px solid #f3f3f3; 
+      border-top: 2px solid #3d3d3dff;
+      border-radius: 50%;
+      width: 15px;
+      height: 15px;
+      animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .wc-message-buttons>div {
@@ -382,15 +422,11 @@ export const BaseTheme = (theme: Theme) => `
       fill: ${theme.mainColor};
       cursor: auto;
       opacity: 0.7;
-      ${!theme.showAiMessageIndicator ? `display: none;` : ''}
+      ${!disclaimerEnabled ? `display: none;` : ''}
     }
 
     .wc-message-buttons>.wc-message-button-ai:hover {
       fill: ${theme.mainColor};
-    }
-
-    .wc-message-buttons.wc-rating-in-progress>.wc-message-button-info {
-      display: block;
     }
 
     .wc-message-wrapper:hover .wc-message-buttons>div {
@@ -428,3 +464,4 @@ export const BaseTheme = (theme: Theme) => `
 
     ${theme.customCss || ''}
   `
+    }
