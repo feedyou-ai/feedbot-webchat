@@ -588,7 +588,6 @@ export const AssistantTheme = (theme: Theme) => {
 }
 
 .swal2-html-container {
-  border: 1px solid #DDD;
   padding: 0px 12px;
 }
 `}
