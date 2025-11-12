@@ -581,17 +581,6 @@ export const AssistantTheme = (theme: Theme) => {
   color: #67b0ffff !important;
 }
 
-.source-link-chip {
-  display: inline-block;
-  background-color: #ddd !important;
-  color: #424242 !important;
-  border-radius: 5px !important;
-  padding: 4px 5px !important;
-  margin: 2px;
-  border: 0 !important;
-  text-decoration: none !important;
-}
-
 .swal2-title {
   text-align: left;
   padding: 16px 32px;

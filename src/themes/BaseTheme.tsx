@@ -441,6 +441,17 @@ export const BaseTheme = (theme: Theme) => {
       padding: 12px 6px 12px 6px !important;
     }
 
+    .source-link-chip {
+      display: inline-block;
+      background-color: #ddd !important;
+      color: #424242 !important;
+      border-radius: 5px !important;
+      padding: 4px 5px !important;
+      margin: 2px;
+      border: 0 !important;
+      text-decoration: none !important;
+    }
+
     ${theme.enableScreenshotUpload && !isSafari() ? `
       .wc-upload-screenshot {
         display: inline-block !important;
