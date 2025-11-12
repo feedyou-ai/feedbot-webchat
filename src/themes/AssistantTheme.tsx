@@ -540,7 +540,7 @@ export const AssistantTheme = (theme: Theme) => {
   bottom: 0;
   display: flex;
   justify-content: center;
-  height: 100px;
+  height: 75px;
   background-color: transparent !important;
 }
 
@@ -557,6 +557,7 @@ export const AssistantTheme = (theme: Theme) => {
 
 .wc-console .wc-textbox textarea {
   padding: 15px;
+  padding-top: 20px;
   border-radius: 12px;
   margin: 0px;
   border: 1px solid #ccc;
