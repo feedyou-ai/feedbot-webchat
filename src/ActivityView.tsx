@@ -124,11 +124,11 @@ export class ActivityView extends React.Component<ActivityViewProps, {}> {
                     );
 
             case 'typing':
-                return <div className="ticontainer">
-                <div className="tiblock">
-                  <div className="tidot"></div>
-                  <div className="tidot"></div>
-                  <div className="tidot"></div>
+                return <div className="wc-typing-container">
+                <div className="wc-typing-block">
+                  <div className="wc-typing-dot"></div>
+                  <div className="wc-typing-dot"></div>
+                  <div className="wc-typing-dot"></div>
                 </div>
               </div>;
         }
