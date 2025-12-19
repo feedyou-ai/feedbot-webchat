@@ -452,6 +452,11 @@ export const BaseTheme = (theme: Theme) => {
       text-decoration: none !important;
     }
 
+    .feedbot-wrapper.dark-mode .source-link-chip {
+      background-color: #575757 !important;
+      color: #DDD !important;
+    }
+
     ${theme.enableScreenshotUpload && !isSafari() ? `
       .wc-upload-screenshot {
         display: inline-block !important;
