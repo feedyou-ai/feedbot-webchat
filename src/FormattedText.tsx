@@ -122,7 +122,7 @@ function escapeHtml(unsafe: string) {
 
  const isUrlFeedyouPreview = (url: string) => {
     const parsedUrl = new URL(url)
-    const previewHtmlRegex = /\/preview\/html\/?$/
+    const previewHtmlRegex = /\/api\/messages\/kb\/[^\/]+\/documents\/[^\/]+\/preview/
     return previewHtmlRegex.test(parsedUrl.pathname)
 }
 
