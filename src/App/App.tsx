@@ -215,6 +215,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     : false;
   props.resize = props.hasOwnProperty("resize") ? props.resize : "detect";
   props.locale = props.hasOwnProperty("locale") ? props.locale : "cs-cz";
+  setFeedyouParam("locale", props.locale)
   
   // FEEDYOU configurable theming
   if (props.theme || !container) {
