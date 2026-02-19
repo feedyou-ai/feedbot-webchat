@@ -81,10 +81,10 @@ const renderMarkdown = (
             if(isUrlFeedyouPreview(url)){
                 // If the URL is a Feedyou preview link, show a custom iframe modal
                 // Use data attribute instead of inline onclick for better security
-                return `<a href="${escapeHtml(url)}" class="source-link-chip feedyou-preview-link" data-preview-url="${escapeHtml(url)}">${label}</a>`;
+                return `<a href="${escapeHtml(url)}" class="source-link-chip feedyou-preview-link" data-preview-url="${escapeHtml(url)}">${escapeHtml(label)}</a>`;
             }
 
-            return `<a href="${escapeHtml(url)}" target="_blank"><span class="source-link-chip">${label}</span></a>`;
+            return `<a href="${escapeHtml(url)}" target="_blank"><span class="source-link-chip">${escapeHtml(label)}</span></a>`;
         });
     } else {
         // Replace spaces with non-breaking space Unicode characters
@@ -148,7 +148,7 @@ function escapeHtml(unsafe: string) {
     }
 
     const originalSourceHtml = originalSourceUrl
-        ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: left; font-size: 12px; color: grey"><span>${localized.originalSource}: </span><a style="color: grey;" href="${escapeHtml(originalSourceUrl)}" target="_blank" rel="noopener noreferrer" style="word-break: break-all;">${escapeHtml(originalSourceUrl)}</a></div>`
+        ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: left; font-size: 12px; color: grey"><span>${escapeHtml(localized.originalSource)}: </span><a style="color: grey;" href="${escapeHtml(originalSourceUrl)}" target="_blank" rel="noopener noreferrer" style="word-break: break-all;">${escapeHtml(originalSourceUrl)}</a></div>`
         : '';
 
     Swal.fire({
