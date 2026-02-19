@@ -176,6 +176,7 @@ if (typeof window !== 'undefined' && !window.feedyouPreviewClickHandlerAttached)
       if (previewLink) {
         e.preventDefault();
         const url = previewLink.getAttribute('data-preview-url');
+        // Note: getAttribute automatically decodes HTML entities, so we get the original URL
         if (url) {
           showIframeModal(e, url);
         }
