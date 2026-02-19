@@ -1,6 +1,7 @@
 import * as MarkdownIt from 'markdown-it';
 import * as React from 'react';
 import { getFeedyouParam } from './FeedyouParams';
+import { strings, defaultStrings } from './Strings';
 import { twemoji } from './lib.js'
 const Swal = require('sweetalert2')
 
@@ -126,9 +127,28 @@ function escapeHtml(unsafe: string) {
 }
 
  const showIframeModal = (e:MouseEvent ,url: string) => {
+    const locale = getFeedyouParam('locale') || 'en-us';
+    const localized = strings(locale) || defaultStrings;
+
+    let originalSourceUrl: string | null = null;
+    try {
+        const parsedUrl = new URL(url);
+        const fragment = parsedUrl.hash.replace(/^#/, '');
+        const params = new URLSearchParams(fragment);
+        if (params.has('source')) {
+            originalSourceUrl = decodeURIComponent(params.get('source'));
+        }
+    } catch (_) {
+        // ignore parse errors
+    }
+
+    const originalSourceHtml = originalSourceUrl
+        ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: left; font-size: 12px; color: grey"><span>${localized.originalSource}: </span><a style="color: grey;" href="${originalSourceUrl}" target="_blank" rel="noopener noreferrer" style="word-break: break-all;">${originalSourceUrl}</a></div>`
+        : '';
+
     Swal.fire({
-        title: 'Source',
-        html: `<iframe width="100%" height="600px" frameborder="0" src="${url}"></iframe>`,
+        title: localized.referencedSource,
+        html: `<iframe width="100%" height="600px" frameborder="0" src="${url}"></iframe>${originalSourceHtml}`,
         showCloseButton: true,
         showConfirmButton: false,
         width: 1000,
