@@ -169,16 +169,26 @@ declare global {
 
 // Set up event delegation for preview links (only attach once)
 if (typeof window !== 'undefined' && !window.feedyouPreviewClickHandlerAttached) {
-  document.addEventListener('click', (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    const previewLink = target.closest('.feedyou-preview-link');
-    if (previewLink) {
-      e.preventDefault();
-      const url = previewLink.getAttribute('data-preview-url');
-      if (url) {
-        showIframeModal(e, url);
+  const attachPreviewHandler = () => {
+    document.addEventListener('click', (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const previewLink = target.closest('.feedyou-preview-link');
+      if (previewLink) {
+        e.preventDefault();
+        const url = previewLink.getAttribute('data-preview-url');
+        if (url) {
+          showIframeModal(e, url);
+        }
       }
-    }
-  });
-  window.feedyouPreviewClickHandlerAttached = true;
+    });
+    window.feedyouPreviewClickHandlerAttached = true;
+  };
+
+  // Attach handler when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachPreviewHandler);
+  } else {
+    // DOM is already ready
+    attachPreviewHandler();
+  }
 }
