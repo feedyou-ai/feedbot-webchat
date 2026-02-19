@@ -80,12 +80,11 @@ const renderMarkdown = (
         .replace(/<a href="(.+?)" target="_.+?">\[([^\]]+)\]<\/a>/gi, (_match, url ,label) => {
             if(isUrlFeedyouPreview(url)){
                 // If the URL is a Feedyou preview link, show a custom iframe modal
-                // Escape URL for HTML context and JavaScript string context
-                const escapedUrl = escapeHtml(url).replace(/'/g, "\\'");
-                return `<a href="${escapeHtml(url)}" class="source-link-chip" onclick="showIframeModal(event, '${escapedUrl}')">${label}</a>`;
+                // Use data attribute instead of inline onclick for better security
+                return `<a href="${escapeHtml(url)}" class="source-link-chip feedyou-preview-link" data-preview-url="${escapeHtml(url)}">${label}</a>`;
             }
 
-            return `<a href="${url}" target="_blank"><span class="source-link-chip">${label}</span></a>`;
+            return `<a href="${escapeHtml(url)}" target="_blank"><span class="source-link-chip">${label}</span></a>`;
         });
     } else {
         // Replace spaces with non-breaking space Unicode characters
@@ -164,8 +163,22 @@ function escapeHtml(unsafe: string) {
 
 declare global {
   interface Window {
-    showIframeModal: (e: MouseEvent, url: string) => void;
+    feedyouPreviewClickHandlerAttached?: boolean;
   }
 }
 
-  window.showIframeModal = (e: MouseEvent, url: string) => showIframeModal(e, url);
+// Set up event delegation for preview links (only attach once)
+if (typeof window !== 'undefined' && !window.feedyouPreviewClickHandlerAttached) {
+  document.addEventListener('click', (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const previewLink = target.closest('.feedyou-preview-link');
+    if (previewLink) {
+      e.preventDefault();
+      const url = previewLink.getAttribute('data-preview-url');
+      if (url) {
+        showIframeModal(e, url);
+      }
+    }
+  });
+  window.feedyouPreviewClickHandlerAttached = true;
+}
