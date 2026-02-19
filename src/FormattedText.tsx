@@ -80,7 +80,9 @@ const renderMarkdown = (
         .replace(/<a href="(.+?)" target="_.+?">\[([^\]]+)\]<\/a>/gi, (_match, url ,label) => {
             if(isUrlFeedyouPreview(url)){
                 // If the URL is a Feedyou preview link, show a custom iframe modal
-                return `<a href="${url}" class="source-link-chip" onclick="showIframeModal(event, '${url}')">${label}</a>`;
+                // Escape URL for HTML context and JavaScript string context
+                const escapedUrl = escapeHtml(url).replace(/'/g, "\\'");
+                return `<a href="${escapeHtml(url)}" class="source-link-chip" onclick="showIframeModal(event, '${escapedUrl}')">${label}</a>`;
             }
 
             return `<a href="${url}" target="_blank"><span class="source-link-chip">${label}</span></a>`;
@@ -121,9 +123,13 @@ function escapeHtml(unsafe: string) {
  }
 
  const isUrlFeedyouPreview = (url: string) => {
-    const parsedUrl = new URL(url)
-    const previewHtmlRegex = /\/preview\/html\/?$/
-    return previewHtmlRegex.test(parsedUrl.pathname)
+    try {
+        const parsedUrl = new URL(url)
+        const previewHtmlRegex = /\/preview\/html\/?$/
+        return previewHtmlRegex.test(parsedUrl.pathname)
+    } catch (_) {
+        return false
+    }
 }
 
  const showIframeModal = (e:MouseEvent ,url: string) => {
@@ -143,12 +149,12 @@ function escapeHtml(unsafe: string) {
     }
 
     const originalSourceHtml = originalSourceUrl
-        ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: left; font-size: 12px; color: grey"><span>${localized.originalSource}: </span><a style="color: grey;" href="${originalSourceUrl}" target="_blank" rel="noopener noreferrer" style="word-break: break-all;">${originalSourceUrl}</a></div>`
+        ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: left; font-size: 12px; color: grey"><span>${localized.originalSource}: </span><a style="color: grey;" href="${escapeHtml(originalSourceUrl)}" target="_blank" rel="noopener noreferrer" style="word-break: break-all;">${escapeHtml(originalSourceUrl)}</a></div>`
         : '';
 
     Swal.fire({
         title: localized.referencedSource,
-        html: `<iframe width="100%" height="600px" frameborder="0" src="${url}"></iframe>${originalSourceHtml}`,
+        html: `<iframe width="100%" height="600px" frameborder="0" src="${escapeHtml(url)}"></iframe>${originalSourceHtml}`,
         showCloseButton: true,
         showConfirmButton: false,
         width: 1000,
