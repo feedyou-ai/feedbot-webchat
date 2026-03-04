@@ -110,6 +110,7 @@ export const AssistantTheme = (theme: Theme) => {
   .feedbot-wrapper .wc-message-content p {
     margin: 0;
     padding: 0;
+    line-height: 1.5;
   }
 
   .feedbot-wrapper .wc-message-from-bot .wc-message-content {
@@ -265,7 +266,7 @@ export const AssistantTheme = (theme: Theme) => {
     height: 40px;
     cursor: pointer;
     z-index: 1000;
-
+    position: fixed;
     background-color: transparent;
     text-align: left;
     padding-top: 0px;
@@ -321,7 +322,7 @@ export const AssistantTheme = (theme: Theme) => {
 
   .feedbot-wrapper .feedbot {
     position: relative;
-    height: 95%;
+    height: 100%;
   }
 
   .feedbot-wrapper.dark-mode {
@@ -467,8 +468,30 @@ export const AssistantTheme = (theme: Theme) => {
     text-align: center;
   }
 
+  .wc-app ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .wc-app ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
   .wc-app ::-webkit-scrollbar-thumb {
-    background-color: #ececec;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+
+  .wc-app ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+  }
+
+  .wc-message-groups {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(123, 123, 123, 0.35) transparent;
+  }
+    
+  .feedbot-wrapper.dark-mode .wc-message-groups {
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   }
 
   .wc-app h1, .wc-app h2, .wc-app h3, .wc-app h4, .wc-app p, .wc-app ul, .wc-app ol {
@@ -532,7 +555,7 @@ export const AssistantTheme = (theme: Theme) => {
 }
 
 .wc-message-groups {
-  bottom: 120px;
+  bottom: 60px;
 }
 
 .feedbot-wrapper .wc-console {
@@ -561,6 +584,7 @@ export const AssistantTheme = (theme: Theme) => {
   border-radius: 12px;
   margin: 0px;
   border: 1px solid #ccc;
+  background: white;
   box-sizing: border-box;
   margin: 0;
 }
@@ -589,6 +613,51 @@ export const AssistantTheme = (theme: Theme) => {
 
 .swal2-html-container {
   padding: 0px 12px;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-popup {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-title {
+  color: #e0e0e0;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-html-container {
+  color: #c0c0c0;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-html-container textarea,
+body:has(.feedbot-wrapper.dark-mode) .swal2-html-container input {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-html-container iframe {
+  border: 1px solid #333;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-validation-message {
+  background: #2a2a2a;
+  color: #ff6b6b;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-close {
+  color: #aaa;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-close:hover {
+  color: #fff;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(100, 200, 100, 0.3);
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-icon.swal2-error {
+  border-color: rgba(255, 100, 100, 0.4);
 }
 `}
   
