@@ -77,7 +77,7 @@ const renderMarkdown = (
 
         __html = ma.join('<br/>')
         //transform markdown links whose text is wrapped in [ ] into "chip" elements
-        .replace(/<a href="(.+?)" target="_.+?">\[([^\]]+)\]<\/a>/gi, (_match, url ,label) => {
+        .replace(/<a[^>]*href="([^"]+)"[^>]*>\[([^\]]+)\]<\/a>/gi, (_match, url ,label) => {
             if(isUrlFeedyouPreview(url)){
                 // If the URL is a Feedyou preview link, show a custom iframe modal
                 return `<a href="${url}" class="source-link-chip" onclick="showIframeModal(event, '${url}')">${label}</a>`;
