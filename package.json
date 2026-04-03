@@ -9,15 +9,16 @@
     "build-test": "cd test && npm run build",
     "build-test-watch": "concurrently \"tsc -w -p ./test/mock_dl\" \"tsc -w -p ./test\"",
     "build-css": "node-sass ./src/scss/ -o . && rimraf ./includes/",
+    "build-twemoji-assets": "node ./scripts/copy-twemoji-assets.js",
     "build-ac-config": "ac-scss2json ./src/scss/includes/adaptive-card-config.scss > adaptivecards-hostconfig.json",
-    "build-all-style": "npm run build-css && npm run build-ac-config && webpack",
-    "build": "npm run build-css && tsc && webpack --progress",
+    "build-all-style": "npm run build-css && npm run build-twemoji-assets && npm run build-ac-config && webpack",
+    "build": "npm run build-css && npm run build-twemoji-assets && tsc && webpack --progress",
     "watch": "npm-run-all -p -r -l tsc-watch webpack-watch",
     "tsc-watch": "tsc -w",
     "webpack": "webpack",
     "webpack-watch": "webpack --progress --watch",
     "clean": "rimraf built",
-    "prepublish": "tsc && npm run build-css && webpack --progress --config webpack.production.config.js",
+    "prepublish": "tsc && npm run build-css && npm run build-twemoji-assets && webpack --progress --config webpack.production.config.js",
     "prepare": "patch-package",
     "start": "http-server -p 8000",
     "test": "cd test && npm test",
@@ -60,6 +61,7 @@
     "simple-update-in": "^1.2.0",
     "smartsupp-websocket": "^1.1.0",
     "sweetalert2": "^11.17.2",
+    "twemoji": "14.0.2",
     "tslib": "1.7.1",
     "uglifyjs-webpack-plugin": "1.3.0"
   },
@@ -68,6 +70,7 @@
     "@types/react": "15.6.1",
     "@types/react-dom": "15.5.7",
     "@types/react-redux": "5.0.5",
+    "@twemoji/svg": "15.0.0",
     "awesome-typescript-loader": "3.1.2",
     "babel-core": "^6.26.3",
     "babel-loader": "^6.4.1",
@@ -100,6 +103,7 @@
     "botchat-es5.js",
     "botchat-es5.js.map",
     "CognitiveServices.js",
-    "CognitiveServices.js.map"
+    "CognitiveServices.js.map",
+    "twemoji/"
   ]
 }
