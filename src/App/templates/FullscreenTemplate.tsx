@@ -18,7 +18,7 @@ export class FullscreenTemplate extends React.Component<Props, null> {
 		const { theme } = this.props
 		const customScript = theme && theme.template && theme.template.customScript
 		
-		if (customScript) {
+		if (customScript && !this.props.forbidScriptInjection) {
 			appendScriptToBody(customScript)
 		}
 	}
