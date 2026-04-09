@@ -876,3 +876,7 @@
         width: calc(100% - 1.5rem);
         margin-top: 1rem;
     }
+
+    .wc-message-buttons * {
+	    box-sizing: initial !important;
+    }
