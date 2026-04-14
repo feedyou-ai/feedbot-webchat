@@ -209,7 +209,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
         if (rating === -1 && isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : [])) {
             const customExplanationForCurrentRole = (this.props.theme.genAi ? this.props.theme.genAi : ({customExplanations: []} as any)).customExplanations.find((customExplanation: any) => customExplanation.roles.includes(getRole()))
-            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), customExplanationForCurrentRole)
+            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), () => callback(false), customExplanationForCurrentRole)
         } else {
             this.rate(activity, rating, '', callback)
         }
@@ -884,7 +884,7 @@ function getRole(): Role {
     return isInArray          
  }
 
-function getExplanation(callback: (explanation: string) => void, customExplanationForCurrentRole: CustomExplanation | undefined) {
+function getExplanation(callback: (explanation: string) => void, onCancel: () => void, customExplanationForCurrentRole: CustomExplanation | undefined) {
     const title = (customExplanationForCurrentRole && customExplanationForCurrentRole.title) || 'Zpětná vazba'
     const intro = (customExplanationForCurrentRole && customExplanationForCurrentRole.intro) || "Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný."
     const explanationFields = (customExplanationForCurrentRole && customExplanationForCurrentRole.explanationFields.length > 0) ? customExplanationForCurrentRole.explanationFields : [{"name": "swal-problem", "label": "<b>Stručně prosím popište, co by na odpovědi mohlo být lépe: <span style='color: red;'>*</span></b>", "required": true}]
@@ -934,6 +934,8 @@ function getExplanation(callback: (explanation: string) => void, customExplanati
     }).then((result: any) => {
         if (result.value) {
             callback(result.value);
+        } else {
+            onCancel();
         }
     })
 }
