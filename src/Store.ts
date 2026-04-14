@@ -402,6 +402,9 @@ export type HistoryAction = {
     id: string
 } | {
     type: 'Clear_History'
+} | {
+    type: 'Update_Streamed_Message',
+    activity: Activity
 }
 
 const copyArrayWithUpdatedItem = <T>(array: Array<T>, i: number, item: T) => [
@@ -550,6 +553,54 @@ export const history: Reducer<HistoryState> = (
                 activities: copyArrayWithUpdatedItem(state.activities, i, newActivity),
                 selectedActivity: state.selectedActivity === activity ? newActivity : state.selectedActivity
             }
+
+        case 'Update_Streamed_Message': {
+            // Find the streamed activity to update (by streamId or as the last bot message)
+            const streamId = action.activity.channelData && action.activity.channelData.streamId;
+            let targetIndex = -1;
+
+            if (streamId) {
+                // Find activity with matching streamId
+                targetIndex = state.activities.findIndex(a =>
+                    a.channelData && a.channelData.streamId === streamId
+                );
+            }
+
+            if (targetIndex === -1) {
+                // Fallback: find the last message from the same sender
+                for (let j = state.activities.length - 1; j >= 0; j--) {
+                    if (state.activities[j].from &&
+                        state.activities[j].from.id === action.activity.from.id &&
+                        state.activities[j].type === 'message') {
+                        targetIndex = j;
+                        break;
+                    }
+                }
+            }
+
+            if (targetIndex === -1) return state;
+
+            const targetActivity = state.activities[targetIndex];
+            const incomingMessage = action.activity as Message;
+            const targetMessage = targetActivity as Message;
+
+            const updatedActivity: Activity = {
+                ...targetActivity,
+                // Preserve suggestedActions from the final message
+                suggestedActions: incomingMessage.suggestedActions || targetMessage.suggestedActions,
+                // Merge channelData (preserve queryId, modelId, etc. for ratings)
+                channelData: {
+                    ...(targetActivity.channelData || {}),
+                    ...(action.activity.channelData || {})
+                }
+            } as Activity;
+
+            return {
+                ...state,
+                activities: copyArrayWithUpdatedItem(state.activities, targetIndex, updatedActivity),
+                selectedActivity: state.selectedActivity === targetActivity ? updatedActivity : state.selectedActivity
+            };
+        }
 
         default:
             return state;

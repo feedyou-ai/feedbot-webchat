@@ -185,6 +185,14 @@ export class Chat extends React.Component<ChatProps, {}> {
                 break;
             case "message":
                 if (activity.channelData && activity.channelData.alreadyStreamed) {
+                    // Update the last streamed activity with important properties from the final message
+                    // (suggestedActions, channelData with queryId for ratings, etc.)
+                    if (activity.suggestedActions || (activity.channelData && activity.channelData.queryId)) {
+                        this.store.dispatch<ChatActions>({
+                            type: 'Update_Streamed_Message',
+                            activity
+                        });
+                    }
                     break
                 }
 
