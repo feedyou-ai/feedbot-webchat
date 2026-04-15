@@ -94,7 +94,7 @@ export class ExpandableTemplate extends React.Component<Props, State> {
 				</div>
 				
 				{signature && showSignature &&
-					<Signature signature={signature} botId={bot.id} />
+					<Signature signature={signature} botId={bot.id} forbidStyleInjection={this.props.forbidStyleInjection} />
 				}
 				
 				{this.doesTemplateSupportPopupMsg() && !initialized && popupMessage && (

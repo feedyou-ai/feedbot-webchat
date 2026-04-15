@@ -1,4 +1,5 @@
-var twemojiApi = require('twemoji');
+var twemojiModule = require('twemoji');
+var twemojiApi = twemojiModule.default || twemojiModule;
 
 var BOTCHAT_SCRIPT_PATTERN = /(?:^|\/)botchat(?:-es5)?\.js(?:[?#].*)?$/i;
 

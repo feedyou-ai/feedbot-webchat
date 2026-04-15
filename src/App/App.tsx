@@ -18,6 +18,8 @@ export type AppProps = ChatProps & {
   openUrlTarget: "new" | "same" | "same-domain";
   persist?: "user" | "conversation" | "none";
   manualCloseExpireInMinutes?: number
+  forbidScriptInjection?: boolean;
+  forbidStyleInjection?: boolean;
 };
 
 export const App = async (props: AppProps, container?: HTMLElement) => {
@@ -163,11 +165,11 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
             }, props.userData || {})
         }
 
-        if (config.customCss) {
+        if (config.customCss && !props.forbidStyleInjection) {
           props.theme.customCss = config.customCss;
         }
 
-        if(config.customScript && !props.hasOwnProperty("customScript")) {
+        if(config.customScript && !props.forbidScriptInjection && !props.hasOwnProperty("customScript")) {
           const customScriptTag = document.createElement("script");
           customScriptTag.appendChild(document.createTextNode(config.customScript))
           document.body.appendChild(customScriptTag);
@@ -219,7 +221,11 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
   
   // FEEDYOU configurable theming
   if (props.theme || !container) {
-    const theme = { mainColor: "#D83838", ...props.theme };
+    const theme = {
+      mainColor: "#D83838",
+      ...props.theme,
+      ...(props.forbidStyleInjection ? { customCss: undefined } : {}),
+    };
     props.theme && (props.theme.enableScreenshotUpload = !!props.enableScreenshotUpload)
     const themeStyle = document.createElement("style");
     themeStyle.type = "text/css";
