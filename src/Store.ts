@@ -442,6 +442,26 @@ export const history: Reducer<HistoryState> = (
         case 'Receive_Message':
             if (state.activities.find(a => a.id === action.activity.id)) return state; // don't allow duplicate messages
 
+            // FEEDYOU: when a final `alreadyStreamed` message arrives, drop the partial streamed chunks so the
+            // store ends up with a single activity that has full text + attachments
+            if (action.activity.channelData && action.activity.channelData.alreadyStreamed) {
+                const streamId = action.activity.channelData.streamId;
+                const fromId = action.activity.from && action.activity.from.id;
+                const isChunkToDrop = (activity: Activity) => {
+                    if (!activity.channelData || !activity.channelData.streamId) return false;
+                    if (streamId) return activity.channelData.streamId === streamId;
+                    return activity.from && activity.from.id === fromId;
+                };
+                return {
+                    ... state,
+                    activities: [
+                        ... state.activities.filter(activity => activity.type !== "typing" && !isChunkToDrop(activity)),
+                        action.activity,
+                        ... state.activities.filter(activity => activity.from.id !== action.activity.from.id && activity.type === "typing"),
+                    ]
+                };
+            }
+
             return {
                 ... state,
                 activities: [
