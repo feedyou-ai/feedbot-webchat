@@ -184,8 +184,26 @@ export const FullScreenTheme = (theme: Theme) => `
     text-align: center;
   }
 
+  .wc-app ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .wc-app ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
   .wc-app ::-webkit-scrollbar-thumb {
-    background-color: #ececec;
+    background-color: rgba(123, 123, 123, 0.35);
+    border-radius: 10px;
+  }
+
+  .wc-app ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(123, 123, 123, 0.35);
+  }
+
+  .wc-message-groups {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(123, 123, 123, 0.35) transparent;
   }
 
   .wc-app h1, .wc-app h2, .wc-app h3, .wc-app h4, .wc-app p, .wc-app ul, .wc-app ol {
