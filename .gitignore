@@ -28,3 +28,4 @@ CognitiveServices.js.map
 *.css
 /test/uploads
 .env
+/twemoji
