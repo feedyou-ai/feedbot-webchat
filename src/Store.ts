@@ -410,6 +410,20 @@ const copyArrayWithUpdatedItem = <T>(array: Array<T>, i: number, item: T) => [
     ... array.slice(i + 1)
 ];
 
+// FEEDYOU: returns a predicate that decides whether a given activity is a streamed chunk belonging to
+// the same stream as `finalActivity` (a message with channelData.alreadyStreamed). When the final message
+// carries a streamId we match exactly; otherwise we conservatively match any chunk from the same sender.
+const isStreamChunkMatcher = (finalActivity: Activity) => {
+    const streamId = finalActivity.channelData && finalActivity.channelData.streamId;
+    const fromId = finalActivity.from && finalActivity.from.id;
+    return (activity: Activity) => {
+        const chunkStreamId = activity.channelData && activity.channelData.streamId;
+        if (!chunkStreamId) return false;
+        if (streamId) return chunkStreamId === streamId;
+        return !!(activity.from && activity.from.id === fromId);
+    };
+};
+
 export const history: Reducer<HistoryState> = (
     state: HistoryState = {
         activities: [],
@@ -444,20 +458,16 @@ export const history: Reducer<HistoryState> = (
 
             // FEEDYOU: when a final `alreadyStreamed` message arrives, drop the partial streamed chunks so the
             // store ends up with a single activity that has full text + attachments
-            if (action.activity.channelData && action.activity.channelData.alreadyStreamed) {
-                const streamId = action.activity.channelData.streamId;
-                const fromId = action.activity.from && action.activity.from.id;
-                const isChunkToDrop = (activity: Activity) => {
-                    if (!activity.channelData || !activity.channelData.streamId) return false;
-                    if (streamId) return activity.channelData.streamId === streamId;
-                    return activity.from && activity.from.id === fromId;
-                };
+            const finalChannelData = action.activity.channelData;
+            if (finalChannelData && finalChannelData.alreadyStreamed) {
+                const isChunkOfThisStream = isStreamChunkMatcher(action.activity);
+                const isOwnTyping = (a: Activity) => a.type === "typing" && a.from.id === action.activity.from.id;
                 return {
                     ... state,
                     activities: [
-                        ... state.activities.filter(activity => activity.type !== "typing" && !isChunkToDrop(activity)),
+                        ... state.activities.filter(a => !isOwnTyping(a) && !isChunkOfThisStream(a)),
                         action.activity,
-                        ... state.activities.filter(activity => activity.from.id !== action.activity.from.id && activity.type === "typing"),
+                        ... state.activities.filter(a => a.type === "typing" && a.from.id !== action.activity.from.id),
                     ]
                 };
             }
