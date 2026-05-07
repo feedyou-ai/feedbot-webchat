@@ -126,9 +126,11 @@ function escapeHtml(unsafe: string) {
     return previewHtmlRegex.test(parsedUrl.pathname)
 }
 
- const showIframeModal = (e:MouseEvent ,url: string) => {
+ const showIframeModal = (e: MouseEvent, url: string) => {
     const locale = getFeedyouParam('locale') || 'en-us';
     const localized = strings(locale) || defaultStrings;
+
+    const isDarkMode = !!document.querySelector('.feedbot-wrapper.dark-mode')
 
     let originalSourceUrl: string | null = null;
     try {
@@ -142,19 +144,25 @@ function escapeHtml(unsafe: string) {
         // ignore parse errors
     }
 
+    const linkColor = isDarkMode ? '#aaa' : 'grey';
+    const borderColor = isDarkMode ? '#444' : '#eee';
     const originalSourceHtml = originalSourceUrl
-        ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: left; font-size: 12px; color: grey"><span>${localized.originalSource}: </span><a style="color: grey;" href="${originalSourceUrl}" target="_blank" rel="noopener noreferrer" style="word-break: break-all;">${originalSourceUrl}</a></div>`
+        ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid ${borderColor}; text-align: left; font-size: 12px; color: ${linkColor}"><span>${localized.originalSource}: </span><a style="color: ${linkColor}; word-break: break-all;" href="${originalSourceUrl}" target="_blank" rel="noopener noreferrer">${originalSourceUrl}</a></div>`
         : '';
+
+    const iframeFilter = isDarkMode ? 'filter: invert(1) hue-rotate(180deg);' : '';
 
     Swal.fire({
         title: localized.referencedSource,
-        html: `<iframe width="100%" height="600px" frameborder="0" src="${url}"></iframe>${originalSourceHtml}`,
+        html: `<iframe width="100%" height="600px" frameborder="0" src="${url}" style="${iframeFilter}"></iframe>${originalSourceHtml}`,
         showCloseButton: true,
         showConfirmButton: false,
         width: 1000,
-      })
+        background: isDarkMode ? '#1e1e1e' : '#fff',
+        color: isDarkMode ? '#e0e0e0' : '#545454',
+    })
     e.preventDefault();
-  }
+}
 
 declare global {
   interface Window {
