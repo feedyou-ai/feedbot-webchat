@@ -459,10 +459,10 @@ export const history: Reducer<HistoryState> = (
                 return {
                     ... state,
                     activities: [
-    ... state.activities.filter(a => a.type !== "typing" && !areActivitiesFromSameStream(a, action.activity)),
-    action.activity,
-    ... state.activities.filter(a => a.type === "typing" && a.from.id !== action.activity.from.id),
-]
+                        ... state.activities.filter(a => a.type !== "typing" && !areActivitiesFromSameStream(a, action.activity)),
+                        action.activity,
+                        ... state.activities.filter(a => a.type === "typing" && a.from.id !== action.activity.from.id),
+                    ]
                 };
             }
 
