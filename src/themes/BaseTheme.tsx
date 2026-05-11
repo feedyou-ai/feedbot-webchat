@@ -446,8 +446,8 @@ export const BaseTheme = (theme: Theme) => {
       background-color: #ddd !important;
       color: #424242 !important;
       border-radius: 5px !important;
-      padding: 4px 5px !important;
-      margin: 2px;
+      padding: 0px 5px !important;
+      margin: 1px 2px;
       border: 0 !important;
       text-decoration: none !important;
     }
