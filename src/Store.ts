@@ -415,9 +415,10 @@ const copyArrayWithUpdatedItem = <T>(array: Array<T>, i: number, item: T) => [
 const areActivitiesFromSameStream = (a1: Activity, a2: Activity): boolean => {
     const streamId1 = a1.channelData && a1.channelData.streamId;
     const streamId2 = a2.channelData && a2.channelData.streamId;
-    if (!streamId1 || !streamId2) return false;
-    if (streamId1 === streamId2) return true;
-    return false
+    if (!streamId1 && !streamId2) return false;
+    if (streamId1 && streamId2) return streamId1 === streamId2;
+    // one has streamId, one doesn't — fall back to sender match
+    return !!(a1.from && a2.from && a1.from.id === a2.from.id);
 };
 
 export const history: Reducer<HistoryState> = (
