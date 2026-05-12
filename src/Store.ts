@@ -410,15 +410,19 @@ const copyArrayWithUpdatedItem = <T>(array: Array<T>, i: number, item: T) => [
     ... array.slice(i + 1)
 ];
 
-// FEEDYOU: checks if two activities belong to the same stream. Matches by streamId when available,
-// otherwise falls back to matching any chunk (activity with channelData.streamId) from the same sender.
-const areActivitiesFromSameStream = (a1: Activity, a2: Activity): boolean => {
-    const streamId1 = a1.channelData && a1.channelData.streamId;
-    const streamId2 = a2.channelData && a2.channelData.streamId;
-    if (!streamId1 && !streamId2) return false;
-    if (streamId1 && streamId2) return streamId1 === streamId2;
-    // one has streamId, one doesn't — fall back to sender match
-    return !!(a1.from && a2.from && a1.from.id === a2.from.id);
+// FEEDYOU: checks if `chunk` is a streamed chunk belonging to the same stream as `finalActivity`.
+// Matches by streamId if both have one, otherwise falls back to same sender.
+const areActivitiesFromSameStream = (chunk: Activity, finalActivity: Activity): boolean => {
+    const chunkStreamId = chunk.channelData && chunk.channelData.streamId;
+    const isStreamEvent = (chunk as any).name === 'message-stream-chunk';
+    if (!chunkStreamId && !isStreamEvent) return false;
+
+    const finalStreamId = finalActivity.channelData && finalActivity.channelData.streamId;
+    if (finalStreamId && chunkStreamId) return chunkStreamId === finalStreamId;
+
+    // Fallback: alreadyStreamed message doesn't carry streamId, so match any chunk from the same sender.
+    // Safe because the bot sends streams sequentially (no concurrent independent streams).
+    return !!(chunk.from && finalActivity.from && chunk.from.id === finalActivity.from.id);
 };
 
 export const history: Reducer<HistoryState> = (
@@ -452,6 +456,26 @@ export const history: Reducer<HistoryState> = (
         }
         case 'Receive_Message':
             if (state.activities.find(a => a.id === action.activity.id)) return state; // don't allow duplicate messages
+
+            // FEEDYOU: if this is a late-arriving stream chunk whose streamId siblings were already
+            // cleaned up by alreadyStreamed, discard it
+            const incomingName = (action.activity as any).name;
+            if (incomingName === 'message-stream-chunk') {
+                const chunkStreamId = action.activity.channelData && action.activity.channelData.streamId;
+                if (chunkStreamId) {
+                    const hasSiblings = state.activities.some(a =>
+                        a.channelData && a.channelData.streamId === chunkStreamId
+                    );
+                    // If no other chunks with same streamId exist but there IS a finalized message, drop
+                    if (!hasSiblings) {
+                        const fromId = action.activity.from && action.activity.from.id;
+                        const hasFinalized = state.activities.some(a =>
+                            a.channelData && a.channelData.alreadyStreamed && a.from && a.from.id === fromId
+                        );
+                        if (hasFinalized) return state;
+                    }
+                }
+            }
 
             // FEEDYOU: when a final `alreadyStreamed` message arrives, drop the partial streamed chunks so the
             // store ends up with a single activity that has full text + attachments
