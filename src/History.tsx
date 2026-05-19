@@ -7,6 +7,7 @@ import { classList, doCardAction, IDoCardAction } from './Chat';
 import * as konsole from './Konsole';
 import { sendMessage } from './Store';
 import { activityWithSuggestedActions } from './activityWithSuggestedActions';
+import { groupBy } from './utils/groupBy';
 
 const Swal = require('sweetalert2')
 
@@ -159,18 +160,7 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                 this.largeWidth = this.props.size.width * 2;
                 content = <this.measurableCarousel/>;
             } else {
-                const activities = this.props.activities.reduce((out, activity) => {
-                    if (activity.channelData && activity.channelData.streamId && activity.type === 'message') {
-                        const firstStreamIndex = out.findIndex(a => a.channelData && a.channelData.streamId === activity.channelData.streamId)
-                        const firstStreamActivity = out[firstStreamIndex]
-                        if (firstStreamActivity && firstStreamActivity.type === 'message') {
-                            firstStreamActivity.text = firstStreamActivity.text+' '+activity.text
-                            return out
-                        }
-                    }
-                    out.push(Object.assign({}, activity))
-                    return out
-                }, [])
+                const activities: any[] = mergeStreamedActivities(this.props.activities) // Cast to any to satisfy future property accesses - BC
 
                 content = activities.map((activity, index) =>
                     (activity.type !== 'message' || activity.text || (activity.attachments && activity.attachments.length)) &&
@@ -302,6 +292,41 @@ const measurePaddedWidth = (el: HTMLElement): number => {
 
 const suitableInterval = (current: Activity, next: Activity) =>
     Date.parse(next.timestamp) - Date.parse(current.timestamp) > 5 * 60 * 1000;
+
+function mergeStreamedActivities(activities: any[]): any[] {
+    // Legacy bot versions do not populate streamId on final msg - for those conversations, just display the streamed messages
+    activities = activities.filter(a => !(a.channelData && a.channelData.alreadyStreamed && !a.channelData.streamId));
+    
+    const activitiesByStreamId: { [streamId: string]: Activity[] } = groupBy(activities, 'channelData.streamId');
+
+    return activities.reduce((out: any[], activity: any) => {
+        if (!activity.channelData || !activity.channelData.streamId || activity.type !== 'message') {
+            out.push(Object.assign({}, activity));
+            return out;
+        }
+        const streamId = activity.channelData.streamId;
+        const streamActivities = activitiesByStreamId[streamId];
+        const chunks = streamActivities.filter(a => !a.channelData.alreadyStreamed);
+        const hasLastChunk = chunks.some(a => a.channelData.isLastChunk);
+        const hasPostStreamMessage = streamActivities.some(a => a.channelData.alreadyStreamed);
+        const isFinished = hasLastChunk && hasPostStreamMessage;
+
+        if (activity.channelData.alreadyStreamed && isFinished) {
+            if (isFinished) {
+                out.push(Object.assign({}, activity));
+            }
+            return out
+        }
+
+        if (!isFinished && chunks[0] === activity) {
+            const merged = Object.assign({}, activity);
+            merged.text = chunks.map(a => a.text).join(' ');
+            out.push(merged);
+        }
+        
+        return out;
+    }, []);
+}
 
 export interface WrappedActivityProps {
     activity: Activity,

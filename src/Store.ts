@@ -410,16 +410,6 @@ const copyArrayWithUpdatedItem = <T>(array: Array<T>, i: number, item: T) => [
     ... array.slice(i + 1)
 ];
 
-// FEEDYOU: checks if two activities belong to the same stream. Matches by streamId when available,
-// otherwise falls back to matching any chunk (activity with channelData.streamId) from the same sender.
-const areActivitiesFromSameStream = (a1: Activity, a2: Activity): boolean => {
-    const streamId1 = a1.channelData && a1.channelData.streamId;
-    const streamId2 = a2.channelData && a2.channelData.streamId;
-    if (!streamId1 || !streamId2) return false;
-    if (streamId1 === streamId2) return true;
-    return false
-};
-
 export const history: Reducer<HistoryState> = (
     state: HistoryState = {
         activities: [],
@@ -451,20 +441,6 @@ export const history: Reducer<HistoryState> = (
         }
         case 'Receive_Message':
             if (state.activities.find(a => a.id === action.activity.id)) return state; // don't allow duplicate messages
-
-            // FEEDYOU: when a final `alreadyStreamed` message arrives, drop the partial streamed chunks so the
-            // store ends up with a single activity that has full text + attachments
-            const finalChannelData = action.activity.channelData;
-            if (finalChannelData && finalChannelData.alreadyStreamed) {
-                return {
-                    ... state,
-                    activities: [
-                        ... state.activities.filter(a => a.type !== "typing" && !areActivitiesFromSameStream(a, action.activity)),
-                        action.activity,
-                        ... state.activities.filter(a => a.type === "typing" && a.from.id !== action.activity.from.id),
-                    ]
-                };
-            }
 
             return {
                 ... state,
