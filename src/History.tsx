@@ -297,7 +297,7 @@ function mergeStreamedActivities(activities: any[]): any[] {
     // Legacy bot versions do not populate streamId on final msg - for those conversations, just display the streamed messages
     activities = activities.filter(a => !(a.channelData && a.channelData.alreadyStreamed && !a.channelData.streamId));
     
-    const activitiesByStreamId: { [streamId: string]: Activity[] } = groupBy(activities, 'channelData.streamId');
+    const activitiesByStreamId: { [streamId: string]: any[] } = groupBy(activities, 'channelData.streamId');
 
     return activities.reduce((out: any[], activity: any) => {
         if (!activity.channelData || !activity.channelData.streamId || activity.type !== 'message') {
