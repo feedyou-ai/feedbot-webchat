@@ -29,16 +29,12 @@ patch-package
          }
          if (Utils.isNullOrEmpty(this.iconUrl)) {
              buttonElement.classList.add("noIcon");
-
-@@ -4592,9 +4597,9 @@ var AdaptiveCard = /** @class */ (function (_super) {
-         this.version = Version.parse(json["version"]);
-         this.fallbackText = json["fallbackText"];
-         _super.prototype.parse.call(this, json, errors);
-     };
-     AdaptiveCard.prototype.render = function (target) {
+@@ -4592,7 +4597,7 @@ var AdaptiveCard = /** @class */ (function (_super) {
          var renderedCard;
          if (!this.isVersionSupported()) {
              renderedCard = document.createElement("div");
 -            renderedCard.innerHTML = this.fallbackText ? this.fallbackText : "The specified card version is not supported.";
 +            renderedCard.textContent = this.fallbackText ? this.fallbackText : "The specified card version is not supported.";
          }
+         else {
+             renderedCard = _super.prototype.render.call(this);
