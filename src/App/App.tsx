@@ -4,6 +4,7 @@ import { DirectLine } from 'botframework-directlinejs'
 import * as konsole from '../Konsole'
 import { getFeedyouParam, setFeedyouParam } from '../FeedyouParams'
 import { getStyleForTheme, Theme } from '../themes'
+import { sanitizeCssColor } from '../utils/sanitize'
 import { generateUserId } from '../utils/generateUserId'
 
 const Swal = require('sweetalert2')
@@ -131,7 +132,10 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         };
 
         if (config.mainColor) {
-          props.theme.mainColor = config.mainColor;
+          const safeMainColor = sanitizeCssColor(config.mainColor)
+          if (safeMainColor) {
+            props.theme.mainColor = safeMainColor
+          }
         }
 
         props.theme.showSignature = !config.hideSignature

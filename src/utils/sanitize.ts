@@ -47,6 +47,21 @@ export function sanitizeUrl(url: string): string {
 }
 
 /**
+ * Validate a CSS color value to prevent CSS injection into style blocks.
+ * Allows hex (#RGB / #RRGGBB / #RGBA / #RRGGBBAA), rgb/rgba, and hsl/hsla
+ * functional notation.  Returns the trimmed value when valid, or an empty
+ * string for anything that does not match a known-safe pattern.
+ */
+export function sanitizeCssColor(color: string): string {
+    const trimmed = (color || '').trim()
+    const safe =
+        /^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?([0-9a-fA-F]{2})?$/.test(trimmed) ||
+        /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\)$/.test(trimmed) ||
+        /^hsla?\(\s*\d{1,3}(\.\d+)?\s*,\s*\d{1,3}(\.\d+)?%\s*,\s*\d{1,3}(\.\d+)?%\s*(,\s*(0|1|0?\.\d+)\s*)?\)$/.test(trimmed)
+    return safe ? trimmed : ''
+}
+
+/**
  * Escape a string for safe interpolation inside an HTML *attribute* value
  * (single- or double-quoted).  Stricter than escapeHtml because it also
  * encodes backticks which can matter in some older browsers.

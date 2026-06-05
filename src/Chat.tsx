@@ -21,6 +21,7 @@ import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
 import { getFeedyouParam } from './FeedyouParams';
 import { CustomExplanation, Role, Theme } from './themes';
+import { sanitizeHtml, sanitizeUrl, escapeAttr } from './utils/sanitize';
 
 const Swal = require('sweetalert2')
 
@@ -246,7 +247,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         Swal.fire({
             width: 1000,
             title: "Query details",
-            html: activity.channelData.info
+            html: sanitizeHtml(activity.channelData.info)
         });
     }
 
@@ -439,7 +440,8 @@ export class Chat extends React.Component<ChatProps, {}> {
             .filter((activity: any) => activity.type === "event" && activity.name === "redirect")
             .subscribe((activity: any) => {
                 // ignore redirect inside of Designer's Try panel
-                activity.value && !window.hasOwnProperty('API_URL') && (location.href = activity.value)
+                const safeRedirectUrl = activity.value && sanitizeUrl(activity.value)
+                safeRedirectUrl && !window.hasOwnProperty('API_URL') && (location.href = safeRedirectUrl)
             })
 
         this.logSubscribtion = botConnection.activity$
@@ -891,16 +893,16 @@ function getExplanation(callback: (explanation: string) => void, customExplanati
 
     const fieldsHtml = explanationFields.map((field) => {
         return `
-        <label for="${field.name}">${field.label}</label>
-        <textarea class="form-control" id="${field.name}" rows="3"></textarea>
+        <label for="${escapeAttr(field.name)}">${sanitizeHtml(field.label)}</label>
+        <textarea class="form-control" id="${escapeAttr(field.name)}" rows="3"></textarea>
         `})
 
     Swal.fire({
-        title,
+        title: sanitizeHtml(title),
         showCancelButton: true,
         cancelButtonText: 'Zrušit',
         html: `
-          <p style="margin-top:32px;text-align:left;">${intro}</p>
+          <p style="margin-top:32px;text-align:left;">${sanitizeHtml(intro)}</p>
           <form style="text-align:left;">
             <div class="form-group">
                 ${fieldsHtml}
