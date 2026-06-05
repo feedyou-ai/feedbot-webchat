@@ -58,6 +58,15 @@ const chatWithPolyfillConfig = {
     }
 }
 
+const chatRestrictedConfig = {
+    entry: "./src/BotChatRestricted.ts",
+    output: {
+        libraryTarget: "window",
+        library: "BotChat",
+        filename: "./botchat-restricted.js"
+    }
+}
+
 // Config for addon features
 const featureConfig = {
     entry: {
@@ -73,5 +82,6 @@ const featureConfig = {
 module.exports = [
     Object.assign(chatConfig, coreConfig),
     Object.assign(chatWithPolyfillConfig, coreConfig),
+    Object.assign(chatRestrictedConfig, coreConfig),
     Object.assign(featureConfig, coreConfig)
 ];

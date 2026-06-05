@@ -255,7 +255,9 @@ async function fetchConfig(host: string, props: AppProps): Promise<Response>{
       body: JSON.stringify({
         user: props.user,
         channel: props.channel,
-        referrer: window.location.href,
+        referrer: props.forbidReferrerQuery
+          ? (window.location.origin + window.location.pathname)
+          : window.location.href,
         template
       }),
     }

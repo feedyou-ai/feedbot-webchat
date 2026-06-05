@@ -76,6 +76,8 @@ export interface ChatProps {
     typingDelay?: number
     theme?: Theme
     initialMessage?: string
+    forbidReferrerQuery?: boolean
+    forbidDataLayer?: boolean
 }
 
 
@@ -342,7 +344,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             ...(this.props.userData || {}),
             ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
             ...getLocaleUserData(this.props.locale),
-            ...getReferrerUserData(), 
+            ...getReferrerUserData(this.props.forbidReferrerQuery), 
               "user-agent":  navigator.userAgent
         }
 
@@ -423,7 +425,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         this.gtmEventsSubscription = botConnection.activity$
             .filter((activity: any) => activity.type === "event" && activity.name === "google-tag-manager-track-event")
-            .subscribe((activity: any) => trackGoogleTagManagerEvent(JSON.parse(activity.value)))
+            .subscribe((activity: any) => trackGoogleTagManagerEvent(JSON.parse(activity.value), this.props.forbidDataLayer))
 
         /*this.handoffSubscription = botConnection.activity$
             .filter((activity: any) => activity.type === "event" && activity.name === "handoff")
@@ -819,7 +821,10 @@ function getGoogleAnalyticsUserData() {
     return {}
 }
 
-function getReferrerUserData() {
+function getReferrerUserData(forbidReferrerQuery?: boolean) {
+    if (forbidReferrerQuery) {
+        return {referrerUrl: window.location.origin + window.location.pathname}
+    }
     return {referrerUrl: window.location.href}
 }
 
@@ -847,10 +852,14 @@ function trackGoogleAnalyticsEvent(event: GaEvent) {
     }
 }
 
-function trackGoogleTagManagerEvent({event, variables, dataLayerName}: GtmEvent) {
+function trackGoogleTagManagerEvent({event, variables, dataLayerName}: GtmEvent, forbidDataLayer?: boolean) {
     const data = (variables || []).reduce((data, variable) => ({...data, [variable.name]: variable.value}), {event})
     const dataLayer = dataLayerName || "dataLayer"
     
+    if (forbidDataLayer) {
+        console.warn('dataLayer tracking is disabled (forbidDataLayer=true) - skipping GTM custom event dataLayer.push(...)', data)
+        return
+    }
     if (typeof (window as any)[dataLayer] === 'object') {
         console.log('Tracking GTM custom event dataLayer.push(...)', data)
         ;(window as any)[dataLayer].push(data)
