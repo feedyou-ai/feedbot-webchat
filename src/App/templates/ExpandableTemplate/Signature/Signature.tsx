@@ -87,6 +87,7 @@ export const Signature: React.StatelessComponent<Props> = ({
 				<a
 					className='signature-link'
 					target='_blank'
+					rel='noopener noreferrer'
 					href={enhancedFeedyouUrl}>
 					Feedyou
 				</a>
