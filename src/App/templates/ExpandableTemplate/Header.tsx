@@ -114,7 +114,7 @@ export class Header extends React.Component<Props, State> {
 										</li>
 									)}
 
-									{template.persistentMenu.map((menuItem, index) => (
+									{(template.persistentMenu || []).map((menuItem, index) => (
 										<li key={index}>
 											<a onClick={() => handleTriggerDialog(menuItem.dialog)}>{menuItem.title}</a>
 										</li>
