@@ -68,7 +68,7 @@ export class Header extends React.Component<Props, State> {
 		);
 
 		return (
-			<div className="feedbot-header" onClick={isCollapsed && onClick} style={{ backgroundColor }}>
+			<div className="feedbot-header" onClick={isCollapsed ? onClick : undefined} style={{ backgroundColor }}>
 				<div className="feedbot-header-name">
 					{template.type === 'expandable-knob-v2' || template.type === 'sidebar-v2' ? (
 						<div className="feedbot-avatar" style={{ backgroundImage: `url("${avatar}")` }}></div>
