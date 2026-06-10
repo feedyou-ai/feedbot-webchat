@@ -107,7 +107,10 @@ export class Header extends React.Component<Props, State> {
 								<ul className="feedbot-persistent-menu-links">
 									{checkFeedbotTestMode() && (
 										<li className="feedbot-persistent-menu-debug">
-											<a onClick={handleStartOver}>
+											<a href="#" onClick={e => {
+												e.preventDefault();
+												handleStartOver();
+											}}>
 												<span>Start over</span>
 												{startOverIcon}
 											</a>
