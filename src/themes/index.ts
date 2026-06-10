@@ -65,7 +65,7 @@ export type Theme = {
 		partnerLogoUrl: string,
 		partnerLogoStyle: string,
 		partnerLinkUrl: string,
-		mode: string
+		mode: string,
 		partnerName: string,
 	}
 };
