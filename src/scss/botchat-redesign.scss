@@ -1168,7 +1168,7 @@ body .wc-app,
 	background-color: $blueLight;
 	outline: 2px solid $blueDark;
 	border-radius: 4px;
-	transition: background-color .2s ease, border .2 ease;
+	transition: background-color 0.2s ease, border 0.2s ease;
 }
 .feedbot-persistent-menu-debug a {
 	display: flex !important;
