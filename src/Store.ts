@@ -17,7 +17,7 @@ export enum ListeningState {
     STOPPING
 }
 
-export const sendMessage = (text: string, from: User, locale: string) => ({
+export const sendMessage = (text: string, from: User, locale: string, channelData: any = {}) => ({
     type: 'Send_Message',
     activity: {
         type: "message",
@@ -25,7 +25,8 @@ export const sendMessage = (text: string, from: User, locale: string) => ({
         from,
         locale,
         textFormat: 'plain',
-        timestamp: (new Date()).toISOString()
+        timestamp: (new Date()).toISOString(),
+        channelData
     }} as ChatActions);
 
 export const sendFiles = (files: FileList, from: User, locale: string) => ({
@@ -458,7 +459,7 @@ export const history: Reducer<HistoryState> = (
                     {
                         ... action.activity,
                         timestamp: (new Date()).toISOString(),
-                        channelData: { clientActivityId: state.clientActivityBase + state.clientActivityCounter }
+                        channelData: { ...(action.activity.channelData || {}), clientActivityId: state.clientActivityBase + state.clientActivityCounter }
                     },
                     ... state.activities.filter(activity => activity.type === "typing"),
                 ],
@@ -751,7 +752,7 @@ const showAutoSuggestBasedOnChannelData: Epic<ChatActions, ChatState> = (
         showAutoSuggest:
             typeof action.activity.channelData === "object" &&
             action.activity.channelData.autosuggest &&
-            ["google-city", "static", "repository"].includes(
+            ["google-places-city", "static", "repository"].includes(
             action.activity.channelData.autosuggest.type
             ),
         autoSuggestType:

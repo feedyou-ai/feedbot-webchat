@@ -1,7 +1,9 @@
 import * as MarkdownIt from 'markdown-it';
 import * as React from 'react';
 import { getFeedyouParam } from './FeedyouParams';
+import { strings, defaultStrings } from './Strings';
 import { twemoji } from './lib.js'
+const Swal = require('sweetalert2')
 
 export interface IFormattedTextProps {
     text: string,
@@ -69,9 +71,20 @@ const renderMarkdown = (
           .replace(/\[(.*?)\]\((.*?)( +".*?"){0,1}\)/ig, (match, text, url, title) => `[${text}](${markdownIt.normalizeLink(url)}${title === undefined ? '' : title})`);
 
         const arr = src.split(/\n *\n|\r\n *\r\n|\r *\r/);
-        const ma = arr.map(a => markdownIt.render(a));
+        const ma = arr.map(a => {
+            return markdownIt.render(a)
+        });
 
-        __html = ma.join('<br/>');
+        __html = ma.join('<br/>')
+        //transform markdown links whose text is wrapped in [ ] into "chip" elements
+        .replace(/<a[^>]*href="([^"]+)"[^>]*>\[([^\]]+)\]<\/a>/gi, (_match, url ,label) => {
+            if(isUrlFeedyouPreview(url)){
+                // If the URL is a Feedyou preview link, show a custom iframe modal
+                return `<a href="${url}" class="source-link-chip" onclick="showIframeModal(event, '${url}')">${label}</a>`;
+            }
+
+            return `<a href="${url}" target="_blank"><span class="source-link-chip">${label}</span></a>`;
+        });
     } else {
         // Replace spaces with non-breaking space Unicode characters
         __html = text.replace(/ */, '\u00A0');
@@ -106,3 +119,55 @@ function escapeHtml(unsafe: string) {
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
  }
+
+ const isUrlFeedyouPreview = (url: string) => {
+    const parsedUrl = new URL(url)
+    const previewHtmlRegex = /\/api\/messages\/kb\/[^\/]+\/documents\/[^\/]+\/preview/
+    return previewHtmlRegex.test(parsedUrl.pathname)
+}
+
+ const showIframeModal = (e: MouseEvent, url: string) => {
+    const locale = getFeedyouParam('locale') || 'en-us';
+    const localized = strings(locale) || defaultStrings;
+
+    const isDarkMode = !!document.querySelector('.feedbot-wrapper.dark-mode')
+
+    let originalSourceUrl: string | null = null;
+    try {
+        const parsedUrl = new URL(url);
+        const fragment = parsedUrl.hash.replace(/^#/, '');
+        const params = new URLSearchParams(fragment);
+        if (params.has('source')) {
+            originalSourceUrl = decodeURIComponent(params.get('source'));
+        }
+    } catch (_) {
+        // ignore parse errors
+    }
+
+    const linkColor = isDarkMode ? '#aaa' : 'grey';
+    const borderColor = isDarkMode ? '#444' : '#eee';
+    const originalSourceHtml = originalSourceUrl
+        ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid ${borderColor}; text-align: left; font-size: 12px; color: ${linkColor}"><span>${localized.originalSource}: </span><a style="color: ${linkColor}; word-break: break-all;" href="${originalSourceUrl}" target="_blank" rel="noopener noreferrer">${originalSourceUrl}</a></div>`
+        : '';
+
+    const iframeFilter = isDarkMode ? 'filter: invert(1) hue-rotate(180deg);' : '';
+
+    Swal.fire({
+        title: localized.referencedSource,
+        html: `<iframe width="100%" height="600px" frameborder="0" src="${url}" style="${iframeFilter}"></iframe>${originalSourceHtml}`,
+        showCloseButton: true,
+        showConfirmButton: false,
+        width: 1000,
+        background: isDarkMode ? '#1e1e1e' : '#fff',
+        color: isDarkMode ? '#e0e0e0' : '#545454',
+    })
+    e.preventDefault();
+}
+
+declare global {
+  interface Window {
+    showIframeModal: (e: MouseEvent, url: string) => void;
+  }
+}
+
+  window.showIframeModal = (e: MouseEvent, url: string) => showIframeModal(e, url);

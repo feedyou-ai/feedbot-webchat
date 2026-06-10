@@ -6,6 +6,8 @@ import { getFeedyouParam, setFeedyouParam } from '../FeedyouParams'
 import { getStyleForTheme, Theme } from '../themes'
 import { generateUserId } from '../utils/generateUserId'
 
+const Swal = require('sweetalert2')
+
 export type AppProps = ChatProps & {
   theme?: Theme; // option to override theme settings from remote config
   defaultTheme?: Theme; // option to set default template when no remote config found (on default microsite for example)
@@ -88,6 +90,12 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         }
       }
 
+      // FBOT-3192 temporary fix for Safari 26 on Mac, where websocket is not connected properly
+      const isSafariOnMac = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && /Macintosh/.test(navigator.userAgent);
+      if (isSafariOnMac) {
+        directLine.webSocket = false 
+      }
+
       props.botConnection = new DirectLine({
         ...directLine,
         token: body.token,
@@ -113,6 +121,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
       if (config && config.template) {
         props.theme = {
           ...props.theme,
+          genAi: {...config.genAi},
           template: {
             ...config.template,
             ...(props.theme ? props.theme.template : {}),
@@ -125,7 +134,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 
         props.theme.showSignature = !config.hideSignature
         props.theme.signature = config.signature || {}
-
+        props.theme.showAiMessageIndicator = !!config.showAiMessageIndicator
         props.theme.enableScreenshotUpload = !!config.enableScreenshotUpload
 
         if (config.showInput && !props.hasOwnProperty("disableInputWhenNotNeeded")) {
@@ -206,6 +215,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     : false;
   props.resize = props.hasOwnProperty("resize") ? props.resize : "detect";
   props.locale = props.hasOwnProperty("locale") ? props.locale : "cs-cz";
+  setFeedyouParam("locale", props.locale)
   
   // FEEDYOU configurable theming
   if (props.theme || !container) {

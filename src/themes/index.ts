@@ -4,8 +4,25 @@ import { ExpandableKnobTheme } from './ExpandableKnobTheme'
 import { SidebarTheme } from './SidebarTheme'
 import { ExpandableKnobThemeV2 } from './ExpandableKnobThemeV2'
 import { SidebarThemeV2 } from './SidebarThemeV2'
+import { AssistantTheme } from './AssistantTheme'
 
-export type TemplateType = 'expandable-bar' | 'full-screen'| 'expandable-knob'| 'sidebar'| 'expandable-knob-v2'| 'sidebar-v2'
+export type TemplateType = 'expandable-bar' | 'full-screen'| 'expandable-knob'| 'sidebar'| 'expandable-knob-v2'| 'sidebar-v2' | 'assistant'
+
+export type Role = "admin" | "user" | "customer"
+
+export type CustomExplanation = {
+	roles: Role[],
+	required: boolean,
+	intro: string,
+	title: string
+	explanationFields: ExplanationFields[]
+}
+
+export type ExplanationFields = {
+		name: string,
+		label: string,
+		required: boolean,
+	}
 
 export type Theme = {
 	mainColor: string;
@@ -30,10 +47,20 @@ export type Theme = {
 			title: string;
 			dialog: string;
 		}[]
+		welcomeTitle?: string,
+		exampleQueries?: string[],
 	};
+	genAi?: {
+		ratingRoles: Role[],
+		explanationRoles: Role[],
+		customExplanations: CustomExplanation[],
+		disclaimerEnabled: boolean,
+		customDisclaimerText: string,
+	},
 	customCss?: string;
 	showSignature?: boolean,
 	enableScreenshotUpload?: boolean
+	showAiMessageIndicator?: boolean
 	signature?: {
 		partnerLogoUrl: string,
 		partnerLogoStyle: string,
@@ -49,6 +76,8 @@ export function getStyleForTheme(theme: Theme, remoteConfig: boolean): string {
 			return ExpandableBarTheme(theme)
 		case 'full-screen':
 			return FullScreenTheme(theme)
+		case "assistant":
+			return AssistantTheme(theme)
 		case 'expandable-knob':
 			return ExpandableKnobTheme(theme)
 		case 'sidebar':
