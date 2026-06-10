@@ -1162,7 +1162,7 @@ body .wc-app,
     overflow: hidden;
     text-overflow: ellipsis;
 	cursor: pointer;
-	transition: background-color .2s ease, border .2 ease;
+	transition: background-color 0.2s ease, border 0.2s ease;
 }
 .feedbot-persistent-menu-links a:hover {
 	background-color: $blueLight;
