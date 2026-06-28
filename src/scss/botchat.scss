@@ -905,10 +905,10 @@
       border-radius: 50%;
       width: 15px;
       height: 15px;
-      animation: spin 1.2s linear infinite;
+      animation: wc-spin-rotate 1.2s linear infinite;
     }
 
-    @keyframes spin {
+    @keyframes wc-spin-rotate {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
