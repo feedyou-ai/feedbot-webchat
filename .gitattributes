@@ -6,4 +6,4 @@
 *.js text eol=lf
 *.html text eol=lf
 *.map text eol=lf
-patches/**.patch text eol=lf
+patches/*.patch -text
