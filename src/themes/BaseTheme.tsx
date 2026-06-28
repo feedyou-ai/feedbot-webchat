@@ -365,57 +365,6 @@ export const BaseTheme = (theme: Theme) => {
       width: 100%;
     }
     
-    .wc-message-buttons {
-      float: left;
-      padding-left: 8px;
-      width: 100%;
-      height: 44px;
-    }
-
-    .wc-message-buttons .loader {
-      border: 2px solid #f3f3f3; 
-      border-top: 2px solid #3d3d3dff;
-      border-radius: 50%;
-      width: 15px;
-      height: 15px;
-      animation: spin 1.2s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .wc-message-buttons>div {
-      width: 20px;
-      height: 20px;
-      padding: 10px 6px 12px 6px;
-      float: left;
-      fill: #d5d7d8;
-      display: none;
-      cursor: pointer;
-    }
-
-    .wc-message-wrapper:last-child .wc-message-buttons>div {
-      display: block;
-    }   
-
-    .wc-message-buttons>div:hover {
-      fill: #b0b1b1;
-    }
-
-    .wc-message-buttons.wc-rating-in-progress>.wc-message-button-vote-up, .wc-message-buttons.wc-rating-in-progress>.wc-message-button-vote-down {
-      fill: #e5e5e5 !important;
-      display: block;
-      cursor: wait;
-    }
-
-    .wc-message-buttons>.wc-message-button-copy {
-      width: 17px;
-      height: 17px;
-      padding-top: 12px;
-    }
-
     .wc-message-buttons>.wc-message-button-ai {
       padding-top: 11px;
       display: block;
@@ -427,18 +376,6 @@ export const BaseTheme = (theme: Theme) => {
 
     .wc-message-buttons>.wc-message-button-ai:hover {
       fill: ${theme.mainColor};
-    }
-
-    .wc-message-wrapper:hover .wc-message-buttons>div {
-      display: block;
-    }
-
-    .wc-message-button-vote-down {
-      padding: 13px 6px 8px 6px !important;
-    }
-
-    .wc-message-button-info {
-      padding: 12px 6px 12px 6px !important;
     }
 
     .source-link-chip {
