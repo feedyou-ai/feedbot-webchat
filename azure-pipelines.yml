@@ -24,7 +24,7 @@ steps:
 #     echo '//registry.npmjs.org/:_authToken=$(NPMTOKEN)' > .npmrc
 
   - script: |
-      npm install
+      npm ci
     displayName: 'NPM install'
 
   - script: |
