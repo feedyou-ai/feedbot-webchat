@@ -718,17 +718,23 @@ export const doCardAction = (
             window.open(text);
             break;
         case "signin":
+            const safeSigninUrl = sanitizeUrl(text);
+
+            if (!safeSigninUrl) {
+                break;
+            }
+
             let loginWindow =  window.open();
             if (botConnection.getSessionId)  {
                 botConnection.getSessionId().subscribe(sessionId => {
                     konsole.log("received sessionId: " + sessionId);
-                    loginWindow.location.href = text + encodeURIComponent('&code_challenge=' + sessionId);
+                    loginWindow.location.href = safeSigninUrl + encodeURIComponent('&code_challenge=' + sessionId);
                 }, error => {
                     konsole.log("failed to get sessionId", error);
                 });
             }
             else {
-                loginWindow.location.href = text;
+                loginWindow.location.href = safeSigninUrl;
             }
             break;
 

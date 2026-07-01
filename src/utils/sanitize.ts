@@ -46,6 +46,22 @@ export function sanitizeUrl(url: string): string {
     return ''
 }
 
+export function sanitizeCssUrl(url: string): string {
+    const safeUrl = sanitizeUrl(url)
+
+    if (!safeUrl) {
+        return '""'
+    }
+
+    return '"' + safeUrl
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/[\n\r\f]/g, '')
+        .replace(/</g, '\\3C ')
+        .replace(/>/g, '\\3E ')
+        + '"'
+}
+
 /**
  * Validate a CSS color value to prevent CSS injection into style blocks.
  * Allows hex (#RGB / #RRGGBB / #RGBA / #RRGGBBAA), rgb/rgba, and hsl/hsla
