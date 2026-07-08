@@ -637,6 +637,7 @@ body:has(.feedbot-wrapper.dark-mode) .swal2-html-container input {
 
 body:has(.feedbot-wrapper.dark-mode) .swal2-html-container iframe {
   border: 1px solid #333;
+  width: calc(100% - 2px);
 }
 
 body:has(.feedbot-wrapper.dark-mode) .swal2-validation-message {
