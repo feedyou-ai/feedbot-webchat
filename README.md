@@ -29,16 +29,16 @@ Please paste these values to places marked by `...` in examples.
 
 ### What you will need to do on your website
 
-Include `botchat.css`, `botchat-es5.js` (from our https://cdn.feedyou.ai/webchat/latest/... CDN) and following code into your website and paste required values you got from Feedyou. It will create expandable webchat in bottom right corner for you.
+Include `botchat.css`, `botchat-es5.js` and the sibling `twemoji/` folder from the build output on your website and paste required values you got from Feedyou. It will create expandable webchat in bottom right corner for you.
 
 ```HTML
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="https://cdn.feedyou.ai/webchat/latest/botchat.css" rel="stylesheet" />
+    <link href="/webchat/botchat.css" rel="stylesheet" />
   </head>
   <body>
-    <script src="https://cdn.feedyou.ai/webchat/latest/botchat-es5.js"></script>
+    <script src="/webchat/botchat-es5.js"></script>
     <script>
       BotChat.App({
         directLine: { secret: '...' },
@@ -53,6 +53,8 @@ Include `botchat.css`, `botchat-es5.js` (from our https://cdn.feedyou.ai/webchat
 ```
 
 > If you don't want to use polyfills for older browsers, you can use `botchat.js` instead of default `botchat-es5.js`.
+
+> Keep the generated `twemoji/` directory next to `botchat.js` or `botchat-es5.js`; the bundle resolves emoji SVG files relative to the script URL.
 
 If you want to make the expansion logic by yourself or you want to put bot directly into some existing element on your page, you can check out our examples:
 

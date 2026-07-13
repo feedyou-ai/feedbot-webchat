@@ -229,26 +229,6 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     document.body.appendChild(themeStyle);
   }
 
-  // FEEDYOU use twemoji to make emoji compatible
-  const script = document.createElement("script");
-  script.src = "https://unpkg.com/twemoji@14.0.2/dist/twemoji.min.js";
-  script.async = true;
-  document.body.appendChild(script);
-
-  const style = document.createElement("style");
-  style.type = "text/css";
-  style.appendChild(
-    document.createTextNode(`
-        img.emoji {
-            height: 1em;
-            width: 1em;
-            margin: 0 .05em 0 .1em;
-            vertical-align: -0.1em;
-        }
-    `)
-  );
-  document.head.appendChild(style);
-
 	renderWebchatApp(props, container)
 };
 

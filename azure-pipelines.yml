@@ -44,6 +44,7 @@ steps:
         botchat.css
         botchat.js
         botchat.js.map
+        twemoji/**
       targetFolder: $(Build.ArtifactStagingDirectory)
 
 #  - task: ArchiveFiles@2
