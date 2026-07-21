@@ -43,11 +43,15 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     // TODO test IE11 https://github.com/matthew-andrews/isomorphic-fetch
     try {
       let response: Response
-      try {
-        response = await fetchConfig(props.bot.id, props)
-      } catch (err) {
-        // try to fetch from webapp as fallback
-        response = await fetchConfig(props.bot.id+'-app', props)
+      if (props.bot.endpoint) {
+        response = await fetchConfig(props.bot.endpoint, props)
+      } else {
+        try {
+          response = await fetchConfig(`${props.bot.id}.azurewebsites.net`, props)
+        } catch (err) {
+          // try to fetch from webapp as fallback
+          response = await fetchConfig(`${props.bot.id}-app.azurewebsites.net`, props)
+        }
       }
 
       if (!response || !response.ok) {
@@ -242,10 +246,10 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 	renderWebchatApp(props, container)
 };
 
-async function fetchConfig(host: string, props: AppProps): Promise<Response>{
+async function fetchConfig(endpoint: string, props: AppProps): Promise<Response>{
   const template = props.theme && props.theme.template && props.theme.template.type ? {type: props.theme.template.type} : null
   return fetch(
-    `https://${host}.azurewebsites.net/webchat/config`,
+    `https://${endpoint}/webchat/config`,
     {
       method: "POST",
       headers: {

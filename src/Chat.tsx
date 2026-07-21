@@ -55,7 +55,7 @@ export interface ChatProps {
     chatTitle?: boolean | string,
     consolePlaceholder?: string
     user: User,
-    bot: User,
+    bot: User & { endpoint?: string },
     botConnection?: IBotConnection,
     directLine?: DirectLineOptions,
     speechOptions?: SpeechOptions,
