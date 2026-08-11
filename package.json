@@ -94,6 +94,7 @@
     "built/",
     "adaptivecards-hostconfig.json",
     "botchat-fullwindow.css",
+    "botchat-redesign.css",
     "botchat.css",
     "botchat.js",
     "botchat.js.map",

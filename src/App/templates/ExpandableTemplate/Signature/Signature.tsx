@@ -2,6 +2,7 @@ import * as React from 'react'
 import { SignatureLink } from './SignatureLink'
 import { Theme } from '../../../../themes'
 import { AppProps } from '../../../App'
+import { isRedesignTemplate } from '../../../../utils/redesign'
 
 import { SignatureTemplate } from './SignatureTemplate'
 
@@ -28,9 +29,7 @@ export const Signature: React.StatelessComponent<Props> = ({
 		mode,
 		partnerName,
 	} = signature
-	const {
-		theme: { template },
-	} = appProps
+	const template = (appProps.theme && appProps.theme.template) || {}
 
 	const attachQueryStringToUrl = (url: string) =>
 		`${url}${getLinkQueryString(botId)}`
@@ -62,10 +61,7 @@ export const Signature: React.StatelessComponent<Props> = ({
 	}
 
 	/* Webchat Redesign Signature */
-	if (
-		template.type === 'expandable-knob-v2' ||
-		template.type === 'sidebar-v2'
-	) {
+	if (isRedesignTemplate(template.type)) {
 		if (mode === 'both') {
 			return (
 				<SignatureTemplate>

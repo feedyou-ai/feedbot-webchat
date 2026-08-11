@@ -5,6 +5,7 @@ import * as konsole from '../Konsole'
 import { getFeedyouParam, setFeedyouParam } from '../FeedyouParams'
 import { getStyleForTheme, Theme } from '../themes'
 import { generateUserId } from '../utils/generateUserId'
+import { enableRedesign, isRedesignTemplate } from '../utils/redesign'
 
 const Swal = require('sweetalert2')
 
@@ -217,9 +218,17 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
   props.locale = props.hasOwnProperty("locale") ? props.locale : "cs-cz";
   setFeedyouParam("locale", props.locale)
   
+  // FEEDYOU webchat redesign - opt-in via template type, loads its own stylesheet
+  const redesign = isRedesignTemplate(
+    props.theme && props.theme.template && props.theme.template.type
+  );
+  if (redesign) {
+    enableRedesign();
+  }
+
   // FEEDYOU configurable theming
   if (props.theme || !container) {
-    const theme = { mainColor: "#0063f8", ...props.theme };
+    const theme = { mainColor: redesign ? "#0063f8" : "#D83838", ...props.theme };
     props.theme && (props.theme.enableScreenshotUpload = !!props.enableScreenshotUpload)
     const themeStyle = document.createElement("style");
     themeStyle.type = "text/css";

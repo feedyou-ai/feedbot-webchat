@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { AppProps } from '../../App'
-import { Theme } from '../../../themes'
+import { isRedesignTemplate } from '../../../utils/redesign'
 
 export type Props = {
 	appProps: AppProps
@@ -18,25 +18,39 @@ export class Header extends React.Component<Props, State> {
 	render() {
 		const {
 			appProps: {
-				theme: { mainColor, template },
+				theme: { mainColor },
 				header: { extraHtml }
 			},
 			isCollapsed,
 			onClick
 		} = this.props;
 
+		const template = (this.props.appProps.theme && this.props.appProps.theme.template) || {};
+		const title = getTitle(this.props.appProps, isCollapsed);
+
+		if (!isRedesignTemplate(template.type)) {
+			return (
+				<div className="feedbot-header" onClick={onClick} style={{ backgroundColor: mainColor || '#e51836' }}>
+					<span className="feedbot-title">
+						 {title}
+					</span>
+
+					{extraHtml && <span className="feedbot-extra-html" dangerouslySetInnerHTML={{ __html: extraHtml }}/>}
+
+					<a
+						onClick={e => e.preventDefault()}
+						className="feedbot-minimize"
+						href="#"
+					>_</a>
+				</div>
+			)
+		}
+
 		const handlePersistentMenuToggle = () => {
 			this.setState(prevState => ({
 				isMenuOpen: !prevState.isMenuOpen
 			}));
 		};
-
-		let backgroundColor;
-		if (template.type !== 'expandable-knob-v2' && template.type !== 'sidebar-v2') {
-			backgroundColor = mainColor || '#fb584e';
-		}
-
-		const title = getTitle(this.props.appProps, isCollapsed);
 
 		const avatar =
 			template.avatar ||
@@ -68,16 +82,12 @@ export class Header extends React.Component<Props, State> {
 		);
 
 		return (
-			<div className="feedbot-header" onClick={isCollapsed ? onClick : undefined} style={{ backgroundColor }}>
+			<div className="feedbot-header" onClick={isCollapsed ? onClick : undefined}>
 				<div className="feedbot-header-name">
-					{template.type === 'expandable-knob-v2' || template.type === 'sidebar-v2' ? (
-						<div className="feedbot-avatar" style={{ backgroundImage: `url("${avatar}")` }}></div>
-					) : null}
+					<div className="feedbot-avatar" style={{ backgroundImage: `url("${avatar}")` }}></div>
 					<div className="feedbot-name">
 						<span className="feedbot-title">{title}</span>
-						{template.type === 'expandable-knob-v2' || template.type === 'sidebar-v2' ? (
-							<span className="feedbot-supportive-title">{template.supportiveTitle}</span>
-						) : null}
+						<span className="feedbot-supportive-title">{template.supportiveTitle}</span>
 					</div>
 				</div>
 
@@ -86,8 +96,7 @@ export class Header extends React.Component<Props, State> {
 				)}
 
 				<div className="feedbot-header-actions">
-					{(template.type === 'expandable-knob-v2' || template.type === 'sidebar-v2') &&
-					(checkFeedbotTestMode() || (template.persistentMenu && template.persistentMenu.length > 0)) ? (
+					{checkFeedbotTestMode() || (template.persistentMenu && template.persistentMenu.length > 0) ? (
 						<div className="feedbot-persistent-menu" onClick={handlePersistentMenuToggle}>
 							<a className="feedbot-persistent-menu-toggle">
 								<svg
@@ -137,14 +146,13 @@ export class Header extends React.Component<Props, State> {
 						className="feedbot-minimize"
 						href="#"
 					>
-						{template.type === 'expandable-knob-v2' || template.type === 'sidebar-v2' ? (
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="26"
-								height="26"
-								viewBox="0 0 26 26"
-								fill="none"
-							>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="26"
+							height="26"
+							viewBox="0 0 26 26"
+							fill="none"
+						>
 								<path
 									fillRule="evenodd"
 									clipRule="evenodd"
@@ -163,10 +171,7 @@ export class Header extends React.Component<Props, State> {
 									d="M13 1.75C6.7868 1.75 1.75 6.7868 1.75 13C1.75 19.2132 6.7868 24.25 13 24.25C19.2132 24.25 24.25 19.2132 24.25 13C24.25 6.7868 19.2132 1.75 13 1.75ZM0.25 13C0.25 5.95837 5.95837 0.25 13 0.25C20.0416 0.25 25.75 5.95837 25.75 13C25.75 20.0416 20.0416 25.75 13 25.75C5.95837 25.75 0.25 20.0416 0.25 13Z"
 									fill="currentColor"
 								/>
-							</svg>
-						) : (
-							'_'
-						)}
+						</svg>
 					</a>
 				</div>
 			</div>
