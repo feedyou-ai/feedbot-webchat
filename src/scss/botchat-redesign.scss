@@ -997,6 +997,53 @@ body .wc-app,
 	fill: $blue;
 }
 
+.wc-message-buttons * {
+	box-sizing: initial !important;
+}
+
+.wc-message-buttons {
+	float: left;
+	padding-left: 8px;
+	width: 100%;
+	height: 44px;
+}
+
+.wc-message-buttons > div {
+	width: 20px;
+	height: 20px;
+	padding: 10px 6px 12px;
+	float: left;
+	fill: #d5d7d8;
+	display: none;
+	cursor: pointer;
+}
+
+.wc-message-wrapper:last-child .wc-message-buttons > div,
+.wc-message-wrapper:hover .wc-message-buttons > div {
+	display: block;
+}
+
+.wc-message-buttons > .wc-message-button-copy {
+	width: 17px;
+	height: 17px;
+	padding-top: 12px;
+}
+
+.wc-message-buttons > .wc-message-button-ai {
+	padding-top: 11px;
+	display: block;
+	cursor: auto;
+	opacity: 0.7;
+}
+
+.wc-message-button-vote-down {
+	padding: 13px 6px 8px !important;
+}
+
+.wc-message-button-info {
+	padding: 12px 6px !important;
+}
+
 /* animation */
 
 .wc-typing {
