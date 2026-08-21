@@ -51,7 +51,8 @@ $card_padding: 8px;
 	z-index: 100000;
 }
 .feedbot-wrapper:not(.collapsed) {
-	border: 1px solid $silverMedium;
+	border: 1px solid rgba($black, 0.08);
+	box-shadow: 0 12px 36px rgba($black, 0.14);
 }
 .feedbot-header {
 	border-top-left-radius: 10px;
@@ -150,6 +151,12 @@ $card_padding: 8px;
 .feedbot-wrapper .wc-app .wc-card button {
 	outline: 0;
 }
+
+.feedbot-wrapper button:focus-visible,
+.feedbot-wrapper [role='button']:focus-visible {
+	outline: 2px solid $blue;
+	outline-offset: 2px;
+}
 .wc-carousel .wc-hscroll > ul > li {
 	padding: 4px !important;
 }
@@ -201,6 +208,9 @@ $card_padding: 8px;
 }
 
 .wc-list.tiles .ac-pushButton {
+	background-color: $blueLight;
+	border-color: $blue;
+	color: $blueDark;
 	flex-basis: 44% !important;
 	min-height: 120px !important;
 	margin: 3% !important;
@@ -211,14 +221,17 @@ $card_padding: 8px;
 }
 
 .feedbot-wrapper .wc-app .wc-list.tiles .wc-card .ac-pushButton:active {
-	background-color: unset;
+	background-color: $blueLight;
+	color: $blueDark;
 }
 
 .wc-list.tiles .ac-pushButton img {
+	filter: brightness(0) drop-shadow(200px 0 0 $blue);
 	width: 36px !important;
 	height: 36px !important;
 	margin-right: 0px !important;
 	margin-bottom: 10px !important;
+	transform: translateX(-200px);
 }
 
 .wc-list.tiles .ac-pushButton div {
@@ -347,7 +360,7 @@ body .wc-app,
 	outline: 0;
 	overflow-x: hidden;
 	overflow-y: scroll;
-	padding: 10px 5px 0px 10px;
+	padding: 14px 8px 0 12px;
 	position: absolute;
 	right: 0;
 	top: 0;
@@ -375,6 +388,7 @@ body .wc-app,
 	.wc-hscroll > ul {
 		height: $actionsHeight;
 		padding: 0px 18px;
+		text-align: center;
 
 		> li {
 			display: inline-block;
@@ -382,24 +396,24 @@ body .wc-app,
 			max-width: 40%;
 
 			button {
-				background-color: $white;
+				background-color: rgba($blue, 0.06);
 				color: $blueDark;
-				min-height: 40px;
+				min-height: 38px;
 				overflow: hidden;
-				padding: 0 16px;
+				padding: 0 14px;
 				text-overflow: ellipsis;
 				white-space: nowrap;
 				width: 100%;
-				border-radius: 5px;
-				border-width: 1px;
-				font-weight: bold;
+				border: 1px solid rgba($blue, 0.16);
+				border-radius: 8px;
+				font-weight: 500;
+				transition: background-color $actionTransition, border-color $actionTransition;
 			}
 
 			button:focus,
 			button:hover {
 				background-color: $blueLight;
-				border-color: $blueDark;
-				border-width: 1px;
+				border-color: rgba($blue, 0.35);
 				color: $blueDark;
 			}
 
@@ -474,10 +488,10 @@ body .wc-app,
 /* messages */
 
 .wc-message-wrapper {
-	animation: animationFrames 2s;
+	animation: animationFrames 180ms ease-out;
 	animation-iteration-count: 1;
 	clear: both;
-	margin-bottom: 10px;
+	margin-bottom: 14px;
 	overflow: hidden;
 	position: relative;
 	/*transition: max-height 2s ease-in-out;*/
@@ -510,10 +524,10 @@ body .wc-app,
 }
 
 .wc-message-content {
-	box-shadow: 0px 1px 2px 0px $shadow;
+	box-shadow: 0 1px 3px $shadow;
 	padding: 13px;
 	word-break: break-word;
-	border: 1px solid $silverMedium;
+	border: 1px solid rgba($black, 0.07);
 }
 
 .wc-message-content.clickable {
@@ -546,7 +560,7 @@ body .wc-app,
 
 .wc-message-from {
 	clear: both;
-	color: $silver;
+	color: $grey;
 	font-size: 11px;
 	margin-top: 5px;
 }
@@ -555,32 +569,34 @@ body .wc-app,
 
 .wc-card {
 	background-color: $white;
-	border-radius: 10px;
-	border: 1px solid $silverMedium;
+	border-radius: 12px;
+	border: 1px solid rgba($black, 0.07);
+	box-shadow: 0 2px 8px rgba($black, 0.06);
 
 	.non-adaptive-content {
 		margin: $card_padding $card_padding 0 $card_padding;
 	}
 
 	button {
-		border: 1px solid $silverMedium;
+		border: 1px solid rgba($blue, 0.18);
 		color: $blueDark;
-		background: $white;
-		font-weight: bold;
+		background: rgba($blue, 0.05);
+		font-weight: 500;
 		min-height: 40px;
-		border-radius: 5px;
+		border-radius: 8px;
 		flex: auto;
+		transition: background-color $actionTransition, border-color $actionTransition;
 	}
 
 	button:hover {
 		background-color: $blueLight;
-		border: 2px solid $blueDark;
+		border-color: rgba($blue, 0.35);
 		color: $blueDark;
 	}
 
 	button:active {
 		background-color: $blueLight;
-		border: 2px solid $blueDark;
+		border-color: $blueDark;
 		color: $blueDark;
 	}
 
@@ -759,14 +775,18 @@ body .wc-app,
 	margin-top: 8px;
 
 	button.scroll {
+		align-items: center;
 		background-color: $blue;
-		height: 31px;
+		display: flex;
+		height: 36px;
+		justify-content: center;
 		overflow: hidden;
 		padding: 0px;
 		position: absolute;
 		top: 50%;
-		width: 43px;
-		border-radius: 100px;
+		transform: translateY(-50%);
+		width: 36px;
+		border-radius: 50%;
 		border: 2px solid $blueDark;
 	}
 
@@ -781,7 +801,10 @@ body .wc-app,
 	}
 
 	button.scroll svg {
+		display: block;
 		fill: $white;
+		height: 28px;
+		width: 28px;
 	}
 
 	button.scroll.previous {
@@ -833,9 +856,9 @@ body .wc-app,
 
 .wc-message-from-me .wc-message-content {
 	background-color: $c_messageFromMe;
-	border: 1px solid $blueDark;
+	border: 1px solid transparent;
 	color: $white;
-	border-radius: 10px 10px 4px 10px;
+	border-radius: 12px 12px 4px 12px;
 }
 
 /* from bot */
@@ -848,23 +871,29 @@ body .wc-app,
 .wc-message-from-bot .wc-message-content {
 	background-color: $c_messageFromThem;
 	color: $black;
-	border-radius: 10px 10px 10px 4px;
+	border-radius: 12px 12px 12px 4px;
 }
 
 /* console */
 
 .wc-console {
 	background: #ffffff;
-	border: 1px solid #c7d0d7;
-	border-radius: 5px;
-	margin: 18px;
+	border: 1px solid $silverMedium;
+	border-radius: 10px;
+	margin: 14px 16px;
 	bottom: 0;
 	box-sizing: border-box;
-	height: 45px;
+	height: 44px;
 	left: 0;
 	position: absolute;
 	right: 0;
-	box-shadow: 0px 1px 2px 0px $shadow;
+	box-shadow: 0 1px 3px $shadow;
+	transition: border-color $actionTransition, box-shadow $actionTransition;
+
+	&:focus-within {
+		border-color: rgba($blue, 0.55);
+		box-shadow: 0 0 0 3px rgba($blue, 0.1);
+	}
 
 	> .wc-upload,
 	> .wc-textbox,
@@ -905,14 +934,14 @@ body .wc-app,
 	}
 
 	textarea::placeholder {
-		color: $silver;
+		color: $grey;
 	}
 
 	&.has-text .wc-send svg {
 		fill: $blue;
 	}
 	&.has-text {
-		border: 1px solid $grey;
+		border-color: rgba($blue, 0.45);
 	}
 
 	.wc-upload {
@@ -998,50 +1027,74 @@ body .wc-app,
 }
 
 .wc-message-buttons * {
-	box-sizing: initial !important;
+	box-sizing: border-box !important;
 }
 
 .wc-message-buttons {
-	float: left;
-	padding-left: 8px;
-	width: 100%;
-	height: 44px;
+	align-items: center;
+	clear: both;
+	display: flex;
+	gap: 2px;
+	height: 0;
+	margin-left: 8px;
+	overflow: visible;
+	width: auto;
 }
 
 .wc-message-buttons > div {
-	width: 20px;
-	height: 20px;
-	padding: 10px 6px 12px;
-	float: left;
-	fill: #d5d7d8;
+	align-items: center;
+	border-radius: 6px;
 	display: none;
+	fill: $grey;
+	height: 40px;
+	justify-content: center;
+	padding: 11px;
+	width: 40px;
 	cursor: pointer;
+	transition: background-color $actionTransition, fill $actionTransition;
+
+	&:hover {
+		background-color: rgba($black, 0.06);
+		fill: $black;
+	}
+
+	svg {
+		display: block;
+		height: 16px;
+		width: 16px;
+	}
 }
 
 .wc-message-wrapper:last-child .wc-message-buttons > div,
-.wc-message-wrapper:hover .wc-message-buttons > div {
-	display: block;
+.wc-message-wrapper:hover .wc-message-buttons > div,
+.wc-message-wrapper:focus-within .wc-message-buttons > div {
+	display: flex;
 }
 
 .wc-message-buttons > .wc-message-button-copy {
-	width: 17px;
-	height: 17px;
-	padding-top: 12px;
+	height: 40px;
+	padding: 11px;
+	width: 40px;
 }
 
 .wc-message-buttons > .wc-message-button-ai {
-	padding-top: 11px;
-	display: block;
+	display: flex;
 	cursor: auto;
-	opacity: 0.7;
+	opacity: 0.65;
 }
 
 .wc-message-button-vote-down {
-	padding: 13px 6px 8px !important;
+	padding: 11px !important;
 }
 
 .wc-message-button-info {
-	padding: 12px 6px !important;
+	padding: 11px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wc-message-wrapper {
+		animation: none;
+	}
 }
 
 /* animation */

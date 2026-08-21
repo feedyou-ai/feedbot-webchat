@@ -1,6 +1,9 @@
 import { Theme } from './index';
+import { RedesignTheme } from './RedesignTheme';
 
 export const ExpandableKnobThemeV2 = (theme: Theme) => `
+${RedesignTheme(theme)}
+
 /* webchat redesign */
 .feedbot-wrapper.collapsed .feedbot-header {
     background-image: url(${
@@ -17,7 +20,9 @@ export const ExpandableKnobThemeV2 = (theme: Theme) => `
 .feedbot-signature {
 	bottom: -23px;
 	font-size: 13px;
-	right: -5px;
+	left: 50%;
+	right: auto;
+	transform: translateX(-50%);
 }
 
 /* user custom css */

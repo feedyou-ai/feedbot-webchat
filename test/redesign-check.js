@@ -70,4 +70,14 @@ r.enableRedesign()
 r.enableRedesign()
 assert.strictEqual(head.children.length, 1, 'stylesheet must not be injected twice')
 
+// V2 templates must include the runtime color layer, not only the static redesign CSS
+const theme = { mainColor: '#fb584e', template: {} }
+const knobStyles = require('../built/themes/ExpandableKnobThemeV2').ExpandableKnobThemeV2(theme)
+const sidebarStyles = require('../built/themes/SidebarThemeV2').SidebarThemeV2(theme)
+
+for (const styles of [knobStyles, sidebarStyles]) {
+	assert.ok(styles.indexOf('#fb584e') !== -1, 'V2 theme must include mainColor')
+	assert.ok(styles.indexOf('.wc-list.tiles .ac-pushButton') !== -1, 'V2 theme must style tiles dynamically')
+}
+
 console.log('redesign-check: all assertions passed')

@@ -1,6 +1,9 @@
 import { Theme } from './index';
+import { RedesignTheme } from './RedesignTheme';
 
 export const SidebarThemeV2 = (theme: Theme) => `
+${RedesignTheme(theme)}
+
 /* webchat redesign */
 .feedbot-wrapper.collapsed .feedbot-header {
     background-image: url(${
@@ -21,10 +24,19 @@ export const SidebarThemeV2 = (theme: Theme) => `
     max-height: 100%;
     border-radius: 0;
 }
+.feedbot-wrapper .wc-console {
+    bottom: 13px;
+}
+.feedbot-wrapper .wc-message-groups,
+.feedbot-wrapper .wc-suggested-actions {
+    bottom: 83px;
+}
 .feedbot-signature {
-    bottom: -2px;
+    bottom: 2px;
     font-size: 11px;
-    right: 13px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
 }
 
 /* user custom css */
