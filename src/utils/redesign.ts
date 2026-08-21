@@ -12,6 +12,9 @@ const REDESIGN_STYLESHEET = 'botchat-redesign.css'
 
 const FALLBACK_STYLESHEET_URL = 'https://cdn.feedyou.ai/webchat/latest/' + REDESIGN_STYLESHEET
 
+const getBaseStylesheet = (): HTMLLinkElement =>
+	document.querySelector('link[href*="botchat.css"]') as HTMLLinkElement
+
 export const isRedesignTemplate = (type?: string): boolean =>
 	REDESIGN_TEMPLATES.indexOf(type) !== -1
 
@@ -24,7 +27,7 @@ export const isRedesignActive = (): boolean =>
 // Derive the redesign stylesheet URL from whatever botchat build the page already
 // loaded, so self-hosted and version-pinned deployments keep working.
 const getRedesignStylesheetUrl = (): string => {
-	const link = document.querySelector('link[href*="botchat.css"]') as HTMLLinkElement
+	const link = getBaseStylesheet()
 	if (link && link.getAttribute('href')) {
 		return link.getAttribute('href').replace('botchat.css', REDESIGN_STYLESHEET)
 	}
@@ -49,11 +52,15 @@ export const enableRedesign = () => {
 		return
 	}
 
-	// appended last so it wins over botchat.css, but still before the theme <style>
-	// which App appends to <body>
 	const link = document.createElement('link')
 	link.rel = 'stylesheet'
 	link.type = 'text/css'
 	link.href = href
-	document.head.appendChild(link)
+
+	const baseStylesheet = getBaseStylesheet()
+	if (baseStylesheet && baseStylesheet.parentNode) {
+		baseStylesheet.parentNode.insertBefore(link, baseStylesheet.nextSibling)
+	} else {
+		document.head.appendChild(link)
+	}
 }
