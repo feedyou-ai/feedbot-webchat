@@ -41,6 +41,7 @@ steps:
         botchat-es5.js
         botchat-es5.js.map
         botchat-fullwindow.css
+        botchat-redesign.css
         botchat.css
         botchat.js
         botchat.js.map
