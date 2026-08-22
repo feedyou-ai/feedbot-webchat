@@ -53,7 +53,7 @@ export class Header extends React.Component<Props> {
 		}
 
 		const avatar =
-			template.avatar ||
+			template.avatarUrl ||
 			"https://feedyou.blob.core.windows.net/webchat/chatbot-default-avatar-v2.svg";
 
 		const startOverIcon = (

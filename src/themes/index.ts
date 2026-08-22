@@ -41,7 +41,7 @@ export type Theme = {
 		iconUrl?: string,
 		customScript?: string,
 		logoUrl?: string,
-		avatar?: string;
+		avatarUrl?: string;
 		supportiveTitle?: string;
 		persistentMenu?: {
 			title: string;
