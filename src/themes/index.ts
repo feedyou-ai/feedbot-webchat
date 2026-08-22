@@ -67,6 +67,7 @@ export type Theme = {
 		partnerLinkUrl: string,
 		mode: string,
 		partnerName: string,
+		disclaimer?: string,
 	}
 };
 

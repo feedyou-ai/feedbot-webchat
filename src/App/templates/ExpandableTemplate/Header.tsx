@@ -2,19 +2,15 @@ import * as React from 'react'
 import { AppProps } from '../../App'
 import { isRedesignTemplate } from '../../../utils/redesign'
 
+let isPersistentMenuDismissed = false
+
 export type Props = {
 	appProps: AppProps
 	onClick(): void
 	isCollapsed: boolean
 }
 
-export type State = {
-	isMenuOpen: boolean;
-};
-
-export class Header extends React.Component<Props, State> {
-	state: State = { isMenuOpen: false };
-
+export class Header extends React.Component<Props> {
 	render() {
 		const {
 			appProps: {
@@ -27,6 +23,16 @@ export class Header extends React.Component<Props, State> {
 
 		const template = (this.props.appProps.theme && this.props.appProps.theme.template) || {};
 		const title = getTitle(this.props.appProps, isCollapsed);
+		const dismissPersistentMenu = (menuItem: HTMLElement) => {
+			isPersistentMenuDismissed = true
+			const menu = getPersistentMenu(menuItem)
+			menu && menu.classList.add('dismissed')
+		}
+		const resetPersistentMenu = (toggle: HTMLElement) => {
+			isPersistentMenuDismissed = false
+			const menu = getPersistentMenu(toggle)
+			menu && menu.classList.remove('dismissed')
+		}
 
 		if (!isRedesignTemplate(template.type)) {
 			return (
@@ -45,12 +51,6 @@ export class Header extends React.Component<Props, State> {
 				</div>
 			)
 		}
-
-		const handlePersistentMenuToggle = () => {
-			this.setState(prevState => ({
-				isMenuOpen: !prevState.isMenuOpen
-			}));
-		};
 
 		const avatar =
 			template.avatar ||
@@ -97,8 +97,14 @@ export class Header extends React.Component<Props, State> {
 
 				<div className="feedbot-header-actions">
 					{checkFeedbotTestMode() || (template.persistentMenu && template.persistentMenu.length > 0) ? (
-						<div className="feedbot-persistent-menu" onClick={handlePersistentMenuToggle}>
-							<a className="feedbot-persistent-menu-toggle">
+						<div className={`feedbot-persistent-menu${isPersistentMenuDismissed ? ' dismissed' : ''}`}>
+							<a
+								className="feedbot-persistent-menu-toggle"
+								tabIndex={0}
+								aria-label="Menu"
+								onMouseEnter={e => resetPersistentMenu(e.currentTarget)}
+								onFocus={e => resetPersistentMenu(e.currentTarget)}
+							>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									width="3"
@@ -112,12 +118,12 @@ export class Header extends React.Component<Props, State> {
 									/>
 								</svg>
 							</a>
-							{this.state.isMenuOpen && (
-								<ul className="feedbot-persistent-menu-links">
+							<ul className="feedbot-persistent-menu-links">
 									{checkFeedbotTestMode() && (
 										<li className="feedbot-persistent-menu-debug">
 											<a href="#" onClick={e => {
 												e.preventDefault();
+												dismissPersistentMenu(e.currentTarget);
 												handleStartOver();
 											}}>
 												<span>Start over</span>
@@ -130,12 +136,12 @@ export class Header extends React.Component<Props, State> {
 										<li key={index}>
 												<a href="#" onClick={e => {
 													e.preventDefault();
+													dismissPersistentMenu(e.currentTarget);
 													handleTriggerDialog(menuItem.dialog);
 												}}>{menuItem.title}</a>
 										</li>
 									))}
-								</ul>
-							)}
+							</ul>
 						</div>
 					) : null}
 					<a
@@ -188,6 +194,14 @@ const getTitle = (props: AppProps, isCollapsed: boolean) => {
 
 	return titleToShow
 };
+
+const getPersistentMenu = (element: HTMLElement): HTMLElement | null => {
+	let current: HTMLElement | null = element
+	while (current && !current.classList.contains('feedbot-persistent-menu')) {
+		current = current.parentElement
+	}
+	return current
+}
 
 /**
  * Triggers a specified dialog for the persistent menu item from Channel settings

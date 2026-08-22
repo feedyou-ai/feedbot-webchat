@@ -28,6 +28,7 @@ export const Signature: React.StatelessComponent<Props> = ({
 		partnerLogoStyle,
 		mode,
 		partnerName,
+		disclaimer,
 	} = signature
 	const template = (appProps.theme && appProps.theme.template) || {}
 
@@ -62,31 +63,51 @@ export const Signature: React.StatelessComponent<Props> = ({
 
 	/* Webchat Redesign Signature */
 	if (isRedesignTemplate(template.type)) {
+		const redesignPrefix = (
+			<span className='signature-prefix'>
+				{disclaimer && <span className='signature-disclaimer'>{disclaimer} · </span>}
+				Powered by
+			</span>
+		)
+
 		if (mode === 'both') {
 			return (
 				<SignatureTemplate>
-					{partnerLink} &{' '}
-					<a
-						className='signature-link'
-						target='_blank'
-						href={enhancedFeedyouUrl}>
-						Feedyou
-					</a>
+					<span className='signature-redesign-content'>
+						{redesignPrefix}
+						{partnerLink} &{' '}
+						<a
+							className='signature-link'
+							target='_blank'
+							href={enhancedFeedyouUrl}>
+							Feedyou
+						</a>
+					</span>
 				</SignatureTemplate>
 			);
 		}
 		if (mode === 'partner') {
-			return <SignatureTemplate>{partnerLink}</SignatureTemplate>
+			return (
+				<SignatureTemplate>
+					<span className='signature-redesign-content'>
+						{redesignPrefix}
+						{partnerLink}
+					</span>
+				</SignatureTemplate>
+			)
 		}
 		return (
 			<SignatureTemplate>
-				<a
-					className='signature-link'
-					target='_blank'
-					rel='noopener noreferrer'
-					href={enhancedFeedyouUrl}>
-					Feedyou
-				</a>
+				<span className='signature-redesign-content'>
+					{redesignPrefix}
+					<a
+						className='signature-link'
+						target='_blank'
+						rel='noopener noreferrer'
+						href={enhancedFeedyouUrl}>
+						Feedyou
+					</a>
+				</span>
 			</SignatureTemplate>
 		);
 	}

@@ -6,10 +6,12 @@ export type Props = {
 }
 
 export const SignatureTemplate: React.StatelessComponent = ({ children }) => {
+	const redesign = isRedesignActive()
+
 	return (
 		<div className="feedbot-signature">
 			<div className="feedbot-signature-row">
-				<div style={{ alignSelf: 'center' }}>{isRedesignActive() ? 'powered by' : 'with ❤️ by'}</div>
+				{!redesign && <div style={{ alignSelf: 'center' }}>with ❤️ by</div>}
 				{children}
 			</div>
 		</div>

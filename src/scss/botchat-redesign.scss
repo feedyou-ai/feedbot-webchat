@@ -303,6 +303,16 @@ $card_padding: 8px;
 	align-items: center;
 	height: 100%;
 }
+
+.signature-redesign-content {
+	display: flex;
+	align-items: center;
+	white-space: nowrap;
+}
+
+.signature-prefix {
+	flex-shrink: 0;
+}
 /*
 *
 *
@@ -1220,7 +1230,7 @@ body .wc-app,
 .feedbot-header-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+	gap: 11px;
 	user-select: none;
 }
 .feedbot-persistent-menu-toggle {
@@ -1235,6 +1245,14 @@ body .wc-app,
 	line-height: 0.9em;
 	position: relative;
 }
+.feedbot-persistent-menu::after {
+	content: '';
+	position: absolute;
+	top: 100%;
+	right: -35px;
+	width: 168px;
+	height: 20px;
+}
 .feedbot-persistent-menu-links {
     position: absolute;
     top: 35px;
@@ -1242,33 +1260,56 @@ body .wc-app,
     background-color: $white;
 	border: 1px solid $silver;
 	border-radius: 6px;
-	box-shadow: 0px 1px 2px 0px $shadow;
+	box-shadow: 0 8px 24px $shadow;
     z-index: 1;
     list-style: none;
-	padding: 10px 0;
+	padding: 6px;
     margin: 0;
 	min-width: 11em;
 	max-width: 17em;
-	font-size: 15px;
+	font-size: 14px;
+	line-height: 1.35;
+	opacity: 0;
+	pointer-events: none;
+	visibility: hidden;
+}
+.feedbot-persistent-menu:hover .feedbot-persistent-menu-links {
+	opacity: 1;
+	pointer-events: auto;
+	visibility: visible;
+}
+.feedbot-persistent-menu:focus-within .feedbot-persistent-menu-links {
+	opacity: 1;
+	pointer-events: auto;
+	visibility: visible;
+}
+.feedbot-persistent-menu.dismissed .feedbot-persistent-menu-links {
+	opacity: 0;
+	pointer-events: none;
+	visibility: hidden;
 }
 .feedbot-wrapper.collapsed .feedbot-persistent-menu-links {
 	display: none;
 }
 .feedbot-persistent-menu-links a {
-    padding: 10px 20px;
+	color: $greyDark;
+	padding: 10px 12px;
     display: block;
 	box-sizing: border-box;
+	border-radius: 4px;
+	text-decoration: none;
 	white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 	cursor: pointer;
-	transition: background-color 0.2s ease, border 0.2s ease;
+	transition: background-color 0.15s ease, color 0.15s ease;
 }
-.feedbot-persistent-menu-links a:hover {
+.feedbot-persistent-menu-links a:hover,
+.feedbot-persistent-menu-links a:focus-visible {
 	background-color: $blueLight;
-	outline: 2px solid $blueDark;
-	border-radius: 4px;
-	transition: background-color 0.2s ease, border 0.2s ease;
+	color: $blueDark;
+	outline: none;
+	text-decoration: none;
 }
 .feedbot-persistent-menu-debug a {
 	display: flex !important;
