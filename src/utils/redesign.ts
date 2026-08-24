@@ -10,6 +10,8 @@ export const REDESIGN_BODY_CLASS = 'feedbot-redesign'
 
 const REDESIGN_STYLESHEET = 'botchat-redesign.css'
 
+let redesignStylesheetLoad: Promise<void>
+
 const getBaseStylesheet = (): HTMLLinkElement =>
 	document.querySelector('link[href*="botchat.css"]') as HTMLLinkElement
 
@@ -52,15 +54,18 @@ const getRedesignStylesheetUrl = (): string => {
 	}
 }
 
-export const enableRedesign = () => {
+export const enableRedesign = (): Promise<void> => {
 	document.body.className += ' ' + REDESIGN_BODY_CLASS
 
 	const href = getRedesignStylesheetUrl()
 	if (!href) {
-		return
+		return Promise.resolve()
+	}
+	if (redesignStylesheetLoad) {
+		return redesignStylesheetLoad
 	}
 	if (document.querySelector('link[href="' + href + '"]')) {
-		return
+		return Promise.resolve()
 	}
 
 	const link = document.createElement('link')
@@ -68,10 +73,17 @@ export const enableRedesign = () => {
 	link.type = 'text/css'
 	link.href = href
 
-	const baseStylesheet = getBaseStylesheet()
-	if (baseStylesheet && baseStylesheet.parentNode) {
-		baseStylesheet.parentNode.insertBefore(link, baseStylesheet.nextSibling)
-	} else {
-		document.head.appendChild(link)
-	}
+	redesignStylesheetLoad = new Promise<void>(resolve => {
+		link.onload = () => resolve()
+		link.onerror = () => resolve()
+
+		const baseStylesheet = getBaseStylesheet()
+		if (baseStylesheet && baseStylesheet.parentNode) {
+			baseStylesheet.parentNode.insertBefore(link, baseStylesheet.nextSibling)
+		} else {
+			document.head.appendChild(link)
+		}
+	})
+
+	return redesignStylesheetLoad
 }

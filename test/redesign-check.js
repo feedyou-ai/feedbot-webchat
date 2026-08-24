@@ -44,6 +44,8 @@ let head = fakeDom({ link: 'https://cdn.feedyou.ai/webchat/v1.2.3/botchat.css' }
 r = load()
 r.enableRedesign()
 assert.strictEqual(head.children[0].href, 'https://cdn.feedyou.ai/webchat/v1.2.3/botchat-redesign.css')
+assert.strictEqual(typeof head.children[0].onload, 'function', 'stylesheet load must unblock rendering')
+assert.strictEqual(typeof head.children[0].onerror, 'function', 'stylesheet error must unblock rendering')
 assert.ok(document.body.className.indexOf('feedbot-redesign') !== -1, 'body class must be set')
 
 // the running BotChat bundle is authoritative when the CSS link is from another deployment

@@ -223,7 +223,7 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     props.theme && props.theme.template && props.theme.template.type
   );
   if (redesign) {
-    enableRedesign();
+    await enableRedesign();
   }
 
   // FEEDYOU configurable theming
