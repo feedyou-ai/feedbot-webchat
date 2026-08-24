@@ -10,10 +10,14 @@ export const REDESIGN_BODY_CLASS = 'feedbot-redesign'
 
 const REDESIGN_STYLESHEET = 'botchat-redesign.css'
 
-const FALLBACK_STYLESHEET_URL = 'https://cdn.feedyou.ai/webchat/latest/' + REDESIGN_STYLESHEET
-
 const getBaseStylesheet = (): HTMLLinkElement =>
 	document.querySelector('link[href*="botchat.css"]') as HTMLLinkElement
+
+// `currentScript` is available while the bundle evaluates. Keep its source because
+// enableRedesign runs later, after dynamically added script tags may be removed.
+const botchatScriptSource = typeof document !== 'undefined' && (<any>document).currentScript
+	? (<HTMLScriptElement>(<any>document).currentScript).getAttribute('src')
+	: null
 
 export const isRedesignTemplate = (type?: string): boolean =>
 	REDESIGN_TEMPLATES.indexOf(type) !== -1
@@ -24,30 +28,37 @@ export const isRedesignActive = (): boolean =>
 	!!document.body &&
 	document.body.className.indexOf(REDESIGN_BODY_CLASS) !== -1
 
-// Derive the redesign stylesheet URL from whatever botchat build the page already
-// loaded, so self-hosted and version-pinned deployments keep working.
+const getStylesheetUrlFromScript = (src?: string): string =>
+	src && src.replace(/botchat(-es5)?\.js.*$/, REDESIGN_STYLESHEET)
+
+// Derive the redesign stylesheet URL from the same botchat build the page loaded,
+// so self-hosted and version-pinned deployments keep working.
 const getRedesignStylesheetUrl = (): string => {
-	const link = getBaseStylesheet()
-	if (link && link.getAttribute('href')) {
-		return link.getAttribute('href').replace('botchat.css', REDESIGN_STYLESHEET)
+	const currentScriptUrl = getStylesheetUrlFromScript(botchatScriptSource)
+	if (currentScriptUrl) {
+		return currentScriptUrl
 	}
 
 	const script = document.querySelector(
 		'script[src*="botchat-es5.js"], script[src*="botchat.js"]'
 	) as HTMLScriptElement
 	if (script && script.getAttribute('src')) {
-		return script
-			.getAttribute('src')
-			.replace(/botchat(-es5)?\.js.*$/, REDESIGN_STYLESHEET)
+		return getStylesheetUrlFromScript(script.getAttribute('src'))
 	}
 
-	return FALLBACK_STYLESHEET_URL
+	const link = getBaseStylesheet()
+	if (link && link.getAttribute('href')) {
+		return link.getAttribute('href').replace('botchat.css', REDESIGN_STYLESHEET)
+	}
 }
 
 export const enableRedesign = () => {
 	document.body.className += ' ' + REDESIGN_BODY_CLASS
 
 	const href = getRedesignStylesheetUrl()
+	if (!href) {
+		return
+	}
 	if (document.querySelector('link[href="' + href + '"]')) {
 		return
 	}

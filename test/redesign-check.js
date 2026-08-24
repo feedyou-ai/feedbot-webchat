@@ -7,6 +7,7 @@ const fakeDom = tags => {
 	global.document = {
 		body: { className: 'feedbot-enabled' },
 		head,
+		currentScript: tags.currentScript ? { getAttribute: () => tags.currentScript } : null,
 		createElement: () => ({}),
 		querySelector: sel => {
 			if (sel.indexOf('link[href="') === 0) {
@@ -45,6 +46,15 @@ r.enableRedesign()
 assert.strictEqual(head.children[0].href, 'https://cdn.feedyou.ai/webchat/v1.2.3/botchat-redesign.css')
 assert.ok(document.body.className.indexOf('feedbot-redesign') !== -1, 'body class must be set')
 
+// the running BotChat bundle is authoritative when the CSS link is from another deployment
+head = fakeDom({
+	link: 'https://cdn.feedyou.ai/webchat/latest/botchat.css',
+	currentScript: 'https://cdn.feedyou.ai/webchat/master/botchat-es5.js'
+})
+r = load()
+r.enableRedesign()
+assert.strictEqual(head.children[0].href, 'https://cdn.feedyou.ai/webchat/master/botchat-redesign.css')
+
 // relative self-hosted path
 head = fakeDom({ link: '../../botchat.css' })
 r = load()
@@ -57,11 +67,18 @@ r = load()
 r.enableRedesign()
 assert.strictEqual(head.children[0].href, 'https://cdn.feedyou.ai/webchat/latest/botchat-redesign.css')
 
-// nothing to derive from -> cdn fallback
+// source captured while the bundle executes wins when its script tag is later removed
+head = fakeDom({ currentScript: 'https://cdn.feedyou.ai/webchat/master/botchat.js?v=7' })
+r = load()
+document.currentScript = null
+r.enableRedesign()
+assert.strictEqual(head.children[0].href, 'https://cdn.feedyou.ai/webchat/master/botchat-redesign.css')
+
+// never load a stylesheet from a different, hard-coded deployment when source is unknown
 head = fakeDom({})
 r = load()
 r.enableRedesign()
-assert.strictEqual(head.children[0].href, 'https://cdn.feedyou.ai/webchat/latest/botchat-redesign.css')
+assert.strictEqual(head.children.length, 0)
 
 // injected only once
 head = fakeDom({ link: '/botchat.css' })
