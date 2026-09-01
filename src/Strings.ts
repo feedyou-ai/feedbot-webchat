@@ -1,49 +1,57 @@
 export interface Strings {
-    title: string;
-    send: string;
-    unknownFile: string;
-    unknownCard: string;
-    receiptTax: string;
-    receiptVat: string;
-    receiptTotal: string;
-    messageRetry: string;
-    messageFailed: string;
-    messageSending: string;
-    timeSent: string;
-    consolePlaceholder: string;
-    listeningIndicator: string;
-    uploadFile: string;
-    speak: string;
-    uploadFileFailedSize: string;
-    aiMessageTitle: string;
+    title: string,
+    send: string,
+    unknownFile: string,
+    unknownCard: string,
+    receiptTax: string,
+    receiptVat: string,
+    receiptTotal: string
+    messageRetry: string,
+    messageFailed: string,
+    messageSending: string,
+    timeSent: string,
+    consolePlaceholder: string,
+    listeningIndicator: string,
+    uploadFile: string,
+    speak: string,
+    uploadFileFailedSize: string,
+    aiMessageTitle: string,
+    attachmentDropArea?: string,
+    attachmentInfo?: string,
+    attachmentInfoQrOnly?: string,
+    attachmentAlert?: string,
     referencedSource: string;
     originalSource: string;
-  }
-  
-  interface LocalizedStrings {
-    [locale: string]: Strings;
-  }
-  
-  const localizedStrings: LocalizedStrings = {
+}
+
+interface LocalizedStrings {
+    [locale: string]: Strings
+}
+
+const localizedStrings: LocalizedStrings = {
     'en-us': {
-      title: 'Chat',
-      send: 'Send',
-      unknownFile: "[File of type '%1']",
-      unknownCard: "[Unknown Card '%1']",
-      receiptVat: 'VAT',
-      receiptTax: 'Tax',
-      receiptTotal: 'Total',
-      messageRetry: 'retry',
-      messageFailed: "couldn't send",
-      messageSending: 'sending',
-      timeSent: ' at %1',
-      consolePlaceholder: 'Type your message...',
-      listeningIndicator: 'Listening...',
-      uploadFile: 'Upload file',
-      speak: 'Speak',
-      uploadFileFailedSize:
+        title: "Chat",
+        send: "Send",
+        unknownFile: "[File of type '%1']",
+        unknownCard: "[Unknown Card '%1']",
+        receiptVat: "VAT",
+        receiptTax: "Tax",
+        receiptTotal: "Total",
+        messageRetry: "retry",
+        messageFailed: "couldn't send",
+        messageSending: "sending",
+        timeSent: " at %1",
+        consolePlaceholder: "Type your message...",
+        listeningIndicator: "Listening...",
+        uploadFile: "Upload file",
+        speak: "Speak",
+        uploadFileFailedSize:
         'The file is too large to upload. The maximum allowed size is 4 MB. Please choose a smaller file.',
       aiMessageTitle: 'This response was generated with the help of artificial intelligence. The information may not always be accurate, up-to-date, or binding. Please verify important conclusions using reliable sources.',
+        attachmentDropArea: "Click to select file or drop it here",
+        attachmentInfo: "To upload from another device scan or click QR code",
+        attachmentInfoQrOnly: "To upload attachment, visit following address on it or scan QR code on other device:",
+        attachmentAlert: "Please visit following address on device you want to upload from:",
       referencedSource: 'Referenced source',
       originalSource: 'Original source',
     },
@@ -133,25 +141,29 @@ export interface Strings {
       originalSource: 'Originalquelle',
     },
     'pl-pl': {
-      title: 'Chat',
-      send: 'Wyślij',
-      unknownFile: "[Plik typu '%1']",
-      unknownCard: "[Nieznana karta '%1']",
-      receiptVat: 'VAT',
-      receiptTax: 'Podatek',
-      receiptTotal: 'Razem',
-      messageRetry: 'wyślij ponownie',
-      messageFailed: 'wysłanie nieudane',
-      messageSending: 'wysyłanie',
-      timeSent: ' o %1',
-      consolePlaceholder: 'Wpisz swoją wiadomość...',
-      listeningIndicator: 'Słuchanie...',
-      uploadFile: 'Wyślij plik',
-      speak: 'Mów',
-      uploadFileFailedSize: '',
-      aiMessageTitle: '',
-      referencedSource: 'Referenced source',
-      originalSource: 'Original source',
+        title: "Chat",
+        send: "Wyślij",
+        unknownFile: "[Plik typu '%1']",
+        unknownCard: "[Nieznana karta '%1']",
+        receiptVat: "VAT",
+        receiptTax: "Podatek",
+        receiptTotal: "Razem",
+        messageRetry: "wyślij ponownie",
+        messageFailed: "wysłanie nieudane",
+        messageSending: "wysyłanie",
+        timeSent: " o %1",
+        consolePlaceholder: "Wpisz swoją wiadomość...",
+        listeningIndicator: "Słuchanie...",
+        uploadFile: "Wyślij plik",
+        speak: "Mów",
+        uploadFileFailedSize: '',
+      aiMessageTitle: 'Ta odpowiedź została wygenerowana z pomocą sztucznej inteligencji. Informacje mogą nie zawsze być dokładne, aktualne lub wiążące. Prosimy o weryfikację ważnych wniosków na podstawie wiarygodnych źródeł.',
+        attachmentDropArea: "Przeciągnij plik tu lub kliknij w celu wczytania",
+        attachmentInfo: "W celu wczytania z innego urządzenia zeskanuj lub kliknij w ten kod QR",
+        attachmentInfoQrOnly: "W celu wczytania załącznika odwiedź następujący adres lub zeskanuj ten kod QR z innego urządzenia:",
+        attachmentAlert: "W celu wczytania załącznika odwiedź następujący adres lub zeskanuj ten kod QR z innego urządzenia:",
+        referencedSource: 'Wskazane źródło',
+        originalSource: 'Oryginalne źródło',
     },
     'ru-ru': {
       title: 'Чат',
@@ -389,23 +401,27 @@ export interface Strings {
       originalSource: '原始來源',
     },
     'cs-cz': {
-      title: 'Chat',
-      send: 'Odeslat',
-      unknownFile: "[Soubor typu '%1']",
-      unknownCard: "[Neznámá karta '%1']",
-      receiptVat: 'DPH',
-      receiptTax: 'Daň z prod.',
-      receiptTotal: 'Celkem',
-      messageRetry: 'opakovat',
-      messageFailed: 'nepodařilo se odeslat',
-      messageSending: 'Odesílání',
-      timeSent: ' v %1',
-      consolePlaceholder: 'Napište svou zprávu...',
-      listeningIndicator: 'Poslouchám...',
-      uploadFile: 'Nahrát soubor',
-      speak: 'Použít hlas',
-      uploadFileFailedSize: 'Soubor je pro nahrání příliš velký. Vyberte prosím menší soubor.',
+        title: "Chat",
+        send: "Odeslat",
+        unknownFile: "[Soubor typu '%1']",
+        unknownCard: "[Neznámá karta '%1']",
+        receiptVat: "DPH",
+        receiptTax: "Daň z prod.",
+        receiptTotal: "Celkem",
+        messageRetry: "opakovat",
+        messageFailed: "nepodařilo se odeslat",
+        messageSending: "Odesílání",
+        timeSent: " v %1",
+        consolePlaceholder: "Napište svou zprávu...",
+        listeningIndicator: "Poslouchám...",
+        uploadFile: "Nahrát soubor",
+        speak: "Použít hlas",
+        uploadFileFailedSize: 'Soubor je pro nahrání příliš velký. Vyberte prosím menší soubor.',
       aiMessageTitle: 'Tato odpověď byla vygenerována pomocí umělé inteligence. Informace nemusí být vždy přesné, aktuální nebo závazné. Důležité závěry si prosím ověřte z důvěryhodných zdrojů.',
+        attachmentDropArea: "Přetáhněte soubor sem nebo klikněte pro nahrání",
+        attachmentInfo: "Pro nahrání z jiného zařízení naskenujte nebo klikněte na tento QR kód",
+        attachmentInfoQrOnly: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:",
+        attachmentAlert: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:",
       referencedSource: 'Použitý zdroj',
       originalSource: 'Původní zdroj',
     },
