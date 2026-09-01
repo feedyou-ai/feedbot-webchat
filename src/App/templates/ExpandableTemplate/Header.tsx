@@ -1,5 +1,8 @@
 import * as React from 'react'
 import { AppProps } from '../../App'
+import { isRedesignTemplate } from '../../../utils/redesign'
+
+let isPersistentMenuDismissed = false
 
 export type Props = {
 	appProps: AppProps
@@ -7,45 +10,220 @@ export type Props = {
 	isCollapsed: boolean
 }
 
-export const Header: React.StatelessComponent<Props> = ({
-	appProps,
-	onClick,
-	isCollapsed,
-}) => {
-	const {
-		theme: { mainColor },
-		header: { extraHtml },
-	} = appProps
-	
-	const backgroundColor = mainColor || '#e51836'
-	const title = getTitle(appProps, isCollapsed)
-	
-	
-	return (
-		<div className="feedbot-header" onClick={onClick} style={{ backgroundColor }}>
-			<span className="feedbot-title">
-				 {title}
-			</span>
-			
-			{extraHtml && <span className="feedbot-extra-html" dangerouslySetInnerHTML={{ __html: extraHtml }}/>}
-			
-			<a
-				onClick={e => e.preventDefault()}
-				className="feedbot-minimize"
-				href="#"
-			>_</a>
-		</div>
-	)
+export class Header extends React.Component<Props> {
+	render() {
+		const {
+			appProps: {
+				theme: { mainColor },
+				header: { extraHtml }
+			},
+			isCollapsed,
+			onClick
+		} = this.props;
+
+		const template = (this.props.appProps.theme && this.props.appProps.theme.template) || {};
+		const title = getTitle(this.props.appProps, isCollapsed);
+		const dismissPersistentMenu = (menuItem: HTMLElement) => {
+			isPersistentMenuDismissed = true
+			const menu = getPersistentMenu(menuItem)
+			menu && menu.classList.add('dismissed')
+		}
+		const resetPersistentMenu = (toggle: HTMLElement) => {
+			isPersistentMenuDismissed = false
+			const menu = getPersistentMenu(toggle)
+			menu && menu.classList.remove('dismissed')
+		}
+
+		if (!isRedesignTemplate(template.type)) {
+			return (
+				<div className="feedbot-header" onClick={onClick} style={{ backgroundColor: mainColor || '#e51836' }}>
+					<span className="feedbot-title">
+						 {title}
+					</span>
+
+					{extraHtml && <span className="feedbot-extra-html" dangerouslySetInnerHTML={{ __html: extraHtml }}/>}
+
+					<a
+						onClick={e => e.preventDefault()}
+						className="feedbot-minimize"
+						href="#"
+					>_</a>
+				</div>
+			)
+		}
+
+		const avatar =
+			template.avatarUrl ||
+			"https://feedyou.blob.core.windows.net/webchat/chatbot-default-avatar-v2.svg";
+
+		const startOverIcon = (
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="17"
+				height="15"
+				viewBox="0 0 17 15"
+				fill="none"
+			>
+				<path
+					d="M4.429 1 1 4.429l3.429 3.428"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+				<path
+					d="M1 4.429h10.286a4.571 4.571 0 0 1 0 9.142H5.57"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				/>
+			</svg>
+		);
+
+		return (
+			<div className="feedbot-header" onClick={isCollapsed ? onClick : undefined}>
+				<div className="feedbot-header-name">
+					<div className="feedbot-avatar" style={{ backgroundImage: `url("${avatar}")` }}></div>
+					<div className="feedbot-name">
+						<span className="feedbot-title">{title}</span>
+						<span className="feedbot-supportive-title">{template.supportiveTitle}</span>
+					</div>
+				</div>
+
+				{extraHtml && (
+					<span className="feedbot-extra-html" dangerouslySetInnerHTML={{ __html: extraHtml }} />
+				)}
+
+				<div className="feedbot-header-actions">
+					{checkFeedbotTestMode() || (template.persistentMenu && template.persistentMenu.length > 0) ? (
+						<div className={`feedbot-persistent-menu${isPersistentMenuDismissed ? ' dismissed' : ''}`}>
+							<a
+								className="feedbot-persistent-menu-toggle"
+								tabIndex={0}
+								aria-label="Menu"
+								onMouseEnter={e => resetPersistentMenu(e.currentTarget)}
+								onFocus={e => resetPersistentMenu(e.currentTarget)}
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="3"
+									height="17"
+									viewBox="0 0 3 17"
+									fill="none"
+								>
+									<path
+										d="M3 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 7a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 7a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"
+										fill="currentColor"
+									/>
+								</svg>
+							</a>
+							<ul className="feedbot-persistent-menu-links">
+									{checkFeedbotTestMode() && (
+										<li className="feedbot-persistent-menu-debug">
+											<a href="#" onClick={e => {
+												e.preventDefault();
+												dismissPersistentMenu(e.currentTarget);
+												handleStartOver();
+											}}>
+												<span>Start over</span>
+												{startOverIcon}
+											</a>
+										</li>
+									)}
+
+									{(template.persistentMenu || []).map((menuItem, index) => (
+										<li key={index}>
+												<a href="#" onClick={e => {
+													e.preventDefault();
+													dismissPersistentMenu(e.currentTarget);
+													handleTriggerDialog(menuItem.dialog);
+												}}>{menuItem.title}</a>
+										</li>
+									))}
+							</ul>
+						</div>
+					) : null}
+					<a
+						onClick={e => {
+							e.preventDefault();
+							onClick();
+						}}
+						className="feedbot-minimize"
+						href="#"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="26"
+							height="26"
+							viewBox="0 0 26 26"
+							fill="none"
+						>
+								<path
+									fillRule="evenodd"
+									clipRule="evenodd"
+									d="M17.5303 8.46967C17.8232 8.76256 17.8232 9.23744 17.5303 9.53033L9.53033 17.5303C9.23744 17.8232 8.76256 17.8232 8.46967 17.5303C8.17678 17.2374 8.17678 16.7626 8.46967 16.4697L16.4697 8.46967C16.7626 8.17678 17.2374 8.17678 17.5303 8.46967Z"
+									fill="currentColor"
+								/>
+								<path
+									fillRule="evenodd"
+									clipRule="evenodd"
+									d="M8.46967 8.46967C8.76256 8.17678 9.23744 8.17678 9.53033 8.46967L17.5303 16.4697C17.8232 16.7626 17.8232 17.2374 17.5303 17.5303C17.2374 17.8232 16.7626 17.8232 16.4697 17.5303L8.46967 9.53033C8.17678 9.23744 8.17678 8.76256 8.46967 8.46967Z"
+									fill="currentColor"
+								/>
+								<path
+									fillRule="evenodd"
+									clipRule="evenodd"
+									d="M13 1.75C6.7868 1.75 1.75 6.7868 1.75 13C1.75 19.2132 6.7868 24.25 13 24.25C19.2132 24.25 24.25 19.2132 24.25 13C24.25 6.7868 19.2132 1.75 13 1.75ZM0.25 13C0.25 5.95837 5.95837 0.25 13 0.25C20.0416 0.25 25.75 5.95837 25.75 13C25.75 20.0416 20.0416 25.75 13 25.75C5.95837 25.75 0.25 20.0416 0.25 13Z"
+									fill="currentColor"
+								/>
+						</svg>
+					</a>
+				</div>
+			</div>
+		);
+	}
 }
 
 const getTitle = (props: AppProps, isCollapsed: boolean) => {
 	const { text, textWhenCollapsed } = props.header
-	
+
 	const titleWhenExpanded = text || 'Chatbot'
 	const titleWhenCollapsed = textWhenCollapsed || titleWhenExpanded
 	const titleToShow = isCollapsed ? titleWhenCollapsed : titleWhenExpanded
-	
+
 	return titleToShow
+};
+
+const getPersistentMenu = (element: HTMLElement): HTMLElement | null => {
+	let current: HTMLElement | null = element
+	while (current && !current.classList.contains('feedbot-persistent-menu')) {
+		current = current.parentElement
+	}
+	return current
 }
+
+/**
+ * Triggers a specified dialog for the persistent menu item from Channel settings
+ * @param dialogId Dialog ID to be triggered on persistent menu item click
+ */
+const handleTriggerDialog = (dialogId: string) => {
+	window.dispatchEvent(new CustomEvent('feedbot:trigger-dialog', { detail: dialogId }));
+};
+
+/**
+ * Restart conversation via custom event
+ */
+const handleStartOver = () => {
+	window.dispatchEvent(new CustomEvent('feedbot:start-over'));
+};
+
+/**
+ * Check URL if test mode is being used (#feedbot-test-mode)
+ * @returns Boolean
+ */
+const checkFeedbotTestMode = (): boolean => {
+	return window.location.hash === '#feedbot-test-mode';
+};
 
 export type HeaderProps = Props

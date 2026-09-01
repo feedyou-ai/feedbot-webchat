@@ -5,6 +5,7 @@ import * as konsole from '../Konsole'
 import { getFeedyouParam, setFeedyouParam } from '../FeedyouParams'
 import { getStyleForTheme, Theme } from '../themes'
 import { generateUserId } from '../utils/generateUserId'
+import { enableRedesign, isRedesignTemplate } from '../utils/redesign'
 
 const Swal = require('sweetalert2')
 
@@ -94,6 +95,12 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         if (!getFeedyouParam("openUrlTarget")) {
           setFeedyouParam("openUrlTarget", "same-domain")
         }
+      }
+
+      // FBOT-3192 temporary fix for Safari 26 on Mac, where websocket is not connected properly
+      const isSafariOnMac = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && /Macintosh/.test(navigator.userAgent);
+      if (isSafariOnMac) {
+        directLine.webSocket = false 
       }
 
       props.botConnection = new DirectLine({
@@ -220,10 +227,19 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     : false;
   props.resize = props.hasOwnProperty("resize") ? props.resize : "detect";
   props.locale = props.hasOwnProperty("locale") ? props.locale : "cs-cz";
+  setFeedyouParam("locale", props.locale)
   
+  // FEEDYOU webchat redesign - opt-in via template type, loads its own stylesheet
+  const redesign = isRedesignTemplate(
+    props.theme && props.theme.template && props.theme.template.type
+  );
+  if (redesign) {
+    await enableRedesign();
+  }
+
   // FEEDYOU configurable theming
   if (props.theme || !container) {
-    const theme = { mainColor: "#D83838", ...props.theme };
+    const theme = { mainColor: redesign ? "#0063f8" : "#D83838", ...props.theme };
     props.theme && (props.theme.enableScreenshotUpload = !!props.enableScreenshotUpload)
     const themeStyle = document.createElement("style");
     themeStyle.type = "text/css";

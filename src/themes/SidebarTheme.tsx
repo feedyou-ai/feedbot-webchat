@@ -3,7 +3,7 @@ import { Theme } from './index'
 
 function getSidebarBackgroundColor(theme: Theme) {
 	return '#e1e1e1'
-	
+  
 	// TODO make background tint configurable in theme
 	/*const color = theme.mainColor
 	if(color.startsWith("rgb")){

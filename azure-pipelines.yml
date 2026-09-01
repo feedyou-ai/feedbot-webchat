@@ -24,8 +24,8 @@ steps:
 #     echo '//registry.npmjs.org/:_authToken=$(NPMTOKEN)' > .npmrc
 
   - script: |
-      npm install
-    displayName: 'NPM install'
+      npm ci
+    displayName: 'NPM clean install'
 
   - script: |
       cd packages/server
@@ -41,6 +41,7 @@ steps:
         botchat-es5.js
         botchat-es5.js.map
         botchat-fullwindow.css
+        botchat-redesign.css
         botchat.css
         botchat.js
         botchat.js.map

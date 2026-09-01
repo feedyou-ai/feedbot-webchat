@@ -102,6 +102,35 @@ export const AssistantTheme = (theme: Theme) => {
     opacity: 0.75;
   }
 
+  .feedbot-wrapper .wc-message-content {
+    border-radius: 16px !important;
+    padding: 10px 15px !important;
+  }
+
+  .feedbot-wrapper .wc-message-content p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+  }
+
+  .feedbot-wrapper .wc-message-from-bot .wc-message-content {
+    background-color: #eee !important;
+  }
+
+  .feedbot-wrapper.dark-mode .wc-message-from-bot .wc-message-content {
+    background-color: #333 !important;
+    color: white !important;
+  }
+
+  .feedbot-wrapper .wc-message-from-me .wc-message-content {
+    background-color: ${theme.mainColor};
+    color: white;
+  }
+
+  svg.wc-message-callout {
+    display: none !important;
+  }
+
   .example-query:hover {
     opacity: 1;
   }
@@ -113,6 +142,7 @@ export const AssistantTheme = (theme: Theme) => {
     border-radius: 32px;
     width: 100%;
     height: 100%;
+    max-height: 130px;
     font-size: 16px;
     outline: none;
     resize: none;
@@ -125,10 +155,11 @@ export const AssistantTheme = (theme: Theme) => {
     border-color: ${secondaryColor};
   }
 
-  .card {
+  .card{
     width: 100%;
     max-width: 600px;
-    height: 60px;
+    height: 58px;
+    max-height: 130px;
     margin: 50px auto 65px auto;
     border-radius: 15px;
     position: relative;
@@ -140,7 +171,7 @@ export const AssistantTheme = (theme: Theme) => {
   inherits: false;
 }
 
-.card::after, .card::before {
+.card::after, .card::before{
   content: '';
   position: absolute;
   height: 100%;
@@ -203,6 +234,10 @@ export const AssistantTheme = (theme: Theme) => {
     color: white;
   }
 
+  .send-button svg {
+    margin-top: 2px;
+  }
+
   .send-button.active svg {
     fill: white;
     transition: fill 0.3s ease;
@@ -231,7 +266,7 @@ export const AssistantTheme = (theme: Theme) => {
     height: 40px;
     cursor: pointer;
     z-index: 1000;
-
+    position: fixed;
     background-color: transparent;
     text-align: left;
     padding-top: 0px;
@@ -287,7 +322,7 @@ export const AssistantTheme = (theme: Theme) => {
 
   .feedbot-wrapper .feedbot {
     position: relative;
-    height: 95%;
+    height: 100%;
   }
 
   .feedbot-wrapper.dark-mode {
@@ -378,6 +413,7 @@ export const AssistantTheme = (theme: Theme) => {
 
   .feedbot-wrapper .wc-console {
     border-width: 0px;
+    display: block;
     height: 70px;
   }
 
@@ -400,18 +436,11 @@ export const AssistantTheme = (theme: Theme) => {
 
   .wc-console .wc-mic, .wc-console .wc-send {
     top: 10px !important;
+    right: 25px;
   }
 
   .wc-console input[type=text], .wc-console textarea {
     margin: 0px 15px;
-  }
-
-  .wc-textbox {
-    border-radius: 13px;
-    background-color: #eceff1;
-    height: 70%;
-    margin-bottom: 0px;
-    top: 6px !important;
   }
 
   .wc-suggested-actions .wc-hscroll > ul {
@@ -439,8 +468,30 @@ export const AssistantTheme = (theme: Theme) => {
     text-align: center;
   }
 
+  .wc-app ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .wc-app ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
   .wc-app ::-webkit-scrollbar-thumb {
-    background-color: #ececec;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+
+  .wc-app ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+  }
+
+  .wc-message-groups {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(123, 123, 123, 0.35) transparent;
+  }
+    
+  .feedbot-wrapper.dark-mode .wc-message-groups {
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   }
 
   .wc-app h1, .wc-app h2, .wc-app h3, .wc-app h4, .wc-app p, .wc-app ul, .wc-app ol {
@@ -502,4 +553,112 @@ export const AssistantTheme = (theme: Theme) => {
     margin: 15px auto;
   }
 }
+
+.wc-message-groups {
+  bottom: 60px;
+}
+
+.feedbot-wrapper .wc-console {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  height: 75px;
+  background-color: transparent !important;
+}
+
+
+
+.wc-console .wc-textbox {
+  padding: 0 18px;
+    height: 100%;
+    border-radius: 28px;
+    position: static;
+    width: 100%;
+    display: block;
+}
+
+.wc-console .wc-textbox textarea {
+  padding: 15px;
+  padding-top: 20px;
+  border-radius: 12px;
+  margin: 0px;
+  border: 1px solid #ccc;
+  background: white;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.feedbot-wrapper.dark-mode .wc-console .wc-textbox textarea {
+  border : 1px solid #555;
+  background: #232323;
+  color: white;
+}
+@media (min-width: 1200px) {
+  .feedbot-wrapper .wc-console {
+    width: 1000px;
+    left: calc(50% - 500px);
+  }
+}
+
+.feedbot-wrapper.dark-mode a {
+  color: #67b0ffff !important;
+}
+
+.swal2-title {
+  text-align: left;
+  padding: 16px 32px;
+  font-size: 25px;
+}
+
+.swal2-html-container {
+  padding: 0px 12px;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-popup {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-title {
+  color: #e0e0e0;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-html-container {
+  color: #c0c0c0;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-html-container textarea,
+body:has(.feedbot-wrapper.dark-mode) .swal2-html-container input {
+  background: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-html-container iframe {
+  border: 1px solid #333;
+  width: calc(100% - 2px);
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-validation-message {
+  background: #2a2a2a;
+  color: #ff6b6b;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-close {
+  color: #aaa;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-close:hover {
+  color: #fff;
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: rgba(100, 200, 100, 0.3);
+}
+
+body:has(.feedbot-wrapper.dark-mode) .swal2-icon.swal2-error {
+  border-color: rgba(255, 100, 100, 0.4);
+}
 `}
+  
