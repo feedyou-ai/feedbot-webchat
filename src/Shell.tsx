@@ -283,7 +283,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
             </div>
         ]
 
-          const qrOnlyAttachment = [
+        const qrOnlyAttachment = [
             <div key="b" className="attachment-wrapper qr-only">
                 <span className="attachment-url">{this.props.strings.attachmentInfoQrOnly}<br /><span>{this.props.attachmentUrl}</span></span>
                 <a href="#" onClick={() => alert(this.props.strings.attachmentAlert + '\n\n' + this.props.attachmentUrl)}><img src={this.state && this.state.attachmentQrCode} /></a>

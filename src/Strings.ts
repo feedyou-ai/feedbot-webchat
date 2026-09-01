@@ -51,7 +51,7 @@ const localizedStrings: LocalizedStrings = {
         attachmentDropArea: "Click to select file or drop it here",
         attachmentInfo: "To upload from another device scan or click QR code",
         attachmentInfoQrOnly: "To upload attachment, visit following address on it or scan QR code on other device:",
-        attachmentAlert: "Please visit following address on device you want to upload from:"
+        attachmentAlert: "Please visit following address on device you want to upload from:",
       referencedSource: 'Referenced source',
       originalSource: 'Original source',
     },
@@ -161,7 +161,9 @@ const localizedStrings: LocalizedStrings = {
         attachmentDropArea: "Przeciągnij plik tu lub kliknij w celu wczytania",
         attachmentInfo: "W celu wczytania z innego urządzenia zeskanuj lub kliknij w ten kod QR",
         attachmentInfoQrOnly: "W celu wczytania załącznika odwiedź następujący adres lub zeskanuj ten kod QR z innego urządzenia:",
-        attachmentAlert: "W celu wczytania załącznika odwiedź następujący adres lub zeskanuj ten kod QR z innego urządzenia:"
+        attachmentAlert: "W celu wczytania załącznika odwiedź następujący adres lub zeskanuj ten kod QR z innego urządzenia:",
+        referencedSource: 'Wskazane źródło',
+        originalSource: 'Oryginalne źródło',
     },
     'ru-ru': {
       title: 'Чат',
@@ -419,7 +421,7 @@ const localizedStrings: LocalizedStrings = {
         attachmentDropArea: "Přetáhněte soubor sem nebo klikněte pro nahrání",
         attachmentInfo: "Pro nahrání z jiného zařízení naskenujte nebo klikněte na tento QR kód",
         attachmentInfoQrOnly: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:",
-        attachmentAlert: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:"
+        attachmentAlert: "Pro nahrání přílohy navštivte následující adresu nebo naskenujte QR kód z jiného zařízení:",
       referencedSource: 'Použitý zdroj',
       originalSource: 'Původní zdroj',
     },
