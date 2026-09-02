@@ -21,6 +21,7 @@ import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
 import { getFeedyouParam } from './FeedyouParams';
 import { CustomExplanation, Role, Theme } from './themes';
+import { sanitizeHtml, sanitizeUrl, escapeAttr } from './utils/sanitize';
 
 const Swal = require('sweetalert2')
 
@@ -54,7 +55,7 @@ export interface ChatProps {
     chatTitle?: boolean | string,
     consolePlaceholder?: string
     user: User,
-    bot: User,
+    bot: User & { endpoint?: string },
     botConnection?: IBotConnection,
     directLine?: DirectLineOptions,
     speechOptions?: SpeechOptions,
@@ -75,6 +76,8 @@ export interface ChatProps {
     typingDelay?: number
     theme?: Theme
     initialMessage?: string
+    forbidReferrerQuery?: boolean
+    forbidDataLayer?: boolean
 }
 
 
@@ -246,7 +249,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         Swal.fire({
             width: 1000,
             title: "Query details",
-            html: activity.channelData.info
+            html: sanitizeHtml(activity.channelData.info)
         });
     }
 
@@ -341,7 +344,7 @@ export class Chat extends React.Component<ChatProps, {}> {
             ...(this.props.userData || {}),
             ...(window.location.hash === '#feedbot-test-mode' ? { testMode: true } : {}),
             ...getLocaleUserData(this.props.locale),
-            ...getReferrerUserData(), 
+            ...getReferrerUserData(this.props.forbidReferrerQuery), 
               "user-agent":  navigator.userAgent
         }
 
@@ -422,7 +425,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         this.gtmEventsSubscription = botConnection.activity$
             .filter((activity: any) => activity.type === "event" && activity.name === "google-tag-manager-track-event")
-            .subscribe((activity: any) => trackGoogleTagManagerEvent(JSON.parse(activity.value)))
+            .subscribe((activity: any) => trackGoogleTagManagerEvent(JSON.parse(activity.value), this.props.forbidDataLayer))
 
         /*this.handoffSubscription = botConnection.activity$
             .filter((activity: any) => activity.type === "event" && activity.name === "handoff")
@@ -439,7 +442,8 @@ export class Chat extends React.Component<ChatProps, {}> {
             .filter((activity: any) => activity.type === "event" && activity.name === "redirect")
             .subscribe((activity: any) => {
                 // ignore redirect inside of Designer's Try panel
-                activity.value && !window.hasOwnProperty('API_URL') && (location.href = activity.value)
+                const safeRedirectUrl = activity.value && sanitizeUrl(activity.value)
+                safeRedirectUrl && !window.hasOwnProperty('API_URL') && (location.href = safeRedirectUrl)
             })
 
         this.logSubscribtion = botConnection.activity$
@@ -714,17 +718,23 @@ export const doCardAction = (
             window.open(text);
             break;
         case "signin":
+            const safeSigninUrl = sanitizeUrl(text);
+
+            if (!safeSigninUrl) {
+                break;
+            }
+
             let loginWindow =  window.open();
             if (botConnection.getSessionId)  {
                 botConnection.getSessionId().subscribe(sessionId => {
                     konsole.log("received sessionId: " + sessionId);
-                    loginWindow.location.href = text + encodeURIComponent('&code_challenge=' + sessionId);
+                    loginWindow.location.href = safeSigninUrl + encodeURIComponent('&code_challenge=' + sessionId);
                 }, error => {
                     konsole.log("failed to get sessionId", error);
                 });
             }
             else {
-                loginWindow.location.href = text;
+                loginWindow.location.href = safeSigninUrl;
             }
             break;
 
@@ -817,7 +827,10 @@ function getGoogleAnalyticsUserData() {
     return {}
 }
 
-function getReferrerUserData() {
+function getReferrerUserData(forbidReferrerQuery?: boolean) {
+    if (forbidReferrerQuery) {
+        return {referrerUrl: window.location.origin + window.location.pathname}
+    }
     return {referrerUrl: window.location.href}
 }
 
@@ -845,10 +858,14 @@ function trackGoogleAnalyticsEvent(event: GaEvent) {
     }
 }
 
-function trackGoogleTagManagerEvent({event, variables, dataLayerName}: GtmEvent) {
+function trackGoogleTagManagerEvent({event, variables, dataLayerName}: GtmEvent, forbidDataLayer?: boolean) {
     const data = (variables || []).reduce((data, variable) => ({...data, [variable.name]: variable.value}), {event})
     const dataLayer = dataLayerName || "dataLayer"
     
+    if (forbidDataLayer) {
+        console.warn('dataLayer tracking is disabled (forbidDataLayer=true) - skipping GTM custom event dataLayer.push(...)', data)
+        return
+    }
     if (typeof (window as any)[dataLayer] === 'object') {
         console.log('Tracking GTM custom event dataLayer.push(...)', data)
         ;(window as any)[dataLayer].push(data)
@@ -891,16 +908,16 @@ function getExplanation(callback: (explanation: string) => void, customExplanati
 
     const fieldsHtml = explanationFields.map((field) => {
         return `
-        <label for="${field.name}">${field.label}</label>
-        <textarea class="form-control" id="${field.name}" rows="3"></textarea>
+        <label for="${escapeAttr(field.name)}">${sanitizeHtml(field.label)}</label>
+        <textarea class="form-control" id="${escapeAttr(field.name)}" rows="3"></textarea>
         `})
 
     Swal.fire({
-        title,
+        title: sanitizeHtml(title),
         showCancelButton: true,
         cancelButtonText: 'Zrušit',
         html: `
-          <p style="margin-top:32px;text-align:left;">${intro}</p>
+          <p style="margin-top:32px;text-align:left;">${sanitizeHtml(intro)}</p>
           <form style="text-align:left;">
             <div class="form-group">
                 ${fieldsHtml}

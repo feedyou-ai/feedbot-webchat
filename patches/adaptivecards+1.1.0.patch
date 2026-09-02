@@ -1,29 +1,40 @@
 patch-package
 --- a/node_modules/adaptivecards/lib/card-elements.js
 +++ b/node_modules/adaptivecards/lib/card-elements.js
-@@ -1,4 +1,7 @@
+@@ -1,4 +1,9 @@
  "use strict";
 +
 +var twemoji = require('../../../built/lib').twemoji
++var sanitizeHtml = require('../../../built/lib').sanitizeHtml
++var escapeHtml = require('../../../built/lib').escapeHtml
 +
  var __extends = (this && this.__extends) || (function () {
      var extendStatics = Object.setPrototypeOf ||
          ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-@@ -664,7 +667,7 @@ var TextBlock = /** @class */ (function (_super) {
+@@ -664,7 +669,7 @@ var TextBlock = /** @class */ (function (_super) {
                  var formattedText = TextFormatters.formatText(this.lang, this.text);
                  this._processedText = this.useMarkdown ? AdaptiveCard.processMarkdown(formattedText) : formattedText;
              }
 -            element.innerHTML = this._processedText;
-+            element.innerHTML = twemoji.parse(this._processedText);
++            element.innerHTML = sanitizeHtml(twemoji.parse(this._processedText));
              if (element.firstElementChild instanceof HTMLElement) {
                  var firstElementChild = element.firstElementChild;
                  firstElementChild.style.marginTop = "0px";
-@@ -2291,7 +2294,7 @@ var Action = /** @class */ (function () {
+@@ -2291,7 +2296,7 @@ var Action = /** @class */ (function () {
              titleElement.style.whiteSpace = "nowrap";
          }
          if (hasTitle) {
 -            titleElement.innerText = this.title;
-+            titleElement.innerHTML = twemoji.parse(this.title);
++            titleElement.innerHTML = sanitizeHtml(twemoji.parse(escapeHtml(this.title)));
          }
          if (Utils.isNullOrEmpty(this.iconUrl)) {
              buttonElement.classList.add("noIcon");
+@@ -4592,7 +4597,7 @@ var AdaptiveCard = /** @class */ (function (_super) {
+         var renderedCard;
+         if (!this.isVersionSupported()) {
+             renderedCard = document.createElement("div");
+-            renderedCard.innerHTML = this.fallbackText ? this.fallbackText : "The specified card version is not supported.";
++            renderedCard.textContent = this.fallbackText ? this.fallbackText : "The specified card version is not supported.";
+         }
+         else {
+             renderedCard = _super.prototype.render.call(this);

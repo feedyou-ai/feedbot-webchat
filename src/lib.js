@@ -1,4 +1,6 @@
-var twemojiApi = require('twemoji');
+var twemojiModule = require('twemoji');
+var twemojiApi = twemojiModule.default || twemojiModule;
+var sanitize = require('./utils/sanitize');
 
 var BOTCHAT_SCRIPT_PATTERN = /(?:^|\/)botchat(?:-es5)?\.js(?:[?#].*)?$/i;
 
@@ -46,6 +48,8 @@ function getTwemojiOptions() {
 }
 
 module.exports = {
+  sanitizeHtml: sanitize.sanitizeHtml,
+  escapeHtml: sanitize.escapeHtml,
   twemoji: {
     parse: function(text) {
       return twemojiApi.parse(text, getTwemojiOptions());

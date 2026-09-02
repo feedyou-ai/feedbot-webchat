@@ -429,6 +429,10 @@ export const BaseTheme = (theme: Theme) => {
       fill: ${theme.mainColor};
     }
 
+    .wc-message-buttons * {
+      box-sizing: initial !important;
+    }
+
     .wc-message-wrapper:hover .wc-message-buttons>div {
       display: block;
     }

@@ -4,6 +4,7 @@ import { DirectLine } from 'botframework-directlinejs'
 import * as konsole from '../Konsole'
 import { getFeedyouParam, setFeedyouParam } from '../FeedyouParams'
 import { getStyleForTheme, Theme } from '../themes'
+import { sanitizeCssColor } from '../utils/sanitize'
 import { generateUserId } from '../utils/generateUserId'
 
 const Swal = require('sweetalert2')
@@ -18,6 +19,8 @@ export type AppProps = ChatProps & {
   openUrlTarget: "new" | "same" | "same-domain";
   persist?: "user" | "conversation" | "none";
   manualCloseExpireInMinutes?: number
+  forbidScriptInjection?: boolean;
+  forbidStyleInjection?: boolean;
 };
 
 export const App = async (props: AppProps, container?: HTMLElement) => {
@@ -40,11 +43,15 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     // TODO test IE11 https://github.com/matthew-andrews/isomorphic-fetch
     try {
       let response: Response
-      try {
-        response = await fetchConfig(props.bot.id, props)
-      } catch (err) {
-        // try to fetch from webapp as fallback
-        response = await fetchConfig(props.bot.id+'-app', props)
+      if (props.bot.endpoint) {
+        response = await fetchConfig(props.bot.endpoint, props)
+      } else {
+        try {
+          response = await fetchConfig(`${props.bot.id}.azurewebsites.net`, props)
+        } catch (err) {
+          // try to fetch from webapp as fallback
+          response = await fetchConfig(`${props.bot.id}-app.azurewebsites.net`, props)
+        }
       }
 
       if (!response || !response.ok) {
@@ -129,7 +136,10 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
         };
 
         if (config.mainColor) {
-          props.theme.mainColor = config.mainColor;
+          const safeMainColor = sanitizeCssColor(config.mainColor)
+          if (safeMainColor) {
+            props.theme.mainColor = safeMainColor
+          }
         }
 
         props.theme.showSignature = !config.hideSignature
@@ -163,11 +173,11 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
             }, props.userData || {})
         }
 
-        if (config.customCss) {
+        if (config.customCss && !props.forbidStyleInjection) {
           props.theme.customCss = config.customCss;
         }
 
-        if(config.customScript && !props.hasOwnProperty("customScript")) {
+        if(config.customScript && !props.forbidScriptInjection && !props.hasOwnProperty("customScript")) {
           const customScriptTag = document.createElement("script");
           customScriptTag.appendChild(document.createTextNode(config.customScript))
           document.body.appendChild(customScriptTag);
@@ -219,7 +229,11 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
   
   // FEEDYOU configurable theming
   if (props.theme || !container) {
-    const theme = { mainColor: "#D83838", ...props.theme };
+    const theme = {
+      mainColor: "#D83838",
+      ...props.theme,
+      ...(props.forbidStyleInjection ? { customCss: undefined } : {}),
+    };
     props.theme && (props.theme.enableScreenshotUpload = !!props.enableScreenshotUpload)
     const themeStyle = document.createElement("style");
     themeStyle.type = "text/css";
@@ -232,10 +246,10 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 	renderWebchatApp(props, container)
 };
 
-async function fetchConfig(host: string, props: AppProps): Promise<Response>{
+async function fetchConfig(endpoint: string, props: AppProps): Promise<Response>{
   const template = props.theme && props.theme.template && props.theme.template.type ? {type: props.theme.template.type} : null
   return fetch(
-    `https://${host}.azurewebsites.net/webchat/config`,
+    `https://${endpoint}/webchat/config`,
     {
       method: "POST",
       headers: {
@@ -245,7 +259,9 @@ async function fetchConfig(host: string, props: AppProps): Promise<Response>{
       body: JSON.stringify({
         user: props.user,
         channel: props.channel,
-        referrer: window.location.href,
+        referrer: props.forbidReferrerQuery
+          ? (window.location.origin + window.location.pathname)
+          : window.location.href,
         template
       }),
     }

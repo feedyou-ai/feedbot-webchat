@@ -10,6 +10,7 @@ import * as adaptivecardsHostConfig from '../adaptivecards-hostconfig.json';
 import * as konsole from './Konsole';
 import { ChatState, AdaptiveCardsState } from './Store';
 import { getFeedyouParam } from "./FeedyouParams"
+import { sanitizeUrl } from './utils/sanitize'
 
 export interface Props {
     className?: string,
@@ -102,22 +103,27 @@ class AdaptiveCardContainer extends React.Component<Props, State> {
     private onExecuteAction(action: Action) {
         if (action instanceof OpenUrlAction) {
             const openUrlTarget = getFeedyouParam("openUrlTarget")
+            const actionUrl = decodeActionUrl(action.url)
+            const safeActionUrl = sanitizeUrl(actionUrl)
+
+            if (!safeActionUrl) {
+                return;
+            }
             
             if(openUrlTarget === "same-domain"){
-                const actionUrl = decodeActionUrl(action.url)    
-                const url = new URL(actionUrl)
-                console.log('openUrl same-domain', actionUrl, window.location.hostname, url.hostname)
+                const url = new URL(safeActionUrl)
+                console.log('openUrl same-domain', safeActionUrl, window.location.hostname, url.hostname)
 
                 if(window.location.hostname === url.hostname || url.hostname.endsWith(`.${window.location.hostname}`)){
-                    window.location.href = action.url;
+                    window.location.href = safeActionUrl;
                 }else{
-                    window.open(action.url);
+                    window.open(safeActionUrl);
                 }
             }
             else if(openUrlTarget === "same"){
-                window.location.href = action.url
+                window.location.href = safeActionUrl
             } else {
-                window.open(action.url);
+                window.open(safeActionUrl);
             }
         } else if (action instanceof SubmitAction) {
             if (action.data !== undefined) {

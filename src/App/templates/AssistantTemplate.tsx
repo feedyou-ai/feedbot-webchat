@@ -29,7 +29,7 @@ export class AssistantTemplate extends React.Component<
         const { theme } = this.props
         const customScript = theme && theme.template && theme.template.customScript
 
-        if (customScript) {
+        if (customScript && !this.props.forbidScriptInjection) {
             appendScriptToBody(customScript)
         }
     }

@@ -1,5 +1,6 @@
 import { ExpandableBarTheme } from './ExpandableBarTheme'
 import { Theme } from './index'
+import { sanitizeCssUrl } from '../utils/sanitize'
 
 export const ExpandableKnobTheme = (theme: Theme) => `
   .feedbot-reset {
@@ -56,10 +57,9 @@ export const ExpandableKnobTheme = (theme: Theme) => `
     height: 100%;
     padding: 0px;
 
-    background-image: url(${(theme.template && theme.template.iconUrl)
-	? theme.template.iconUrl
-	: 'https://cdn.feedyou.ai/webchat/message-icon.png'
-});
+    background-image: url(${sanitizeCssUrl((theme.template && theme.template.iconUrl)
+  ? theme.template.iconUrl
+  : 'https://cdn.feedyou.ai/webchat/message-icon.png')});
     background-size: 50px 50px;
     background-position: 12px 12px;
     background-repeat: no-repeat;

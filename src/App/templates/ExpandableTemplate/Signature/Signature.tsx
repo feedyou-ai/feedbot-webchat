@@ -2,6 +2,7 @@ import * as React from 'react'
 import { SignatureLink } from './SignatureLink'
 import { Theme } from '../../../../themes'
 import { SignatureTemplate } from './SignatureTemplate'
+import { sanitizeUrl } from '../../../../utils/sanitize'
 
 type SignatureSchema = Theme['signature']
 const FEEDYOU_LOGO_IMG_SRC = 'https://cdn.feedyou.ai/webchat/feedyou_logo_red.png'
@@ -9,16 +10,18 @@ const FEEDYOU_LOGO_IMG_SRC = 'https://cdn.feedyou.ai/webchat/feedyou_logo_red.pn
 export type Props = {
 	signature: SignatureSchema
 	botId: string
+	forbidStyleInjection?: boolean
 }
 
 const getLinkQueryString = (botId: string) => `?utm_source=webchat&utm_medium=chatbot&utm_campaign=${botId}`
 
-export const Signature: React.StatelessComponent<Props> = ({ signature, botId }) => {
+export const Signature: React.StatelessComponent<Props> = ({ signature, botId, forbidStyleInjection }) => {
 	const { partnerLogoUrl, partnerLinkUrl, partnerLogoStyle,  mode } = signature
 	const attachQueryStringToUrl = (url: string) => `${url}${getLinkQueryString(botId)}`
 	
 	const enhancedFeedyouUrl = attachQueryStringToUrl('https://feedyou.ai')
-	const enhancedPartnerUrl = partnerLinkUrl ? attachQueryStringToUrl(partnerLinkUrl) : enhancedFeedyouUrl
+	const safePartnerLinkUrl = partnerLinkUrl ? sanitizeUrl(partnerLinkUrl) : ''
+	const enhancedPartnerUrl = safePartnerLinkUrl ? attachQueryStringToUrl(safePartnerLinkUrl) : enhancedFeedyouUrl
 	
 	const feedyouLink = <SignatureLink
 		href={enhancedFeedyouUrl}
@@ -28,8 +31,8 @@ export const Signature: React.StatelessComponent<Props> = ({ signature, botId })
 	const partnerLink = <SignatureLink
 		href={enhancedPartnerUrl}
 		imgSrc={partnerLogoUrl}
-		className="partner-logo"
-		customStyles={partnerLogoStyle}
+		className={forbidStyleInjection ? undefined : "partner-logo"}
+		customStyles={forbidStyleInjection ? undefined : partnerLogoStyle}
 	/>
 	
 	if(mode === 'none') {
