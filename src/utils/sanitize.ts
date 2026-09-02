@@ -1,5 +1,11 @@
 const DOMPurify = require('dompurify')
 
+DOMPurify.addHook('afterSanitizeAttributes', (node: Element) => {
+    if (node.tagName === 'A' && node.getAttribute('target') === '_blank') {
+        node.setAttribute('rel', 'noopener noreferrer')
+    }
+})
+
 /**
  * Sanitize an HTML string produced by markdown-it / twemoji so it is safe
  * for dangerouslySetInnerHTML.  Allows the standard inline/block markup that
@@ -10,9 +16,10 @@ export function sanitizeHtml(dirty: string): string {
     // Use DOMPurify defaults which already strip <script>, all on* event
     // handlers, and dangerous URI schemes (javascript:, data:, etc.) while
     // preserving the full set of attributes that markdown-it and twemoji emit.
-    // Only add our custom data-preview-url attribute on top of defaults.
+    // Allow Markdown links to open in a new tab. The hook above prevents the
+    // new page from gaining access to window.opener.
     return DOMPurify.sanitize(dirty, {
-        ADD_ATTR: ['data-preview-url'],
+        ADD_ATTR: ['data-preview-url', 'target'],
     })
 }
 

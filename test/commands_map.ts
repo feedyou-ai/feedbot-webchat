@@ -432,7 +432,10 @@ var commands_map: CommandValuesMap = {
                 .wait(4000)
         },
         client: function () {
-            return window.location.href.indexOf("localhost") !== -1;
+            var link = document.querySelector('.wc-message-wrapper:last-child .wc-message.wc-message-from-bot a') as HTMLAnchorElement;
+            return window.location.href.indexOf("localhost") !== -1 &&
+                link.target === '_blank' &&
+                link.rel === 'noopener noreferrer';
         },
         server: function (conversationId, sendActivity) {
             sendActivity(conversationId, server_content.mar_card);
