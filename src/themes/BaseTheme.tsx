@@ -365,7 +365,7 @@ export const BaseTheme = (theme: Theme) => {
       width: 100%;
     }
     
-    .wc-message-buttons>.wc-message-button-ai {
+    .wc-app .wc-message-buttons>.wc-message-button-ai {
       padding-top: 11px;
       display: block;
       fill: ${theme.mainColor};
@@ -374,7 +374,7 @@ export const BaseTheme = (theme: Theme) => {
       ${!disclaimerEnabled ? `display: none;` : ''}
     }
 
-    .wc-message-buttons>.wc-message-button-ai:hover {
+    .wc-app .wc-message-buttons>.wc-message-button-ai:hover {
       fill: ${theme.mainColor};
     }
 
