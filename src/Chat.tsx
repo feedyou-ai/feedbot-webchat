@@ -75,6 +75,7 @@ export interface ChatProps {
     typingDelay?: number
     theme?: Theme
     initialMessage?: string
+    role?: Role
 }
 
 
@@ -204,8 +205,8 @@ export class Chat extends React.Component<ChatProps, {}> {
     }
 
     private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
-        if (rating === -1 && isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : [])) {
-            const customExplanationForCurrentRole = (this.props.theme.genAi ? this.props.theme.genAi : ({customExplanations: []} as any)).customExplanations.find((customExplanation: any) => customExplanation.roles.includes(getRole()))
+        if (rating === -1 && isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : [], this.props.role)) {
+            const customExplanationForCurrentRole = (this.props.theme.genAi ? this.props.theme.genAi : ({customExplanations: []} as any)).customExplanations.find((customExplanation: any) => customExplanation.roles.includes(this.props.role || getRole()))
             getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), () => callback(false), customExplanationForCurrentRole)
         } else {
             this.rate(activity, rating, '', callback)
@@ -215,7 +216,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private rate(activity: Activity, value: number, explanation = '', callback: (rated: boolean) => void) {
         console.log('Rating ' + value + ' for query ' + activity.channelData.queryId);
 
-        const role = getRole()
+        const role = this.props.role || getRole()
 
         fetch('https://'+this.props.bot.id.replace(/\-app$/,'')+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
             method: 'POST',
@@ -654,9 +655,9 @@ export class Chat extends React.Component<ChatProps, {}> {
                           <MessagePane>
                               <History
                                 customDisclaimerText={ this.props.theme.genAi ? this.props.theme.genAi.customDisclaimerText : '' }
-                                canRate={isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.ratingRoles : [])}
-                                canWriteExplanation={ isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : []) }
-                                canSeeInfo={ getRole() === "admin" }
+                                canRate={isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.ratingRoles : [], this.props.role)}
+                                canWriteExplanation={ isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : [], this.props.role) }
+                                canSeeInfo={ (this.props.role || getRole()) === "admin" }
                                   onCardAction={ this._handleCardAction }
                                   onCardRating={ this._handleCardRating }
                                   onCardInfo={ this._handleCardInfo }
@@ -874,11 +875,11 @@ function getRole(): Role {
     return role || "user"
  }
 
- function isUserRoleInArray(roles: Role[] = []): boolean {
-    const userRole = getRole()
+ function isUserRoleInArray(roles: Role[] = [], role?: Role): boolean {
+    const userRole = role || getRole()
     const isInArray = roles.indexOf(userRole) >= 0
 
-    return isInArray          
+    return isInArray
  }
 
 function getExplanation(callback: (explanation: string) => void, onCancel: () => void, customExplanationForCurrentRole: CustomExplanation | undefined) {
