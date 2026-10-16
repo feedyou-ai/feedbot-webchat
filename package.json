@@ -20,6 +20,7 @@
     "prepublish": "tsc && npm run build-css && webpack --progress --config webpack.production.config.js",
     "prepare": "patch-package",
     "start": "http-server -p 8000",
+    "dev": "node scripts/dev-server/server.js",
     "test": "cd test && npm test",
     "mock": "cd test && npm start",
     "install-test": "cd test && npm install"
