@@ -78,4 +78,6 @@ npm run build
 
 It type-checks, compiles `built/` and the CSS, and builds the development bundles (a few seconds). `npm run build:release` builds the minified bundles that are published, and `npm run verify:build` checks them.
 
+`npm run watch` does the same as `npm run build` on every change to `src/`, until stopped. Run it in the background and wait for `[rspack] Rspack compiled` after an edit.
+
 Reload the browser page afterwards. The server sends `Cache-Control: no-store`, so the new bundle is picked up.

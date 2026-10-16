@@ -4,9 +4,6 @@
   "description": "Embeddable web chat control for the Microsoft Bot Framework modified by Feedyou",
   "main": "built/BotChat.js",
   "types": "built/BotChat.d.ts",
-  "engines": {
-    "node": ">=22"
-  },
   "scripts": {
     "analyze-bundle": "source-map-explorer 'botchat-es5.js'",
     "build-test": "cd test && npm run build",
@@ -16,7 +13,7 @@
     "build": "npm run typecheck && npm run build-lib && npm run build-css && rspack build --mode development",
     "build:release": "npm run typecheck && npm run clean && npm run build-lib && npm run build-css && rspack build --mode production",
     "verify:build": "node scripts/verify-build.js",
-    "watch": "rspack build --mode development --watch",
+    "watch": "node scripts/build/watch.js",
     "clean": "rimraf built",
     "prepublishOnly": "npm run build:release",
     "prepare": "patch-package",
@@ -62,8 +59,7 @@
     "rxjs": "5.4.3",
     "simple-update-in": "^1.2.0",
     "smartsupp-websocket": "^1.1.0",
-    "sweetalert2": "^11.17.2",
-    "tslib": "1.7.1"
+    "sweetalert2": "^11.17.2"
   },
   "devDependencies": {
     "@jridgewell/trace-mapping": "0.3.31",

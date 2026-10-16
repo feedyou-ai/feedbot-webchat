@@ -44,7 +44,9 @@ function normalizeCode(code) {
 				const rounded = String(Number(Number(number).toFixed(5)));
 				return before + (rounded === '0' ? '' : sign) + rounded;
 			})
-			.replace(/\s*([{};:,>=\[\]])\s*/g, '$1')
+			.replace(/\s*([{};,>=\]])\s*/g, '$1')
+			// Only after ':' and '[': a space before them is a descendant combinator (`.a :hover`, `div [x]`).
+			.replace(/([:[])\s+/g, '$1')
 			.replace(/;}/g, '}')
 	);
 }
@@ -61,9 +63,11 @@ function normalizeCss(css) {
 		.join('')
 		// Attribute selectors: [type=text] and [type="text"] are the same.
 		.replace(/\[([\w-]+)([~|^$*]?=)([\w-]+)\]/g, '[$1$2"$3"]');
+	// One entry per rule, each with its closing brace. The closing brace of an @media block is an entry of its own,
+	// so a rule moving into or out of the block is a difference.
 	return normalized
 		.trim()
-		.split('}')
+		.split(/(?<=})/)
 		.map(rule => rule.trim())
 		.filter(Boolean);
 }
