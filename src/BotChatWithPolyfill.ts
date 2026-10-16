@@ -1,7 +1,11 @@
 export * from './BotChat';
 
-// backup browser ArrayBuffer in case it gets overwritten by a polyfill - see below
-const browserArrayBuffer = global.ArrayBuffer
+// The statements below must run in this order: back up the browser ArrayBuffer, load the polyfills, restore it.
+// SWC hoists all imports above the other statements of a module (TypeScript 2.3 kept them in place),
+// so the backup and the restore are imports of their own modules, which run in the order they are listed.
+
+// backup browser ArrayBuffer in case it gets overwritten by a polyfill - see ./polyfills/restoreArrayBuffer
+import './polyfills/saveArrayBuffer';
 
 // below are shims for compatibility with old browsers (IE 10 being the main culprit)
 import 'core-js'
@@ -10,10 +14,7 @@ import 'core-js/modules/es6.array.find';
 import 'core-js/modules/es6.array.find-index';
 import 'isomorphic-fetch';
 
-// fix https://github.com/zloirock/core-js/issues/273 by using browser ArrayBuffer when available - https://feedyou.bitrix24.eu/company/personal/user/1/tasks/task/view/31031/
-if (typeof browserArrayBuffer !== 'undefined') {
-  global.ArrayBuffer = browserArrayBuffer
-}
+import './polyfills/restoreArrayBuffer';
 
 // Polyfill Promise if needed
 if (typeof (window as any).Promise === 'undefined') {
