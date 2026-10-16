@@ -68,14 +68,14 @@ The `playwright` MCP server is configured in `.mcp.json` (Claude Code) and `.cod
 
 Headed mode needs a display, so it won't work for cloud or remote agents.
 
-The MCP server needs Node ≥ 18. If the agent was launched from a shell where `nvm use 8` was active, `npx` starts the server with Node 8 and it fails. Restart the agent from a shell running Node 22.
+The MCP server needs Node ≥ 18. If the agent was launched from a shell running an older Node, `npx` starts the server with it and it fails. Restart the agent from a shell running Node 22 (see `.nvmrc`).
 
 ## Rebuilding
 
-The build still needs Node 8, because of node-sass (see `.node-version`). Agent shells run Node 22 and don't have the `nvm` command, so run the build with the Node 8 binaries first on `PATH`:
-
 ```sh
-PATH="$NVM_DIR/versions/node/v$(cat .node-version)/bin:$PATH" npm run build
+npm run build
 ```
+
+It type-checks, compiles `built/` and the CSS, and builds the development bundles (a few seconds). `npm run build:release` builds the minified bundles that are published, and `npm run verify:build` checks them.
 
 Reload the browser page afterwards. The server sends `Cache-Control: no-store`, so the new bundle is picked up.
