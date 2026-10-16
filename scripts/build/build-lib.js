@@ -39,7 +39,29 @@ function compile(sourceFile) {
 	fs.writeFileSync(mapFile, result.map);
 }
 
-fs.rmSync(OUT_DIR, { recursive: true, force: true });
-const sourceFiles = listSourceFiles();
-sourceFiles.forEach(compile);
-console.log(`Compiled ${sourceFiles.length} files to ${path.relative(ROOT_DIR, OUT_DIR)}/`);
+function build() {
+	const sourceFiles = listSourceFiles();
+	sourceFiles.forEach(compile);
+	console.log(`Compiled ${sourceFiles.length} files to ${path.relative(ROOT_DIR, OUT_DIR)}/`);
+}
+
+// `--watch` (npm run watch) compiles again whenever src/ changes. It keeps built/ in place, so a bundler watching
+// built/lib.js never sees it missing, and keeps watching after a failed compilation.
+if (process.argv.indexOf('--watch') !== -1) {
+	let timer = null;
+	const rebuild = () => {
+		try {
+			build();
+		} catch (error) {
+			console.error(error.message);
+		}
+	};
+	rebuild();
+	fs.watch(SRC_DIR, { recursive: true }, () => {
+		clearTimeout(timer);
+		timer = setTimeout(rebuild, 200);
+	});
+} else {
+	fs.rmSync(OUT_DIR, { recursive: true, force: true });
+	build();
+}
