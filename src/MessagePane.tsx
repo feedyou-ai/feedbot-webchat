@@ -1,25 +1,23 @@
 import * as React from 'react';
-import { Activity, CardAction, User, Message } from 'botframework-directlinejs';
+import { CardAction, Message } from 'botframework-directlinejs';
 import { ChatState } from './Store';
 import { connect } from 'react-redux';
 import { HScroll } from './HScroll';
 import { classList, doCardAction, IDoCardAction } from './Chat';
-import * as konsole from './Konsole';
 import { ChatActions, sendMessage } from './Store';
 import { activityWithSuggestedActions } from './activityWithSuggestedActions';
 import { twemoji } from './lib.js'
 
 export interface MessagePaneProps {
     activityWithSuggestedActions: Message,
-
+    showUploadButton: boolean,
+    doCardAction: IDoCardAction,
     takeSuggestedAction: (message: Message) => any,
-
     children: React.ReactNode,
-    doCardAction: IDoCardAction
 }
 
 const MessagePaneView = (props: MessagePaneProps) =>
-    <div className={ classList('wc-message-pane', props.activityWithSuggestedActions && 'show-actions' ) }>
+<div className={ classList('wc-message-pane', props.activityWithSuggestedActions && 'show-actions', props.showUploadButton && 'has-upload-button' ) }>
         { props.children }
         <div className="wc-suggested-actions">
             <SuggestedActions { ... props }/>
@@ -74,7 +72,8 @@ export const MessagePane = connect(
         // only used to create helper functions below
         botConnection: state.connection.botConnection,
         user: state.connection.user,
-        locale: state.format.locale
+        locale: state.format.locale,
+        showUploadButton:state.format.showUploadButton,
     }), {
         takeSuggestedAction: (message: Message) => ({ type: 'Take_SuggestedAction', message } as ChatActions),
         // only used to create helper functions below
@@ -82,6 +81,7 @@ export const MessagePane = connect(
     }, (stateProps: any, dispatchProps: any, ownProps: any): MessagePaneProps => ({
         // from stateProps
         activityWithSuggestedActions: stateProps.activityWithSuggestedActions,
+        showUploadButton: stateProps.showUploadButton,
         // from dispatchProps
         takeSuggestedAction: dispatchProps.takeSuggestedAction,
         // from ownProps

@@ -18,6 +18,7 @@ export type AppProps = ChatProps & {
   enableScreenshotUpload?: boolean;
   openUrlTarget: "new" | "same" | "same-domain";
   persist?: "user" | "conversation" | "none";
+  fileUpload?: "button" | "dnd-and-mobile" | "mobile";
   manualCloseExpireInMinutes?: number
 };
 
@@ -29,6 +30,11 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
     name: "Uživatel",
     ...props.user
   };
+
+  console.log(props)
+
+  props.uploadUsingQrCodeOnly = props.fileUpload === "mobile"
+  props.uploadUsingDndAndQrCode = props.fileUpload === "dnd-and-mobile"
 
   // FEEDYOU fetch DL token from bot when no token or secret found
   const remoteConfig =
@@ -152,6 +158,11 @@ export const App = async (props: AppProps, container?: HTMLElement) => {
 
         if (config.introDialogId) {
           props.introDialog = {id: config.introDialogId}
+        }
+
+        if(config.fileUpload) {
+          props.uploadUsingQrCodeOnly = config.fileUpload === "mobile"
+          props.uploadUsingDndAndQrCode = config.fileUpload === "dnd-and-mobile"
         }
 
         if (config.userData) {
