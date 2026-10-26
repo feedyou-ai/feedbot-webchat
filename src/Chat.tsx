@@ -16,6 +16,7 @@ import { getTabIndex } from './getTabIndex';
 import { ConnectionStatus } from 'botframework-directlinejs';
 //import { createVisitorClient, VisitorClient, MessageSubType } from 'smartsupp-websocket'
 
+import { Strings } from './Strings';
 import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
@@ -206,7 +207,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private handleCardRating(activity: Activity, rating: number, callback: (rated: boolean) => void) {
         if (rating === -1 && isUserRoleInArray(this.props.theme.genAi ? this.props.theme.genAi.explanationRoles : [])) {
             const customExplanationForCurrentRole = (this.props.theme.genAi ? this.props.theme.genAi : ({customExplanations: []} as any)).customExplanations.find((customExplanation: any) => customExplanation.roles.includes(getRole()))
-            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), () => callback(false), customExplanationForCurrentRole)
+            getExplanation((explanation: string) => this.rate(activity, rating, explanation, callback), () => callback(false), customExplanationForCurrentRole, this.store.getState().format.strings)
         } else {
             this.rate(activity, rating, '', callback)
         }
@@ -224,15 +225,15 @@ export class Chat extends React.Component<ChatProps, {}> {
         }).then(() => {
             Swal.fire({
                 icon: "success",
-                title: "Děkujeme za zpětnou vazbu!"
+                title: this.store.getState().format.strings.feedbackThanks
             });
             callback(true)
         }).catch((err) => {
             console.error('Failed to rate query', err);
             Swal.fire({
                 icon: "error",
-                title: "Něco se pokazilo",
-                text: "Bohužel se nepodařilo odeslat vaši zpětnou vazbu. Budeme moc rádi, pokud ji zkusíte předat jiným způsobem."
+                title: this.store.getState().format.strings.feedbackErrorTitle,
+                text: this.store.getState().format.strings.feedbackErrorMessage
             });
             callback(false)
         })
@@ -242,7 +243,7 @@ export class Chat extends React.Component<ChatProps, {}> {
     private handleCardInfo(activity: Activity) {
         Swal.fire({
             width: 1000,
-            title: "Query details",
+            title: this.store.getState().format.strings.queryDetails,
             html: activity.channelData.info
         });
     }
@@ -881,7 +882,7 @@ function getRole(): Role {
     return isInArray          
  }
 
-function getExplanation(callback: (explanation: string) => void, onCancel: () => void, customExplanationForCurrentRole: CustomExplanation | undefined) {
+function getExplanation(callback: (explanation: string) => void, onCancel: () => void, customExplanationForCurrentRole: CustomExplanation | undefined, strings: Strings) {
     const title = (customExplanationForCurrentRole && customExplanationForCurrentRole.title) || 'Zpětná vazba'
     const intro = (customExplanationForCurrentRole && customExplanationForCurrentRole.intro) || "Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný."
     const explanationFields = (customExplanationForCurrentRole && customExplanationForCurrentRole.explanationFields.length > 0) ? customExplanationForCurrentRole.explanationFields : [{"name": "swal-problem", "label": "<b>Stručně prosím popište, co by na odpovědi mohlo být lépe: <span style='color: red;'>*</span></b>", "required": true}]
@@ -895,7 +896,7 @@ function getExplanation(callback: (explanation: string) => void, onCancel: () =>
     Swal.fire({
         title,
         showCancelButton: true,
-        cancelButtonText: 'Zrušit',
+        cancelButtonText: strings.cancel,
         html: `
           <p style="margin-top:32px;text-align:left;">${intro}</p>
           <form style="text-align:left;">
@@ -921,13 +922,13 @@ function getExplanation(callback: (explanation: string) => void, onCancel: () =>
             })
 
             if (invalidFields.length > 0) {
-                Swal.showValidationMessage(`Prosím vyplňte všechna povinná pole.`)
+                Swal.showValidationMessage(strings.requiredFields)
                 return false
             }
 
             return fields.map(field => field.value).join('\n\n')
         },
-        confirmButtonText: 'Odeslat'
+        confirmButtonText: strings.send
     }).then((result: any) => {
         if (result.value) {
             callback(result.value);

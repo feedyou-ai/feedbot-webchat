@@ -186,7 +186,7 @@ export class HistoryView extends React.Component<HistoryProps, {}> {
                             onClickCopy={() => {
                                 (navigator as any).clipboard.writeText(activity.text);
                                 Swal.fire({
-                                    title: 'Copied!',
+                                    title: this.props.format.strings.copied,
                                     timer: 1500,
                                     showConfirmButton: false,
                                     position: 'top-end',
