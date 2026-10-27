@@ -22,7 +22,8 @@ const BUILD_FILES = {
 	'/CognitiveServices.js': 'application/javascript; charset=utf-8',
 	'/CognitiveServices.js.map': 'application/json; charset=utf-8',
 	'/botchat.css': 'text/css; charset=utf-8',
-	'/botchat-fullwindow.css': 'text/css; charset=utf-8'
+	'/botchat-fullwindow.css': 'text/css; charset=utf-8',
+	'/botchat-redesign.css': 'text/css; charset=utf-8'
 };
 
 const handleChannelRoutes = createChannelRoutes({ getWarnings: getStaleBuildWarnings });

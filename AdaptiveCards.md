@@ -49,20 +49,15 @@ It is important to understand how [Adaptive Cards separate the concerns of card 
 
 ### Building your customization
 
-The Adaptive Cards Host Configuration is stored in the `/adaptivecards-hostconfig.json` file in the root of this repo. This file's content is embedded into `/botchat.js` when you run the `npm run webpack` command. If you have created a Host Configuration file elsewhere, replace the contents of `/adaptivecards-hostconfig.json`, then run `npm run webpack`.
+The Adaptive Cards Host Configuration is stored in the `/adaptivecards-hostconfig.json` file in the root of this repo. This file's content is embedded into `/botchat.js` when you run the `npm run build` command. If you have created a Host Configuration file elsewhere, replace the contents of `/adaptivecards-hostconfig.json`, then run `npm run build`.
 
 ### Optional: Create using SCSS
 
-You may wish to create your Host Configuration using SCSS in this repo. This method allows you to share variables (which may contain font, color, and margins) between CSS and the Adaptive Cards Host Configuration. Follow these steps to create your Host Configuration from SCSS:
-1. Find the file `/src/scss/includes/adaptive-card-config.scss` and modify its contents.
-2. Run the command `npm run build-ac-config`, which creates the `/adaptivecards-hostconfig.json` file for you from the SCSS source.
-    * If you change an SCSS resource that is shared by both your CSS and the Adaptive Cards Host Configuration, such as `/src/scss/includes/colors.scss` or `/src/scss/includes/settings.scss`, you may wish to build both `/botchat.css` and `/adaptivecards-hostconfig.json` by running the command `npm run build-all-style` instead.
+`/src/scss/includes/adaptive-card-config.scss` describes the Host Configuration in SCSS, sharing variables with the CSS. The `npm run build-ac-config` script that generated `/adaptivecards-hostconfig.json` from it was removed with the old build tooling, so keep the two in sync by hand.
 
-3. Embed the JSON file as previously described, by running `npm run webpack`.
+### Optional: Embed without rebuilding
 
-### Optional: Embed without webpack
-
-It is also possible to supply an Adaptive Cards Host Configuration without the need to webpack. Start with the [basic example from the readme](https://github.com/Microsoft/BotFramework-WebChat#easy-in-your-non-react-website-run-web-chat-inline), then add `adaptiveCardsHostConfig` prop when instantiating `BotChat.App`:
+It is also possible to supply an Adaptive Cards Host Configuration without the need to rebuild. Start with the [basic example from the readme](https://github.com/Microsoft/BotFramework-WebChat#easy-in-your-non-react-website-run-web-chat-inline), then add `adaptiveCardsHostConfig` prop when instantiating `BotChat.App`:
 
 ```HTML
 <!DOCTYPE html>

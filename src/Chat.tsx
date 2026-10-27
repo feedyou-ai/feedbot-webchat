@@ -810,6 +810,7 @@ function getGoogleAnalyticsUserData() {
     const tracker = (typeof ga !== 'undefined') && ga && ga.getAll && ga.getAll() && ga.getAll()[0]
     if (tracker) {
         const trackingId = tracker.get('trackingId')
+        // @ts-ignore TS2872 always-truthy `|| {}` is kept as-is to preserve emitted JS
         return {googleAnalyticsTrackingId: trackingId} || {}
     }
     return {}
