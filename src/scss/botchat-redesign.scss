@@ -1036,69 +1036,84 @@ body .wc-app,
 	fill: $blue;
 }
 
-.wc-message-buttons * {
-	box-sizing: border-box !important;
-}
-
-.wc-message-buttons {
-	align-items: center;
-	clear: both;
-	display: flex;
-	gap: 2px;
-	height: 0;
-	margin-left: 8px;
-	overflow: visible;
-	width: auto;
-}
-
-.wc-message-buttons > div {
-	align-items: center;
-	border-radius: 6px;
-	display: none;
-	fill: $grey;
-	height: 40px;
-	justify-content: center;
-	padding: 11px;
-	width: 40px;
-	cursor: pointer;
-	transition: background-color $actionTransition, fill $actionTransition;
-
-	&:hover {
-		background-color: rgba($black, 0.06);
-		fill: $black;
+// botchat.css styles the rating buttons through .wc-app selectors, so these must
+// match its specificity (including the :not below) to win on source order.
+.wc-app {
+	.wc-message-buttons * {
+		box-sizing: border-box !important;
 	}
 
-	svg {
-		display: block;
-		height: 16px;
-		width: 16px;
+	.wc-message-buttons {
+		align-items: center;
+		clear: both;
+		display: flex;
+		float: none;
+		gap: 2px;
+		height: 0;
+		margin-left: 8px;
+		overflow: visible;
+		padding-left: 0;
+		width: auto;
 	}
-}
 
-.wc-message-wrapper:last-child .wc-message-buttons > div,
-.wc-message-wrapper:hover .wc-message-buttons > div,
-.wc-message-wrapper:focus-within .wc-message-buttons > div {
-	display: flex;
-}
+	.wc-message-buttons .loader {
+		animation: none;
+		border: 0;
+		border-radius: 0;
+		height: auto;
+		width: auto;
+	}
 
-.wc-message-buttons > .wc-message-button-copy {
-	height: 40px;
-	padding: 11px;
-	width: 40px;
-}
+	.wc-message-buttons > div {
+		align-items: center;
+		border-radius: 6px;
+		display: none;
+		fill: $grey;
+		float: none;
+		height: 40px;
+		justify-content: center;
+		padding: 11px;
+		width: 40px;
+		cursor: pointer;
+		transition: background-color $actionTransition, fill $actionTransition;
 
-.wc-message-buttons > .wc-message-button-ai {
-	display: flex;
-	cursor: auto;
-	opacity: 0.65;
-}
+		&:hover {
+			background-color: rgba($black, 0.06);
+			fill: $black;
+		}
 
-.wc-message-button-vote-down {
-	padding: 11px !important;
-}
+		svg {
+			display: block;
+			height: 16px;
+			width: 16px;
+		}
+	}
 
-.wc-message-button-info {
-	padding: 11px !important;
+	.wc-message-wrapper:last-child .wc-message-buttons > div:not(.wc-message-button-ai),
+	.wc-message-wrapper:hover .wc-message-buttons > div:not(.wc-message-button-ai),
+	.wc-message-wrapper:focus-within .wc-message-buttons > div:not(.wc-message-button-ai) {
+		display: flex;
+	}
+
+	.wc-message-buttons > .wc-message-button-copy {
+		height: 40px;
+		padding: 11px;
+		width: 40px;
+	}
+
+	.wc-message-buttons > .wc-message-button-ai {
+		display: flex;
+		cursor: auto;
+		opacity: 0.65;
+	}
+
+	.wc-message-buttons > .wc-message-button-vote-down {
+		padding: 11px !important;
+	}
+
+	.wc-message-buttons > .wc-message-button-info {
+		padding: 11px !important;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
