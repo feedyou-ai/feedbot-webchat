@@ -1,10 +1,11 @@
+@use "sass:math";
 @import "colors";
 @import "settings";
 
 $hostConfig: (
   supportsInteractivity: true,
   spacing: (
-    small: ($separation / 2),
+    small: math.div($separation, 2),
     default: $separation,
     medium: ($separation * 2),
     large: ($separation * 3),

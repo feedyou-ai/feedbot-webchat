@@ -543,7 +543,7 @@ export const history: Reducer<HistoryState> = (
             const activity = state.activities[i];
             const newActivity = {
                 ... activity,
-                suggestedActions: undefined
+                suggestedActions: undefined as any
             };
             return {
                 ... state,
@@ -669,6 +669,16 @@ import 'rxjs/add/observable/bindCallback';
 import 'rxjs/add/observable/empty';
 import 'rxjs/add/observable/of';
 
+// Type-only augmentation (emits no JS): newer TS rejects the redux-observable ActionsObservable.lift typing,
+// so every rxjs operator chained on ofType() fails to type-check. The lift overload fixes the class shape;
+// typing ofType() as Observable<any> keeps what TS 2.3 inferred (epic callback actions were effectively `any`).
+declare module 'redux-observable' {
+    interface ActionsObservable<T> {
+        lift<R>(operator: import('rxjs/Operator').Operator<T, R>): Observable<R>;
+        ofType(...key: any[]): Observable<any>;
+    }
+}
+
 
 const sendMessageEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Send_Message')
@@ -705,7 +715,7 @@ const trySendMessageEpic: Epic<ChatActions, ChatState> = (action$, store) =>
         .catch(error => Observable.of({ type: 'Send_Message_Fail', clientActivityId } as HistoryAction))
     });
 
-const speakObservable = Observable.bindCallback<string, string, {}, {}>(Speech.SpeechSynthesizer.speak);
+const speakObservable = Observable.bindCallback<string, string, {}, {}>(Speech.SpeechSynthesizer.speak as any);
 
 const speakSSMLEpic: Epic<ChatActions, ChatState> = (action$, store) =>
     action$.ofType('Speak_SSML')
