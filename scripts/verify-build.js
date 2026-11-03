@@ -22,6 +22,7 @@ const EXPECTED_FILES = [
 	'botchat-fullwindow.css',
 	'botchat-redesign.css',
 	'built/BotChat.js',
+	'built/BotChat.d.ts',
 	'built/lib.js'
 ];
 
