@@ -1,6 +1,7 @@
 // Compiles the `src/BotChat.ts` module graph to `built/` (the package `main`, used by the Designer).
 // The file set is the one `tsc` compiles for tsconfig.json, so it matches what `tsc` emitted before
-// the Rspack migration. The bundles need `built/lib.js` too: patches/adaptivecards+1.1.0.patch requires it.
+// the Rspack migration. SWC only strips types, so `tsc` emits the declarations (the package `types`) next to it.
+// The bundles need `built/lib.js` too: patches/adaptivecards+1.1.0.patch requires it.
 const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -39,9 +40,18 @@ function compile(sourceFile) {
 	fs.writeFileSync(mapFile, result.map);
 }
 
+function emitDeclarations() {
+	childProcess.execFileSync(
+		process.execPath,
+		[require.resolve('typescript/bin/tsc'), '-p', ROOT_DIR, '--noEmit', 'false', '--declaration', '--emitDeclarationOnly', '--outDir', OUT_DIR],
+		{ cwd: ROOT_DIR, stdio: 'inherit' }
+	);
+}
+
 function build() {
 	const sourceFiles = listSourceFiles();
 	sourceFiles.forEach(compile);
+	emitDeclarations();
 	console.log(`Compiled ${sourceFiles.length} files to ${path.relative(ROOT_DIR, OUT_DIR)}/`);
 }
 
