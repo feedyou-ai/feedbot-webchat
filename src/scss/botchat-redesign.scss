@@ -1175,10 +1175,6 @@ body .wc-app,
 	width: 8px;
 }
 
-.wc-app ::-webkit-scrollbar * {
-	background-color: transparent;
-}
-
 .wc-app ::-webkit-scrollbar-thumb {
 	background-color: $silver;
 }
