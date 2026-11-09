@@ -884,9 +884,9 @@ function getRole(): Role {
  }
 
 function getExplanation(callback: (explanation: string) => void, onCancel: () => void, customExplanationForCurrentRole: CustomExplanation | undefined, strings: Strings) {
-    const title = (customExplanationForCurrentRole && customExplanationForCurrentRole.title) || 'Zpětná vazba'
-    const intro = (customExplanationForCurrentRole && customExplanationForCurrentRole.intro) || "Kliknutím na palec dolů nám dáváte vědět, že vygenerovaná odpověď nebyla správná, něco v ní chybělo, popřípadě neodpovídala vašim představám. Váš feedback je velmi vítaný."
-    const explanationFields = (customExplanationForCurrentRole && customExplanationForCurrentRole.explanationFields.length > 0) ? customExplanationForCurrentRole.explanationFields : [{"name": "swal-problem", "label": "<b>Stručně prosím popište, co by na odpovědi mohlo být lépe: <span style='color: red;'>*</span></b>", "required": true}]
+    const title = (customExplanationForCurrentRole && customExplanationForCurrentRole.title) || strings.feedbackTitle
+    const intro = (customExplanationForCurrentRole && customExplanationForCurrentRole.intro) || strings.feedbackIntro
+    const explanationFields = (customExplanationForCurrentRole && customExplanationForCurrentRole.explanationFields.length > 0) ? customExplanationForCurrentRole.explanationFields : [{"name": "swal-problem", "label": `<b>${strings.feedbackExplanationLabel} <span style='color: red;'>*</span></b>`, "required": true}]
 
     const fieldsHtml = explanationFields.map((field) => {
         return `
