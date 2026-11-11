@@ -11,9 +11,11 @@ import {debounce} from "debounce";
 import Downshift from "downshift";
 import fuzzysort =  require('fuzzysort');
 import { isRedesignActive } from './utils/redesign';
+import { getAutosuggestUrl } from './botEndpoints';
 
 interface Props {
     botId: string
+    hostingOrigin?: string
     inputText: string,
     strings: Strings,
     listeningState: ListeningState,
@@ -112,7 +114,7 @@ class ShellContainer extends React.Component<Props, State> implements ShellFunct
 
     debounceCall = debounce(async (queryString: string, action: string, param: string) => {
         const res = await fetch(
-          `https://${this.props.botId}.azurewebsites.net/webchat/${action}/${queryString}/${param}`
+          getAutosuggestUrl(this.props.hostingOrigin, this.props.botId, action, queryString, param)
         );
         const data = await res.json();
   
@@ -386,6 +388,7 @@ export const Shell = connect(
       return {
         // passed down to ShellContainer
         botId: state.connection.bot ? state.connection.bot.id : "",
+        hostingOrigin: state.connection.hostingOrigin,
         inputText: state.shell.input,
         showUploadButton: state.format.showUploadButton,
         attachmentUrl: state.format.attachmentUrl,
@@ -413,6 +416,7 @@ export const Shell = connect(
 }, (stateProps: any, dispatchProps: any, ownProps: any): Props => ({
     // from stateProps
     botId: stateProps.botId,
+    hostingOrigin: stateProps.hostingOrigin,
     inputText: stateProps.inputText,
     showUploadButton: stateProps.showUploadButton,
     attachmentUrl: stateProps.attachmentUrl,
