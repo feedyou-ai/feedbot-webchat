@@ -7,7 +7,7 @@
   "scripts": {
     "analyze-bundle": "source-map-explorer 'botchat-es5.js'",
     "build-test": "cd test && npm run build",
-    "typecheck": "tsc -p .",
+    "typecheck": "tsc -p . && tsc -p tsconfig.test.json",
     "build-lib": "node scripts/build/build-lib.js",
     "build-css": "sass --no-source-map --style=expanded --silence-deprecation=import ./src/scss/:. && rimraf ./includes/",
     "build": "npm run typecheck && npm run build-lib && npm run build-css && rspack build --mode development",
@@ -20,6 +20,7 @@
     "start": "http-server -p 8000",
     "dev": "node scripts/dev-server/server.js",
     "test": "cd test && npm test",
+    "test:unit": "vitest run",
     "mock": "cd test && npm start",
     "install-test": "cd test && npm install"
   },
@@ -84,7 +85,9 @@
     "setimmediate": "1.0.5",
     "source-map-explorer": "^2.5.2",
     "timers-browserify": "2.0.4",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vite": "8.3.7",
+    "vitest": "5.0.5"
   },
   "files": [
     "built/",
