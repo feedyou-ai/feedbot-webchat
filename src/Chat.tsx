@@ -21,6 +21,7 @@ import { History } from './History';
 import { MessagePane } from './MessagePane';
 import { Shell, ShellFunctions } from './Shell';
 import { getFeedyouParam } from './FeedyouParams';
+import { getKbRatingUrl } from './botEndpoints';
 import { CustomExplanation, Role, Theme } from './themes';
 
 const Swal = require('sweetalert2')
@@ -56,6 +57,9 @@ export interface ChatProps {
     consolePlaceholder?: string
     user: User,
     bot: User,
+    // Origin of the bot web app serving rating/autosuggest endpoints, e.g. "https://feedbot-foo-app.azurewebsites.net".
+    // Hosts that know it (Feedbot Designer) pass it; otherwise URLs are guessed from bot.id.
+    hostingOrigin?: string,
     botConnection?: IBotConnection,
     directLine?: DirectLineOptions,
     speechOptions?: SpeechOptions,
@@ -219,7 +223,7 @@ export class Chat extends React.Component<ChatProps, {}> {
 
         const role = this.props.role || getRole()
 
-        fetch('https://'+this.props.bot.id.replace(/\-app$/,'')+'-app.azurewebsites.net/api/messages/kb/'+(activity.channelData.modelId || 'KB')+'/queries/'+activity.channelData.queryPartition+'/'+activity.channelData.queryId+'/rating',{
+        fetch(getKbRatingUrl(this.props.hostingOrigin, this.props.bot.id, activity.channelData.modelId, activity.channelData.queryPartition, activity.channelData.queryId),{
             method: 'POST',
             headers: { accept: 'application/json', 'content-type': 'application/json' },
             body: JSON.stringify({ action: (value === 1 ? 'up' : value === -1 ? 'down' : ''), explanation, role}),
@@ -390,7 +394,7 @@ export class Chat extends React.Component<ChatProps, {}> {
         if (this.props.resize === 'window')
             window.addEventListener('resize', this.resizeListener);
 
-        this.store.dispatch<ChatActions>({ type: 'Start_Connection', user: this.props.user, bot: this.props.bot, botConnection, selectedActivity: this.props.selectedActivity });
+        this.store.dispatch<ChatActions>({ type: 'Start_Connection', user: this.props.user, bot: this.props.bot, hostingOrigin: this.props.hostingOrigin, botConnection, selectedActivity: this.props.selectedActivity });
         
         // setTimeout(() => this.smartsuppHandoff({key: '8f2622df0b638f00440671a5fb471919ff3cfea1'}), 10000)
 

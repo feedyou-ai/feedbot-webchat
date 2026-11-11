@@ -331,7 +331,8 @@ export interface ConnectionState {
     botConnection: IBotConnection,
     selectedActivity: BehaviorSubject<ActivityOrID>,
     user: User,
-    bot: User
+    bot: User,
+    hostingOrigin?: string
 }
 
 export type ConnectionAction = {
@@ -339,6 +340,7 @@ export type ConnectionAction = {
     botConnection: IBotConnection,
     user: User,
     bot: User,
+    hostingOrigin?: string,
     selectedActivity: BehaviorSubject<ActivityOrID>
 } | {
     type: 'Connection_Change',
@@ -351,7 +353,8 @@ export const connection: Reducer<ConnectionState> = (
         botConnection: undefined,
         selectedActivity: undefined,
         user: undefined,
-        bot: undefined
+        bot: undefined,
+        hostingOrigin: undefined
     },
     action: ConnectionAction
 ) => {
@@ -362,6 +365,7 @@ export const connection: Reducer<ConnectionState> = (
                 botConnection: action.botConnection,
                 user: action.user,
                 bot: action.bot,
+                hostingOrigin: action.hostingOrigin,
                 selectedActivity: action.selectedActivity
             };
         case 'Connection_Change':
