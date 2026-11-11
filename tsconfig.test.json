@@ -1,0 +1,10 @@
+{
+    // Vitest only transpiles, so the unit tests get type-checked here (npm run typecheck)
+    "extends": "./tsconfig.json",
+    "files": [
+        "src/adaptivecards-hostconfig.d.ts",
+        "src/jspeech.d.ts",
+        "src/simple-update-in.d.ts"
+    ],
+    "include": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+}

@@ -179,7 +179,7 @@ class AdaptiveCardContainer extends React.Component<Props, State> {
                 renderedCard = adaptiveCard.render();
             } catch (e) {
                 const ve: IValidationError = {
-                    error: -1,
+                    error: -1 as any,
                     message: e
                 };
 
