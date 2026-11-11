@@ -25,4 +25,17 @@ describe('connection reducer', () => {
             selectedActivity
         });
     });
+
+    it('stores the hosting origin on Start_Connection', () => {
+        const state = connection(undefined, {
+            type: 'Start_Connection',
+            botConnection: {} as IBotConnection,
+            user: { id: 'user-1' },
+            bot: { id: 'feedbot-foo-bot', name: 'Chatbot' },
+            hostingOrigin: 'https://feedbot-foo-app.azurewebsites.net',
+            selectedActivity: new BehaviorSubject<ActivityOrID>({})
+        });
+
+        expect(state.hostingOrigin).toBe('https://feedbot-foo-app.azurewebsites.net');
+    });
 });
